@@ -19,7 +19,7 @@ const StickerCard = ({
 }: StickerCardProps) => {
   return (
     <div
-      className={`sticker-card relative aspect-square rounded-lg flex items-center justify-center cursor-pointer select-none ${
+      className={`sticker-card relative aspect-square rounded-md flex items-center justify-center cursor-pointer select-none ${
         collected
           ? "bg-card-collected"
           : "bg-card-uncollected"
@@ -28,7 +28,7 @@ const StickerCard = ({
     >
       {/* Sticker number */}
       <span
-        className={`text-xl font-bold ${
+        className={`text-xs font-bold ${
           collected ? "text-accent-foreground" : "text-muted-foreground"
         }`}
       >
@@ -37,23 +37,23 @@ const StickerCard = ({
 
       {/* Duplicates badge */}
       {duplicates > 0 && (
-        <div className="absolute -top-1 -right-1 bg-secondary text-secondary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center bounce-in">
+        <div className="absolute -top-0.5 -right-0.5 bg-secondary text-secondary-foreground text-[8px] font-bold rounded-full w-3 h-3 flex items-center justify-center bounce-in">
           {duplicates}
         </div>
       )}
 
       {/* Add/Remove duplicate buttons - only show when collected */}
       {collected && (
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-1 pb-1">
+        <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-0.5 pb-0.5">
           {duplicates > 0 && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onRemoveDuplicate();
               }}
-              className="w-5 h-5 rounded-full bg-foreground/20 hover:bg-foreground/30 flex items-center justify-center transition-colors"
+              className="w-3 h-3 rounded-full bg-foreground/20 hover:bg-foreground/30 flex items-center justify-center transition-colors"
             >
-              <Minus className="w-3 h-3 text-accent-foreground" />
+              <Minus className="w-2 h-2 text-accent-foreground" />
             </button>
           )}
           <button
@@ -61,9 +61,9 @@ const StickerCard = ({
               e.stopPropagation();
               onAddDuplicate();
             }}
-            className="w-5 h-5 rounded-full bg-foreground/20 hover:bg-foreground/30 flex items-center justify-center transition-colors"
+            className="w-3 h-3 rounded-full bg-foreground/20 hover:bg-foreground/30 flex items-center justify-center transition-colors"
           >
-            <Plus className="w-3 h-3 text-accent-foreground" />
+            <Plus className="w-2 h-2 text-accent-foreground" />
           </button>
         </div>
       )}
