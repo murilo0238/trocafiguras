@@ -79,7 +79,7 @@ const Index = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-10 gap-1">
             {filteredStickers.map((number) => (
               <StickerCard
                 key={number}
