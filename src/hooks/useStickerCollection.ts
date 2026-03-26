@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { getAllStickerIds, TOTAL_STICKERS } from "@/data/teams";
+import { useAuth } from "@/hooks/useAuth";
 
 interface StickerData {
   collected: boolean;
@@ -7,8 +9,6 @@ interface StickerData {
 }
 
 type StickerCollection = Record<string, StickerData>;
-
-const STORAGE_KEY = "sticker-collection-v2";
 
 const ALL_IDS = getAllStickerIds();
 
@@ -20,72 +20,95 @@ const getDefaultCollection = (): StickerCollection => {
   return collection;
 };
 
-const loadFromStorage = (): StickerCollection => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored) as StickerCollection;
-      // Merge with defaults to handle new stickers
-      const defaults = getDefaultCollection();
-      return { ...defaults, ...parsed };
-    }
-  } catch (error) {
-    console.error("Error loading from localStorage:", error);
-  }
-  return getDefaultCollection();
-};
-
-const saveToStorage = (collection: StickerCollection) => {
-  try {
-    // Only save stickers with data to reduce storage size
-    const toSave: StickerCollection = {};
-    for (const [id, data] of Object.entries(collection)) {
-      if (data.collected || data.duplicates > 0) {
-        toSave[id] = data;
-      }
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-  } catch (error) {
-    console.error("Error saving to localStorage:", error);
-  }
-};
-
 export const useStickerCollection = () => {
-  const [collection, setCollection] = useState<StickerCollection>(loadFromStorage);
+  const { user } = useAuth();
+  const [collection, setCollection] = useState<StickerCollection>(getDefaultCollection);
+  const [loading, setLoading] = useState(true);
 
+  // Load collection from Supabase
   useEffect(() => {
-    saveToStorage(collection);
-  }, [collection]);
+    if (!user) {
+      setCollection(getDefaultCollection());
+      setLoading(false);
+      return;
+    }
+
+    const loadCollection = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("user_stickers")
+        .select("sticker_id, collected, duplicates")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error loading stickers:", error);
+        setLoading(false);
+        return;
+      }
+
+      const col = getDefaultCollection();
+      if (data) {
+        for (const row of data) {
+          col[row.sticker_id] = {
+            collected: row.collected,
+            duplicates: row.duplicates,
+          };
+        }
+      }
+      setCollection(col);
+      setLoading(false);
+    };
+
+    loadCollection();
+  }, [user]);
+
+  // Sync a single sticker to Supabase
+  const syncSticker = useCallback(
+    async (stickerId: string, data: StickerData) => {
+      if (!user) return;
+      await supabase
+        .from("user_stickers")
+        .upsert(
+          {
+            user_id: user.id,
+            sticker_id: stickerId,
+            collected: data.collected,
+            duplicates: data.duplicates,
+          },
+          { onConflict: "user_id,sticker_id" }
+        );
+    },
+    [user]
+  );
 
   const toggleCollected = (id: string) => {
-    setCollection((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        collected: !prev[id]?.collected,
-        duplicates: !prev[id]?.collected ? (prev[id]?.duplicates || 0) : 0,
-      },
-    }));
+    setCollection((prev) => {
+      const current = prev[id] || { collected: false, duplicates: 0 };
+      const newData = {
+        collected: !current.collected,
+        duplicates: !current.collected ? current.duplicates : 0,
+      };
+      syncSticker(id, newData);
+      return { ...prev, [id]: newData };
+    });
   };
 
   const addDuplicate = (id: string) => {
-    setCollection((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        duplicates: (prev[id]?.duplicates || 0) + 1,
-      },
-    }));
+    setCollection((prev) => {
+      const current = prev[id] || { collected: false, duplicates: 0 };
+      const newData = { ...current, duplicates: current.duplicates + 1 };
+      syncSticker(id, newData);
+      return { ...prev, [id]: newData };
+    });
   };
 
   const removeDuplicate = (id: string) => {
-    setCollection((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        duplicates: Math.max(0, (prev[id]?.duplicates || 0) - 1),
-      },
-    }));
+    setCollection((prev) => {
+      const current = prev[id] || { collected: false, duplicates: 0 };
+      const newData = { ...current, duplicates: Math.max(0, current.duplicates - 1) };
+      syncSticker(id, newData);
+      return { ...prev, [id]: newData };
+    });
   };
 
   const values = Object.values(collection);
@@ -103,5 +126,6 @@ export const useStickerCollection = () => {
     removeDuplicate,
     stats,
     allStickerIds: ALL_IDS,
+    loading,
   };
 };
