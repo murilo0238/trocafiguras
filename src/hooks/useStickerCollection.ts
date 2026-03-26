@@ -1,19 +1,21 @@
 import { useState, useEffect } from "react";
+import { getAllStickerIds, TOTAL_STICKERS } from "@/data/teams";
 
 interface StickerData {
   collected: boolean;
   duplicates: number;
 }
 
-type StickerCollection = Record<number, StickerData>;
+type StickerCollection = Record<string, StickerData>;
 
-const STORAGE_KEY = "sticker-collection";
-const TOTAL_STICKERS = 600;
+const STORAGE_KEY = "sticker-collection-v2";
+
+const ALL_IDS = getAllStickerIds();
 
 const getDefaultCollection = (): StickerCollection => {
   const collection: StickerCollection = {};
-  for (let i = 1; i <= TOTAL_STICKERS; i++) {
-    collection[i] = { collected: false, duplicates: 0 };
+  for (const id of ALL_IDS) {
+    collection[id] = { collected: false, duplicates: 0 };
   }
   return collection;
 };
@@ -22,7 +24,10 @@ const loadFromStorage = (): StickerCollection => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored) as StickerCollection;
+      // Merge with defaults to handle new stickers
+      const defaults = getDefaultCollection();
+      return { ...defaults, ...parsed };
     }
   } catch (error) {
     console.error("Error loading from localStorage:", error);
@@ -32,7 +37,14 @@ const loadFromStorage = (): StickerCollection => {
 
 const saveToStorage = (collection: StickerCollection) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(collection));
+    // Only save stickers with data to reduce storage size
+    const toSave: StickerCollection = {};
+    for (const [id, data] of Object.entries(collection)) {
+      if (data.collected || data.duplicates > 0) {
+        toSave[id] = data;
+      }
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   } catch (error) {
     console.error("Error saving to localStorage:", error);
   }
@@ -45,42 +57,43 @@ export const useStickerCollection = () => {
     saveToStorage(collection);
   }, [collection]);
 
-  const toggleCollected = (number: number) => {
+  const toggleCollected = (id: string) => {
     setCollection((prev) => ({
       ...prev,
-      [number]: {
-        ...prev[number],
-        collected: !prev[number].collected,
-        duplicates: !prev[number].collected ? prev[number].duplicates : 0,
+      [id]: {
+        ...prev[id],
+        collected: !prev[id]?.collected,
+        duplicates: !prev[id]?.collected ? (prev[id]?.duplicates || 0) : 0,
       },
     }));
   };
 
-  const addDuplicate = (number: number) => {
+  const addDuplicate = (id: string) => {
     setCollection((prev) => ({
       ...prev,
-      [number]: {
-        ...prev[number],
-        duplicates: prev[number].duplicates + 1,
+      [id]: {
+        ...prev[id],
+        duplicates: (prev[id]?.duplicates || 0) + 1,
       },
     }));
   };
 
-  const removeDuplicate = (number: number) => {
+  const removeDuplicate = (id: string) => {
     setCollection((prev) => ({
       ...prev,
-      [number]: {
-        ...prev[number],
-        duplicates: Math.max(0, prev[number].duplicates - 1),
+      [id]: {
+        ...prev[id],
+        duplicates: Math.max(0, (prev[id]?.duplicates || 0) - 1),
       },
     }));
   };
 
+  const values = Object.values(collection);
   const stats = {
     total: TOTAL_STICKERS,
-    collected: Object.values(collection).filter((s) => s.collected).length,
-    missing: Object.values(collection).filter((s) => !s.collected).length,
-    duplicates: Object.values(collection).reduce((sum, s) => sum + s.duplicates, 0),
+    collected: values.filter((s) => s.collected).length,
+    missing: TOTAL_STICKERS - values.filter((s) => s.collected).length,
+    duplicates: values.reduce((sum, s) => sum + s.duplicates, 0),
   };
 
   return {
@@ -89,6 +102,6 @@ export const useStickerCollection = () => {
     addDuplicate,
     removeDuplicate,
     stats,
-    totalStickers: TOTAL_STICKERS,
+    allStickerIds: ALL_IDS,
   };
 };
