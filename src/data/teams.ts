@@ -7,79 +7,79 @@ export interface TeamSection {
 
 export const SECTIONS: TeamSection[] = [
   // Introdução (20 figurinhas: FWC01-FWC20)
-  { code: "FWC", name: "Copa do Mundo", flag: "🏆" },
+  { code: "FWC", name: "Copa do Mundo 2026", flag: "🏆" },
 
   // Grupo A
-  { code: "QAT", name: "Catar", group: "A", flag: "🇶🇦" },
-  { code: "ECU", name: "Equador", group: "A", flag: "🇪🇨" },
-  { code: "SEN", name: "Senegal", group: "A", flag: "🇸🇳" },
-  { code: "HOL", name: "Holanda", group: "A", flag: "🇳🇱" },
+  { code: "MEX", name: "México", group: "A", flag: "🇲🇽" },
+  { code: "KOR", name: "Coreia do Sul", group: "A", flag: "🇰🇷" },
+  { code: "RSA", name: "África do Sul", group: "A", flag: "🇿🇦" },
+  { code: "DEN", name: "Dinamarca", group: "A", flag: "🇩🇰" },
 
   // Grupo B
-  { code: "ENG", name: "Inglaterra", group: "B", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
-  { code: "IRN", name: "Irã", group: "B", flag: "🇮🇷" },
-  { code: "USA", name: "Estados Unidos", group: "B", flag: "🇺🇸" },
-  { code: "WAL", name: "País de Gales", group: "B", flag: "🏴󠁧󠁢󠁷󠁬󠁳󠁿" },
+  { code: "CAN", name: "Canadá", group: "B", flag: "🇨🇦" },
+  { code: "SUI", name: "Suíça", group: "B", flag: "🇨🇭" },
+  { code: "QAT", name: "Catar", group: "B", flag: "🇶🇦" },
+  { code: "ITA", name: "Itália", group: "B", flag: "🇮🇹" },
 
   // Grupo C
-  { code: "ARG", name: "Argentina", group: "C", flag: "🇦🇷" },
-  { code: "KSA", name: "Arábia Saudita", group: "C", flag: "🇸🇦" },
-  { code: "MEX", name: "México", group: "C", flag: "🇲🇽" },
-  { code: "POL", name: "Polônia", group: "C", flag: "🇵🇱" },
+  { code: "BRA", name: "Brasil", group: "C", flag: "🇧🇷" },
+  { code: "MAR", name: "Marrocos", group: "C", flag: "🇲🇦" },
+  { code: "SCO", name: "Escócia", group: "C", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+  { code: "HAI", name: "Haiti", group: "C", flag: "🇭🇹" },
 
   // Grupo D
-  { code: "FRA", name: "França", group: "D", flag: "🇫🇷" },
+  { code: "USA", name: "Estados Unidos", group: "D", flag: "🇺🇸" },
   { code: "AUS", name: "Austrália", group: "D", flag: "🇦🇺" },
-  { code: "DEN", name: "Dinamarca", group: "D", flag: "🇩🇰" },
-  { code: "TUN", name: "Tunísia", group: "D", flag: "🇹🇳" },
+  { code: "PAR", name: "Paraguai", group: "D", flag: "🇵🇾" },
+  { code: "TUR", name: "Turquia", group: "D", flag: "🇹🇷" },
 
   // Grupo E
-  { code: "ESP", name: "Espanha", group: "E", flag: "🇪🇸" },
-  { code: "CRC", name: "Costa Rica", group: "E", flag: "🇨🇷" },
   { code: "ALE", name: "Alemanha", group: "E", flag: "🇩🇪" },
-  { code: "JPN", name: "Japão", group: "E", flag: "🇯🇵" },
+  { code: "ECU", name: "Equador", group: "E", flag: "🇪🇨" },
+  { code: "CIV", name: "Costa do Marfim", group: "E", flag: "🇨🇮" },
+  { code: "CUR", name: "Curaçao", group: "E", flag: "🇨🇼" },
 
   // Grupo F
-  { code: "BEL", name: "Bélgica", group: "F", flag: "🇧🇪" },
-  { code: "CAN", name: "Canadá", group: "F", flag: "🇨🇦" },
-  { code: "MAR", name: "Marrocos", group: "F", flag: "🇲🇦" },
-  { code: "CRO", name: "Croácia", group: "F", flag: "🇭🇷" },
+  { code: "HOL", name: "Holanda", group: "F", flag: "🇳🇱" },
+  { code: "JPN", name: "Japão", group: "F", flag: "🇯🇵" },
+  { code: "TUN", name: "Tunísia", group: "F", flag: "🇹🇳" },
+  { code: "UKR", name: "Ucrânia", group: "F", flag: "🇺🇦" },
 
   // Grupo G
-  { code: "BRA", name: "Brasil", group: "G", flag: "🇧🇷" },
-  { code: "SRB", name: "Sérvia", group: "G", flag: "🇷🇸" },
-  { code: "SUI", name: "Suíça", group: "G", flag: "🇨🇭" },
-  { code: "CMR", name: "Camarões", group: "G", flag: "🇨🇲" },
+  { code: "BEL", name: "Bélgica", group: "G", flag: "🇧🇪" },
+  { code: "IRN", name: "Irã", group: "G", flag: "🇮🇷" },
+  { code: "EGY", name: "Egito", group: "G", flag: "🇪🇬" },
+  { code: "NZL", name: "Nova Zelândia", group: "G", flag: "🇳🇿" },
 
   // Grupo H
-  { code: "POR", name: "Portugal", group: "H", flag: "🇵🇹" },
-  { code: "GHA", name: "Gana", group: "H", flag: "🇬🇭" },
+  { code: "ESP", name: "Espanha", group: "H", flag: "🇪🇸" },
   { code: "URU", name: "Uruguai", group: "H", flag: "🇺🇾" },
-  { code: "KOR", name: "Coreia do Sul", group: "H", flag: "🇰🇷" },
+  { code: "KSA", name: "Arábia Saudita", group: "H", flag: "🇸🇦" },
+  { code: "CPV", name: "Cabo Verde", group: "H", flag: "🇨🇻" },
 
   // Grupo I
-  { code: "COL", name: "Colômbia", group: "I", flag: "🇨🇴" },
-  { code: "CHI", name: "Chile", group: "I", flag: "🇨🇱" },
-  { code: "PAR", name: "Paraguai", group: "I", flag: "🇵🇾" },
-  { code: "PER", name: "Peru", group: "I", flag: "🇵🇪" },
+  { code: "FRA", name: "França", group: "I", flag: "🇫🇷" },
+  { code: "SEN", name: "Senegal", group: "I", flag: "🇸🇳" },
+  { code: "NOR", name: "Noruega", group: "I", flag: "🇳🇴" },
+  { code: "IRQ", name: "Iraque", group: "I", flag: "🇮🇶" },
 
   // Grupo J
-  { code: "NGA", name: "Nigéria", group: "J", flag: "🇳🇬" },
-  { code: "EGY", name: "Egito", group: "J", flag: "🇪🇬" },
-  { code: "CIV", name: "Costa do Marfim", group: "J", flag: "🇨🇮" },
+  { code: "ARG", name: "Argentina", group: "J", flag: "🇦🇷" },
+  { code: "AUT", name: "Áustria", group: "J", flag: "🇦🇹" },
   { code: "ALG", name: "Argélia", group: "J", flag: "🇩🇿" },
+  { code: "JOR", name: "Jordânia", group: "J", flag: "🇯🇴" },
 
   // Grupo K
-  { code: "ITA", name: "Itália", group: "K", flag: "🇮🇹" },
-  { code: "AUT", name: "Áustria", group: "K", flag: "🇦🇹" },
-  { code: "UKR", name: "Ucrânia", group: "K", flag: "🇺🇦" },
-  { code: "SCO", name: "Escócia", group: "K", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+  { code: "POR", name: "Portugal", group: "K", flag: "🇵🇹" },
+  { code: "COL", name: "Colômbia", group: "K", flag: "🇨🇴" },
+  { code: "UZB", name: "Uzbequistão", group: "K", flag: "🇺🇿" },
+  { code: "JAM", name: "Jamaica", group: "K", flag: "🇯🇲" },
 
   // Grupo L
-  { code: "NOR", name: "Noruega", group: "L", flag: "🇳🇴" },
-  { code: "SUE", name: "Suécia", group: "L", flag: "🇸🇪" },
-  { code: "TUR", name: "Turquia", group: "L", flag: "🇹🇷" },
-  { code: "CZE", name: "República Tcheca", group: "L", flag: "🇨🇿" },
+  { code: "ENG", name: "Inglaterra", group: "L", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+  { code: "CRO", name: "Croácia", group: "L", flag: "🇭🇷" },
+  { code: "PAN", name: "Panamá", group: "L", flag: "🇵🇦" },
+  { code: "GHA", name: "Gana", group: "L", flag: "🇬🇭" },
 
   // Encerramento (20 figurinhas: FIN01-FIN20)
   { code: "FIN", name: "Encerramento", flag: "⭐" },
