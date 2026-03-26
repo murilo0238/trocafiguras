@@ -18,7 +18,7 @@ const StickerCard = ({
   onRemoveDuplicate,
 }: StickerCardProps) => {
   // Extract the code part (letters) and number part
-  const label = id.replace(/(\D+)(\d+)/, "$1 $2");
+  const label = id ? id.replace(/(\D+)(\d+)/, "$1 $2") : "";
 
   return (
     <div
