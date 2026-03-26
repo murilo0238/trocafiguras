@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          latitude: number | null
+          location_updated_at: string | null
+          longitude: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          latitude?: number | null
+          location_updated_at?: string | null
+          longitude?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          latitude?: number | null
+          location_updated_at?: string | null
+          longitude?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_stickers: {
+        Row: {
+          collected: boolean
+          duplicates: number
+          id: string
+          sticker_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          collected?: boolean
+          duplicates?: number
+          id?: string
+          sticker_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          collected?: boolean
+          duplicates?: number
+          id?: string
+          sticker_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
