@@ -1,23 +1,42 @@
 import { useState } from "react";
-import { CheckCircle, XCircle, Copy } from "lucide-react";
+import { CheckCircle, XCircle, Copy, LogOut, ArrowLeftRight } from "lucide-react";
 import StickerCard from "@/components/StickerCard";
 import StatCard from "@/components/StatCard";
 import FilterButtons from "@/components/FilterButtons";
+import TradingPanel from "@/components/TradingPanel";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
+import { useAuth } from "@/hooks/useAuth";
 import { SECTIONS, STICKERS_PER_SECTION } from "@/data/teams";
+import Auth from "./Auth";
 
 type FilterType = "all" | "missing" | "duplicates";
+type TabType = "album" | "trades";
 
 const Index = () => {
+  const { user, loading: authLoading, signOut } = useAuth();
   const {
     collection,
     toggleCollected,
     addDuplicate,
     removeDuplicate,
     stats,
+    loading: collectionLoading,
   } = useStickerCollection();
 
   const [filter, setFilter] = useState<FilterType>("all");
+  const [tab, setTab] = useState<TabType>("album");
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground animate-pulse text-lg">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
 
   const getSectionStickers = (code: string) => {
     const ids: string[] = [];
@@ -36,12 +55,20 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-8">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-4">
-        <h1 className="text-2xl font-bold text-center text-primary mb-4">
-          📒 Meu Álbum
-        </h1>
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-xl font-bold text-primary">📒 Meu Álbum</h1>
+          <button
+            onClick={signOut}
+            className="p-2 rounded-full hover:bg-muted transition-colors"
+            title="Sair"
+          >
+            <LogOut className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        {/* Stats Dashboard */}
+        <div className="grid grid-cols-3 gap-2 mb-3">
           <StatCard
             label="Tenho"
             value={`${stats.collected}/${stats.total}`}
@@ -62,57 +89,88 @@ const Index = () => {
           />
         </div>
 
-        <FilterButtons activeFilter={filter} onFilterChange={setFilter} />
+        {/* Tabs */}
+        <div className="flex gap-2 mb-3">
+          <button
+            onClick={() => setTab("album")}
+            className={`flex-1 py-2 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1 ${
+              tab === "album"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            📒 Álbum
+          </button>
+          <button
+            onClick={() => setTab("trades")}
+            className={`flex-1 py-2 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1 ${
+              tab === "trades"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            <ArrowLeftRight className="w-3 h-3" /> Trocas
+          </button>
+        </div>
+
+        {tab === "album" && (
+          <FilterButtons activeFilter={filter} onFilterChange={setFilter} />
+        )}
       </header>
 
-      {/* Sticker Grid by Sections */}
-      <main className="px-3 pt-4 space-y-4">
-        {SECTIONS.map((section) => {
-          const stickers = getSectionStickers(section.code);
-          if (stickers.length === 0) return null;
-
-          return (
-            <div key={section.code}>
-              {/* Section Header */}
-              <div className="flex items-center gap-2 mb-2 px-1">
-                <span className="text-lg">{section.flag}</span>
-                <h2 className="text-sm font-bold text-primary">
-                  {section.name}
-                </h2>
-                {section.group && (
-                  <span className="text-[10px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
-                    Grupo {section.group}
-                  </span>
-                )}
-              </div>
-
-              {/* Sticker Grid */}
-              <div className="grid grid-cols-10 gap-1">
-                {stickers.map((id) => (
-                  <StickerCard
-                    key={id}
-                    id={id}
-                    collected={collection[id]?.collected || false}
-                    duplicates={collection[id]?.duplicates || 0}
-                    onToggle={() => toggleCollected(id)}
-                    onAddDuplicate={() => addDuplicate(id)}
-                    onRemoveDuplicate={() => removeDuplicate(id)}
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Empty state */}
-        {SECTIONS.every((s) => getSectionStickers(s.code).length === 0) && (
+      {/* Content */}
+      <main className="px-3 pt-4">
+        {collectionLoading ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">
-              {filter === "missing"
-                ? "🎉 Você completou o álbum!"
-                : "Nenhuma figurinha repetida ainda"}
-            </p>
+            <p className="text-muted-foreground animate-pulse">Carregando coleção...</p>
           </div>
+        ) : tab === "album" ? (
+          <div className="space-y-4">
+            {SECTIONS.map((section) => {
+              const stickers = getSectionStickers(section.code);
+              if (stickers.length === 0) return null;
+
+              return (
+                <div key={section.code}>
+                  <div className="flex items-center gap-2 mb-2 px-1">
+                    <span className="text-lg">{section.flag}</span>
+                    <h2 className="text-sm font-bold text-primary">{section.name}</h2>
+                    {section.group && (
+                      <span className="text-[10px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                        Grupo {section.group}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-10 gap-1">
+                    {stickers.map((id) => (
+                      <StickerCard
+                        key={id}
+                        id={id}
+                        collected={collection[id]?.collected || false}
+                        duplicates={collection[id]?.duplicates || 0}
+                        onToggle={() => toggleCollected(id)}
+                        onAddDuplicate={() => addDuplicate(id)}
+                        onRemoveDuplicate={() => removeDuplicate(id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {SECTIONS.every((s) => getSectionStickers(s.code).length === 0) && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-lg">
+                  {filter === "missing"
+                    ? "🎉 Você completou o álbum!"
+                    : "Nenhuma figurinha repetida ainda"}
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <TradingPanel />
         )}
       </main>
     </div>
