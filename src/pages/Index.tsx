@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { CheckCircle, XCircle, Copy, LogOut, ArrowLeftRight } from "lucide-react";
+import { CheckCircle, XCircle, Copy, LogOut, ArrowLeftRight, BarChart3 } from "lucide-react";
 import StickerCard from "@/components/StickerCard";
 import StatCard from "@/components/StatCard";
 import FilterButtons from "@/components/FilterButtons";
 import TradingPanel from "@/components/TradingPanel";
+import StickerRanking from "@/components/StickerRanking";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
 import { useAuth } from "@/hooks/useAuth";
 import { SECTIONS, STICKERS_PER_SECTION } from "@/data/teams";
 import Auth from "./Auth";
 
 type FilterType = "all" | "missing" | "duplicates";
-type TabType = "album" | "trades";
+type TabType = "album" | "trades" | "ranking";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -57,7 +58,7 @@ const Index = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold text-primary">📒 Meu Álbum</h1>
+          <h1 className="text-lg font-bold text-primary">⚽ Controle Copa</h1>
           <button
             onClick={signOut}
             className="p-2 rounded-full hover:bg-muted transition-colors"
@@ -90,10 +91,10 @@ const Index = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-3">
+        <div className="flex gap-1.5 mb-3">
           <button
             onClick={() => setTab("album")}
-            className={`flex-1 py-2 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 py-2 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 ${
               tab === "album"
                 ? "bg-primary text-primary-foreground shadow-md"
                 : "bg-muted text-muted-foreground"
@@ -103,13 +104,23 @@ const Index = () => {
           </button>
           <button
             onClick={() => setTab("trades")}
-            className={`flex-1 py-2 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 py-2 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 ${
               tab === "trades"
                 ? "bg-primary text-primary-foreground shadow-md"
                 : "bg-muted text-muted-foreground"
             }`}
           >
             <ArrowLeftRight className="w-3 h-3" /> Trocas
+          </button>
+          <button
+            onClick={() => setTab("ranking")}
+            className={`flex-1 py-2 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+              tab === "ranking"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            <BarChart3 className="w-3 h-3" /> Ranking
           </button>
         </div>
 
@@ -169,8 +180,10 @@ const Index = () => {
               </div>
             )}
           </div>
-        ) : (
+        ) : tab === "trades" ? (
           <TradingPanel />
+        ) : (
+          <StickerRanking />
         )}
       </main>
     </div>
