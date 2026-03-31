@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { CheckCircle, XCircle, Copy, LogOut, ArrowLeftRight } from "lucide-react";
+import { CheckCircle, XCircle, Copy, LogOut, ArrowLeftRight, BarChart3 } from "lucide-react";
 import StickerCard from "@/components/StickerCard";
 import StatCard from "@/components/StatCard";
 import FilterButtons from "@/components/FilterButtons";
 import TradingPanel from "@/components/TradingPanel";
+import StickerRanking from "@/components/StickerRanking";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
 import { useAuth } from "@/hooks/useAuth";
 import { SECTIONS, STICKERS_PER_SECTION } from "@/data/teams";
 import Auth from "./Auth";
 
 type FilterType = "all" | "missing" | "duplicates";
-type TabType = "album" | "trades";
+type TabType = "album" | "trades" | "ranking";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
