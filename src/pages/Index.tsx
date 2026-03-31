@@ -91,10 +91,10 @@ const Index = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-3">
+        <div className="flex gap-1.5 mb-3">
           <button
             onClick={() => setTab("album")}
-            className={`flex-1 py-2 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 py-2 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 ${
               tab === "album"
                 ? "bg-primary text-primary-foreground shadow-md"
                 : "bg-muted text-muted-foreground"
@@ -104,13 +104,23 @@ const Index = () => {
           </button>
           <button
             onClick={() => setTab("trades")}
-            className={`flex-1 py-2 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 py-2 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 ${
               tab === "trades"
                 ? "bg-primary text-primary-foreground shadow-md"
                 : "bg-muted text-muted-foreground"
             }`}
           >
             <ArrowLeftRight className="w-3 h-3" /> Trocas
+          </button>
+          <button
+            onClick={() => setTab("ranking")}
+            className={`flex-1 py-2 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+              tab === "ranking"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            <BarChart3 className="w-3 h-3" /> Ranking
           </button>
         </div>
 
