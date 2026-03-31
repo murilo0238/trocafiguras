@@ -180,8 +180,10 @@ const Index = () => {
               </div>
             )}
           </div>
-        ) : (
+        ) : tab === "trades" ? (
           <TradingPanel />
+        ) : (
+          <StickerRanking />
         )}
       </main>
     </div>
