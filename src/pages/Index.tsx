@@ -58,7 +58,7 @@ const Index = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold text-primary">📒 Meu Álbum</h1>
+          <h1 className="text-lg font-bold text-primary">⚽ Controle Copa</h1>
           <button
             onClick={signOut}
             className="p-2 rounded-full hover:bg-muted transition-colors"
