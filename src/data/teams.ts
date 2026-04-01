@@ -42,8 +42,8 @@ export const SECTIONS: TeamSection[] = [
   // Grupo F
   { code: "HOL", name: "Holanda", group: "F", flag: "🇳🇱" },
   { code: "JPN", name: "Japão", group: "F", flag: "🇯🇵" },
+  { code: "SWE", name: "Suécia", group: "F", flag: "🇸🇪" },
   { code: "TUN", name: "Tunísia", group: "F", flag: "🇹🇳" },
-  { code: "UKR", name: "Ucrânia", group: "F", flag: "🇺🇦" },
 
   // Grupo G
   { code: "BEL", name: "Bélgica", group: "G", flag: "🇧🇪" },
