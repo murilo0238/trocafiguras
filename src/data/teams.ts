@@ -71,9 +71,9 @@ export const SECTIONS: TeamSection[] = [
 
   // Grupo K
   { code: "POR", name: "Portugal", group: "K", flag: "🇵🇹" },
-  { code: "COL", name: "Colômbia", group: "K", flag: "🇨🇴" },
+  { code: "COD", name: "RD Congo", group: "K", flag: "🇨🇩" },
   { code: "UZB", name: "Uzbequistão", group: "K", flag: "🇺🇿" },
-  { code: "JAM", name: "Jamaica", group: "K", flag: "🇯🇲" },
+  { code: "COL", name: "Colômbia", group: "K", flag: "🇨🇴" },
 
   // Grupo L
   { code: "ENG", name: "Inglaterra", group: "L", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
