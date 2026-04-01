@@ -11,15 +11,15 @@ export const SECTIONS: TeamSection[] = [
 
   // Grupo A
   { code: "MEX", name: "México", group: "A", flag: "🇲🇽" },
-  { code: "KOR", name: "Coreia do Sul", group: "A", flag: "🇰🇷" },
   { code: "RSA", name: "África do Sul", group: "A", flag: "🇿🇦" },
-  { code: "DEN", name: "Dinamarca", group: "A", flag: "🇩🇰" },
+  { code: "KOR", name: "Coreia do Sul", group: "A", flag: "🇰🇷" },
+  { code: "CZE", name: "República Tcheca", group: "A", flag: "🇨🇿" },
 
   // Grupo B
   { code: "CAN", name: "Canadá", group: "B", flag: "🇨🇦" },
-  { code: "SUI", name: "Suíça", group: "B", flag: "🇨🇭" },
+  { code: "BIH", name: "Bósnia", group: "B", flag: "🇧🇦" },
   { code: "QAT", name: "Catar", group: "B", flag: "🇶🇦" },
-  { code: "ITA", name: "Itália", group: "B", flag: "🇮🇹" },
+  { code: "SUI", name: "Suíça", group: "B", flag: "🇨🇭" },
 
   // Grupo C
   { code: "BRA", name: "Brasil", group: "C", flag: "🇧🇷" },
