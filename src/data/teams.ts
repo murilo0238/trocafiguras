@@ -11,15 +11,15 @@ export const SECTIONS: TeamSection[] = [
 
   // Grupo A
   { code: "MEX", name: "México", group: "A", flag: "🇲🇽" },
-  { code: "KOR", name: "Coreia do Sul", group: "A", flag: "🇰🇷" },
   { code: "RSA", name: "África do Sul", group: "A", flag: "🇿🇦" },
-  { code: "DEN", name: "Dinamarca", group: "A", flag: "🇩🇰" },
+  { code: "KOR", name: "Coreia do Sul", group: "A", flag: "🇰🇷" },
+  { code: "CZE", name: "República Tcheca", group: "A", flag: "🇨🇿" },
 
   // Grupo B
   { code: "CAN", name: "Canadá", group: "B", flag: "🇨🇦" },
-  { code: "SUI", name: "Suíça", group: "B", flag: "🇨🇭" },
+  { code: "BIH", name: "Bósnia", group: "B", flag: "🇧🇦" },
   { code: "QAT", name: "Catar", group: "B", flag: "🇶🇦" },
-  { code: "ITA", name: "Itália", group: "B", flag: "🇮🇹" },
+  { code: "SUI", name: "Suíça", group: "B", flag: "🇨🇭" },
 
   // Grupo C
   { code: "BRA", name: "Brasil", group: "C", flag: "🇧🇷" },
@@ -29,8 +29,8 @@ export const SECTIONS: TeamSection[] = [
 
   // Grupo D
   { code: "USA", name: "Estados Unidos", group: "D", flag: "🇺🇸" },
-  { code: "AUS", name: "Austrália", group: "D", flag: "🇦🇺" },
   { code: "PAR", name: "Paraguai", group: "D", flag: "🇵🇾" },
+  { code: "AUS", name: "Austrália", group: "D", flag: "🇦🇺" },
   { code: "TUR", name: "Turquia", group: "D", flag: "🇹🇷" },
 
   // Grupo E
@@ -42,8 +42,8 @@ export const SECTIONS: TeamSection[] = [
   // Grupo F
   { code: "HOL", name: "Holanda", group: "F", flag: "🇳🇱" },
   { code: "JPN", name: "Japão", group: "F", flag: "🇯🇵" },
+  { code: "SWE", name: "Suécia", group: "F", flag: "🇸🇪" },
   { code: "TUN", name: "Tunísia", group: "F", flag: "🇹🇳" },
-  { code: "UKR", name: "Ucrânia", group: "F", flag: "🇺🇦" },
 
   // Grupo G
   { code: "BEL", name: "Bélgica", group: "G", flag: "🇧🇪" },
@@ -71,9 +71,9 @@ export const SECTIONS: TeamSection[] = [
 
   // Grupo K
   { code: "POR", name: "Portugal", group: "K", flag: "🇵🇹" },
-  { code: "COL", name: "Colômbia", group: "K", flag: "🇨🇴" },
+  { code: "COD", name: "RD Congo", group: "K", flag: "🇨🇩" },
   { code: "UZB", name: "Uzbequistão", group: "K", flag: "🇺🇿" },
-  { code: "JAM", name: "Jamaica", group: "K", flag: "🇯🇲" },
+  { code: "COL", name: "Colômbia", group: "K", flag: "🇨🇴" },
 
   // Grupo L
   { code: "ENG", name: "Inglaterra", group: "L", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
