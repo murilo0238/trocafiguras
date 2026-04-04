@@ -52,6 +52,10 @@ export default {
           uncollected: "hsl(var(--card-uncollected))",
           collected: "hsl(var(--card-collected))",
         },
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          light: "hsl(var(--gold-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
