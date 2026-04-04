@@ -47,6 +47,39 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_requests: {
+        Row: {
+          created_at: string
+          from_user_id: string
+          id: string
+          status: string
+          stickers_offered: string[]
+          stickers_requested: string[]
+          to_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          from_user_id: string
+          id?: string
+          status?: string
+          stickers_offered?: string[]
+          stickers_requested?: string[]
+          to_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          status?: string
+          stickers_offered?: string[]
+          stickers_requested?: string[]
+          to_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_stickers: {
         Row: {
           collected: boolean

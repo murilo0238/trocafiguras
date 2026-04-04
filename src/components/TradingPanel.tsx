@@ -1,11 +1,35 @@
-import { MapPin, RefreshCw, Users } from "lucide-react";
+import { useState } from "react";
+import { MapPin, RefreshCw, Users, Send } from "lucide-react";
 import { useTrading } from "@/hooks/useTrading";
+import { useTradeRequests } from "@/hooks/useTradeRequests";
+import QRCodePanel from "@/components/QRCodePanel";
+import TradeRequestsPanel from "@/components/TradeRequestsPanel";
 
 const TradingPanel = () => {
   const { matches, loading, radius, setRadius, findMatches, myLocation } = useTrading();
+  const { sendTradeRequest } = useTradeRequests();
+  const [scannedUserId, setScannedUserId] = useState<string | null>(null);
+
+  const handleProposeTrade = async (match: typeof matches[0]) => {
+    const count = Math.min(match.iCanGive.length, match.theyCanGive.length);
+    await sendTradeRequest(
+      match.userId,
+      match.iCanGive.slice(0, count),
+      match.theyCanGive.slice(0, count)
+    );
+  };
 
   return (
     <div className="space-y-4">
+      {/* QR Code Section */}
+      <QRCodePanel onUserScanned={(userId) => setScannedUserId(userId)} />
+
+      {/* Trade Requests */}
+      <TradeRequestsPanel
+        scannedUserId={scannedUserId}
+        onClearScanned={() => setScannedUserId(null)}
+      />
+
       {/* Radius control */}
       <div className="bg-card rounded-xl p-4 shadow-md space-y-3">
         <div className="flex items-center gap-2">
@@ -106,9 +130,17 @@ const TradingPanel = () => {
                 </div>
               </div>
 
-              <p className="text-center text-[10px] font-bold text-primary">
-                ⚡ {match.tradeScore} troca{match.tradeScore > 1 ? "s" : ""} possíve{match.tradeScore > 1 ? "is" : "l"}
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold text-primary">
+                  ⚡ {match.tradeScore} troca{match.tradeScore > 1 ? "s" : ""} possíve{match.tradeScore > 1 ? "is" : "l"}
+                </p>
+                <button
+                  onClick={() => handleProposeTrade(match)}
+                  className="py-1.5 px-3 rounded-lg bg-primary text-primary-foreground font-bold text-[10px] flex items-center gap-1 hover:opacity-90"
+                >
+                  <Send className="w-3 h-3" /> Propor Troca
+                </button>
+              </div>
             </div>
           ))}
         </div>
