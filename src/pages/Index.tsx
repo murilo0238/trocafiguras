@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CheckCircle, XCircle, Copy, LogOut, ArrowLeftRight, BarChart3 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import StickerCard from "@/components/StickerCard";
+import ShareCollection from "@/components/ShareCollection";
 import StatCard from "@/components/StatCard";
 import FilterButtons from "@/components/FilterButtons";
 import TradingPanel from "@/components/TradingPanel";
