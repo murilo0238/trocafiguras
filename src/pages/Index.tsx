@@ -64,13 +64,16 @@ const Index = () => {
             <img src={logo} alt="Troca Figurinha" className="w-8 h-8 object-contain" />
             <h1 className="text-lg font-bold text-primary">Troca Figurinha</h1>
           </div>
-          <button
-            onClick={signOut}
-            className="p-2 rounded-full hover:bg-muted transition-colors"
-            title="Sair"
-          >
-            <LogOut className="w-4 h-4 text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-1">
+            <ShareCollection collection={collection} />
+            <button
+              onClick={signOut}
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+              title="Sair"
+            >
+              <LogOut className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
         </div>
 
         {/* Stats Dashboard */}
