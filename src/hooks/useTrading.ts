@@ -162,7 +162,7 @@ export const useTrading = () => {
           tradeMatches.push({
             userId: profile.user_id,
             displayName: profile.display_name || "Colecionador",
-            distance: Math.round(profile.distance * 10) / 10,
+            distance: Math.max(0.1, Math.round(profile.distance * 10) / 10),
             iCanGive,
             theyCanGive,
             tradeScore,
