@@ -87,6 +87,12 @@
 
   body {
     @apply bg-background text-foreground font-fredoka;
+    background-image:
+      radial-gradient(circle at 10% 0%, hsl(var(--primary) / 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 90% 100%, hsl(var(--gold) / 0.06) 0%, transparent 45%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><g fill='none' stroke='%233B6BA5' stroke-width='1' opacity='0.05'><polygon points='40,18 48,24 45,34 35,34 32,24'/><circle cx='40' cy='40' r='14'/></g></svg>");
+    background-attachment: fixed;
+    background-repeat: no-repeat, no-repeat, repeat;
   }
 }
 
