@@ -77,8 +77,8 @@ export const useTradeRequests = () => {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel("trade-requests")
+    const channel = supabase.channel(`trade-requests-${user.id}-${Math.random().toString(36).slice(2)}`);
+    channel
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "trade_requests" },
