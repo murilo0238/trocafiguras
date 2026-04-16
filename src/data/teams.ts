@@ -81,8 +81,6 @@ export const SECTIONS: TeamSection[] = [
   { code: "PAN", name: "Panamá", group: "L", flag: "🇵🇦" },
   { code: "GHA", name: "Gana", group: "L", flag: "🇬🇭" },
 
-  // Encerramento (20 figurinhas: FIN01-FIN20)
-  { code: "FIN", name: "Encerramento", flag: "⭐" },
 ];
 
 export const STICKERS_PER_SECTION = 20;

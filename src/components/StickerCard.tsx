@@ -28,7 +28,7 @@ const StickerCard = ({
       onClick={onToggle}
     >
       <span
-        className={`text-[7px] leading-tight font-bold text-center ${
+        className={`text-[10px] leading-tight font-bold text-center px-0.5 ${
           collected ? "text-accent-foreground" : "text-muted-foreground"
         }`}
       >
