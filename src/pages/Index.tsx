@@ -152,10 +152,10 @@ const Index = () => {
               return (
                 <div key={section.code}>
                   <div className="flex items-center gap-2 mb-2 px-1">
-                    <span className="text-lg">{section.flag}</span>
+                    <span className="text-2xl drop-shadow-sm">{section.flag}</span>
                     <h2 className="text-sm font-bold text-primary">{section.name}</h2>
                     {section.group && (
-                      <span className="text-[10px] font-medium bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                      <span className="text-[10px] font-medium bg-gold/20 text-primary px-1.5 py-0.5 rounded-full border border-gold/30">
                         Grupo {section.group}
                       </span>
                     )}
