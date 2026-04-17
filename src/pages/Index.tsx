@@ -62,7 +62,7 @@ const Index = () => {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <img src={logo} alt="Troca Figurinha" className="w-8 h-8 object-contain" />
-            <h1 className="text-lg font-bold text-primary">Troca Figurinha</h1>
+            <h1 className="text-lg font-bold text-primary">Álbum da Copa 2026</h1>
           </div>
           <div className="flex items-center gap-1">
             <ShareCollection collection={collection} />
@@ -161,7 +161,7 @@ const Index = () => {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-10 gap-1">
+                  <div className="grid grid-cols-5 gap-2">
                     {stickers.map((id) => (
                       <StickerCard
                         key={id}
