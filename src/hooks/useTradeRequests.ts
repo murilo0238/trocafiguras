@@ -77,14 +77,32 @@ export const useTradeRequests = () => {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase.channel(`trade-requests-${user.id}-${Math.random().toString(36).slice(2)}`);
+    // Authorize private realtime channel (RLS on realtime.messages)
+    supabase.realtime.setAuth();
+
+    const channel = supabase.channel(`trade-requests:${user.id}`, {
+      config: { private: true },
+    });
     channel
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "trade_requests" },
-        () => {
-          loadRequests();
-        }
+        {
+          event: "*",
+          schema: "public",
+          table: "trade_requests",
+          filter: `to_user_id=eq.${user.id}`,
+        },
+        () => loadRequests()
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "trade_requests",
+          filter: `from_user_id=eq.${user.id}`,
+        },
+        () => loadRequests()
       )
       .subscribe();
 
