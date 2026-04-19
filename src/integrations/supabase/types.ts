@@ -22,6 +22,8 @@ export type Database = {
           latitude: number | null
           location_updated_at: string | null
           longitude: number | null
+          share_collection: boolean
+          share_location: boolean
           updated_at: string
           user_id: string
         }
@@ -32,6 +34,8 @@ export type Database = {
           latitude?: number | null
           location_updated_at?: string | null
           longitude?: number | null
+          share_collection?: boolean
+          share_location?: boolean
           updated_at?: string
           user_id: string
         }
@@ -42,6 +46,8 @@ export type Database = {
           latitude?: number | null
           location_updated_at?: string | null
           longitude?: number | null
+          share_collection?: boolean
+          share_location?: boolean
           updated_at?: string
           user_id?: string
         }
