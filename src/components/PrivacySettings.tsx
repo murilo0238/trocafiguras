@@ -31,9 +31,12 @@ const PrivacySettings = () => {
   const update = async (field: "share_location" | "share_collection", value: boolean) => {
     if (!user) return;
     setLoading(true);
+    const payload = field === "share_location"
+      ? { share_location: value }
+      : { share_collection: value };
     const { error } = await supabase
       .from("profiles")
-      .update({ [field]: value })
+      .update(payload)
       .eq("user_id", user.id);
     setLoading(false);
     if (error) {
