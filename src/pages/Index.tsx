@@ -3,6 +3,7 @@ import { CheckCircle, XCircle, Copy, LogOut, ArrowLeftRight, BarChart3 } from "l
 import logo from "@/assets/logo.png";
 import StickerCard from "@/components/StickerCard";
 import ShareCollection from "@/components/ShareCollection";
+import PrivacySettings from "@/components/PrivacySettings";
 import StatCard from "@/components/StatCard";
 import FilterButtons from "@/components/FilterButtons";
 import TradingPanel from "@/components/TradingPanel";
@@ -65,6 +66,7 @@ const Index = () => {
             <h1 className="text-lg font-bold text-primary">Álbum da Copa 2026</h1>
           </div>
           <div className="flex items-center gap-1">
+            <PrivacySettings />
             <ShareCollection collection={collection} />
             <button
               onClick={signOut}

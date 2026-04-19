@@ -9,8 +9,24 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const validatePassword = (pwd: string): string | null => {
+    if (pwd.length < 8) return "A senha deve ter ao menos 8 caracteres.";
+    if (!/[A-Za-z]/.test(pwd)) return "A senha deve conter ao menos uma letra.";
+    if (!/[0-9]/.test(pwd)) return "A senha deve conter ao menos um número.";
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLogin) {
+      const err = validatePassword(password);
+      if (err) {
+        toast.error(err);
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -74,9 +90,14 @@ const Auth = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 rounded-lg bg-muted text-foreground placeholder:text-muted-foreground border-none focus:ring-2 focus:ring-primary outline-none"
-            minLength={6}
+            minLength={isLogin ? 6 : 8}
             required
           />
+          {!isLogin && (
+            <p className="text-xs text-muted-foreground -mt-2 px-1">
+              Mínimo 8 caracteres, com letras e números.
+            </p>
+          )}
 
           <button
             type="submit"
