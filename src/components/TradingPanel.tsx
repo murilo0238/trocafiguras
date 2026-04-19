@@ -1,22 +1,35 @@
 import { useState } from "react";
 import { MapPin, RefreshCw, Users, Send } from "lucide-react";
 import { useTrading } from "@/hooks/useTrading";
-import { useTradeRequests } from "@/hooks/useTradeRequests";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import QRCodePanel from "@/components/QRCodePanel";
 import TradeRequestsPanel from "@/components/TradeRequestsPanel";
 
 const TradingPanel = () => {
+  const { user } = useAuth();
   const { matches, loading, radius, setRadius, findMatches, myLocation } = useTrading();
-  const { sendTradeRequest } = useTradeRequests();
   const [scannedUserId, setScannedUserId] = useState<string | null>(null);
+  const [proposing, setProposing] = useState<string | null>(null);
 
   const handleProposeTrade = async (match: typeof matches[0]) => {
+    if (!user) return;
+    setProposing(match.userId);
     const count = Math.min(match.iCanGive.length, match.theyCanGive.length);
-    await sendTradeRequest(
-      match.userId,
-      match.iCanGive.slice(0, count),
-      match.theyCanGive.slice(0, count)
-    );
+    const { error } = await supabase.from("trade_requests").insert({
+      from_user_id: user.id,
+      to_user_id: match.userId,
+      stickers_offered: match.iCanGive.slice(0, count),
+      stickers_requested: match.theyCanGive.slice(0, count),
+      status: "pending",
+    });
+    setProposing(null);
+    if (error) {
+      toast.error("Erro ao enviar pedido de troca.");
+      return;
+    }
+    toast.success("Pedido de troca enviado!");
   };
 
   return (
@@ -136,9 +149,10 @@ const TradingPanel = () => {
                 </p>
                 <button
                   onClick={() => handleProposeTrade(match)}
-                  className="py-1.5 px-3 rounded-lg bg-primary text-primary-foreground font-bold text-[10px] flex items-center gap-1 hover:opacity-90"
+                  disabled={proposing === match.userId}
+                  className="py-1.5 px-3 rounded-lg bg-primary text-primary-foreground font-bold text-[10px] flex items-center gap-1 hover:opacity-90 disabled:opacity-50"
                 >
-                  <Send className="w-3 h-3" /> Propor Troca
+                  <Send className="w-3 h-3" /> {proposing === match.userId ? "Enviando..." : "Propor Troca"}
                 </button>
               </div>
             </div>
