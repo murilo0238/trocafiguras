@@ -75,6 +75,40 @@ Deno.serve(async (req) => {
     const offered: string[] = trade.stickers_offered;
     const requested: string[] = trade.stickers_requested;
 
+    // Validate sender owns all offered stickers with duplicates > 0
+    if (offered.length > 0) {
+      const { data: senderOwned } = await admin
+        .from("user_stickers")
+        .select("sticker_id")
+        .eq("user_id", fromUser)
+        .gt("duplicates", 0)
+        .in("sticker_id", offered);
+      const ownedIds = new Set((senderOwned ?? []).map((s) => s.sticker_id));
+      if (offered.some((id) => !ownedIds.has(id))) {
+        return new Response(
+          JSON.stringify({ error: "Sender does not own all offered stickers" }),
+          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
+    // Validate recipient owns all requested stickers with duplicates > 0
+    if (requested.length > 0) {
+      const { data: receiverOwned } = await admin
+        .from("user_stickers")
+        .select("sticker_id")
+        .eq("user_id", toUser)
+        .gt("duplicates", 0)
+        .in("sticker_id", requested);
+      const ownedIds = new Set((receiverOwned ?? []).map((s) => s.sticker_id));
+      if (requested.some((id) => !ownedIds.has(id))) {
+        return new Response(
+          JSON.stringify({ error: "Recipient does not own all requested stickers" }),
+          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     // For each sticker offered by from_user:
     // - Decrease from_user duplicates by 1
     // - Mark as collected for to_user (or add if not exists)
@@ -182,7 +216,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("execute-trade error:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
