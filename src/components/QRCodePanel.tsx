@@ -68,7 +68,7 @@ const QRCodePanel = ({ onUserScanned }: QRCodePanelProps) => {
         if (state === 2) {
           await scanner.stop();
         }
-        await scanner.clear().catch(() => {});
+        try { scanner.clear(); } catch {}
       } catch {
         // ignore
       }
