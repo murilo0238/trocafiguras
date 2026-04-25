@@ -218,10 +218,12 @@ const Index = () => {
               );
             })}
 
-            {SECTIONS.every((s) => getSectionStickers(s.code).length === 0) && (
+            {filteredSections.every((s) => getSectionStickers(s.code).length === 0) && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-lg">
-                  {filter === "missing"
+                  {search
+                    ? "Nenhuma seleção encontrada"
+                    : filter === "missing"
                     ? "🎉 Você completou o álbum!"
                     : "Nenhuma figurinha repetida ainda"}
                 </p>
