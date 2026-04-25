@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,23 +19,28 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!isLogin) {
-      const err = validatePassword(password);
-      if (err) {
-        toast.error(err);
-        return;
-      }
-    }
-
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
         if (error) throw error;
-        toast.success("Login realizado!");
-      } else {
+        toast.success("Enviamos um link para o seu e-mail!");
+        setMode("login");
+      } else if (mode === "signup") {
+        const err = validatePassword(password);
+        if (err) {
+          toast.error(err);
+          setLoading(false);
+          return;
+        }
+        if (password !== confirmPassword) {
+          toast.error("As senhas não coincidem.");
+          setLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -45,6 +51,10 @@ const Auth = () => {
         });
         if (error) throw error;
         toast.success("Conta criada! Verifique seu e-mail.");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        toast.success("Login realizado!");
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -53,24 +63,27 @@ const Auth = () => {
     }
   };
 
+  const inputCls =
+    "w-full px-4 py-3 rounded-lg bg-muted text-foreground placeholder:text-muted-foreground border-none focus:ring-2 focus:ring-primary outline-none";
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-3xl font-bold text-center text-primary mb-2">📒 Meu Álbum</h1>
-        <p className="text-center text-muted-foreground mb-6">Copa do Mundo 2026</p>
+        <h1 className="text-3xl font-bold text-center text-primary mb-2">📒 Álbum da Copa 2026</h1>
+        <p className="text-center text-muted-foreground mb-6">Sua coleção, suas trocas</p>
 
         <form onSubmit={handleSubmit} className="space-y-4 bg-card rounded-xl p-6 shadow-lg">
           <h2 className="text-xl font-bold text-center text-foreground">
-            {isLogin ? "Entrar" : "Criar Conta"}
+            {mode === "login" ? "Entrar" : mode === "signup" ? "Criar Conta" : "Recuperar senha"}
           </h2>
 
-          {!isLogin && (
+          {mode === "signup" && (
             <input
               type="text"
               placeholder="Seu nome"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg bg-muted text-foreground placeholder:text-muted-foreground border-none focus:ring-2 focus:ring-primary outline-none"
+              className={inputCls}
               required
             />
           )}
@@ -80,23 +93,37 @@ const Auth = () => {
             placeholder="E-mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-muted text-foreground placeholder:text-muted-foreground border-none focus:ring-2 focus:ring-primary outline-none"
+            className={inputCls}
             required
           />
 
-          <input
-            type="password"
-            placeholder="Senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-muted text-foreground placeholder:text-muted-foreground border-none focus:ring-2 focus:ring-primary outline-none"
-            minLength={isLogin ? 6 : 8}
-            required
-          />
-          {!isLogin && (
-            <p className="text-xs text-muted-foreground -mt-2 px-1">
-              Mínimo 8 caracteres, com letras e números.
-            </p>
+          {mode !== "forgot" && (
+            <input
+              type="password"
+              placeholder="Senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={inputCls}
+              minLength={mode === "login" ? 6 : 8}
+              required
+            />
+          )}
+
+          {mode === "signup" && (
+            <>
+              <input
+                type="password"
+                placeholder="Confirmar senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={inputCls}
+                minLength={8}
+                required
+              />
+              <p className="text-xs text-muted-foreground -mt-2 px-1">
+                Mínimo 8 caracteres, com letras e números.
+              </p>
+            </>
           )}
 
           <button
@@ -104,15 +131,31 @@ const Auth = () => {
             disabled={loading}
             className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {loading ? "Aguarde..." : isLogin ? "Entrar" : "Criar Conta"}
+            {loading
+              ? "Aguarde..."
+              : mode === "login"
+              ? "Entrar"
+              : mode === "signup"
+              ? "Criar Conta"
+              : "Enviar link de recuperação"}
           </button>
+
+          {mode === "login" && (
+            <button
+              type="button"
+              onClick={() => setMode("forgot")}
+              className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Esqueci minha senha
+            </button>
+          )}
 
           <button
             type="button"
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => setMode(mode === "login" ? "signup" : "login")}
             className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            {isLogin ? "Não tem conta? Criar uma" : "Já tem conta? Entrar"}
+            {mode === "login" ? "Não tem conta? Criar uma" : "Já tem conta? Entrar"}
           </button>
         </form>
       </div>
