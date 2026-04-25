@@ -56,18 +56,39 @@ const QRCodePanel = ({ onUserScanned }: QRCodePanelProps) => {
     }, 300);
   };
 
-  const stopScanner = () => {
-    if (scannerRef.current) {
-      scannerRef.current.stop().catch(() => {});
-      scannerRef.current = null;
-    }
+  const stopScanner = async () => {
+    const scanner = scannerRef.current;
+    scannerRef.current = null;
     setShowScanner(false);
+    if (scanner) {
+      try {
+        // Only stop if it's actually scanning
+        // @ts-ignore - getState exists at runtime
+        const state = scanner.getState ? scanner.getState() : 2;
+        if (state === 2) {
+          await scanner.stop();
+        }
+        try { scanner.clear(); } catch {}
+      } catch {
+        // ignore
+      }
+    }
   };
 
   useEffect(() => {
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {});
+      const scanner = scannerRef.current;
+      scannerRef.current = null;
+      if (scanner) {
+        try {
+          // @ts-ignore
+          const state = scanner.getState ? scanner.getState() : 2;
+          if (state === 2) {
+            scanner.stop().catch(() => {});
+          }
+        } catch {
+          // ignore
+        }
       }
     };
   }, []);
