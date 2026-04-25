@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { CheckCircle, XCircle, Copy, LogOut, ArrowLeftRight, BarChart3 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { CheckCircle, XCircle, Copy, LogOut, ArrowLeftRight, BarChart3, User, Search, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import StickerCard from "@/components/StickerCard";
 import ShareCollection from "@/components/ShareCollection";
-import PrivacySettings from "@/components/PrivacySettings";
 import StatCard from "@/components/StatCard";
 import FilterButtons from "@/components/FilterButtons";
 import TradingPanel from "@/components/TradingPanel";
@@ -29,6 +29,18 @@ const Index = () => {
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [tab, setTab] = useState<TabType>("album");
+  const [search, setSearch] = useState("");
+
+  const normalize = (s: string) =>
+    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  const filteredSections = useMemo(() => {
+    const q = normalize(search.trim());
+    if (!q) return SECTIONS;
+    return SECTIONS.filter(
+      (s) => normalize(s.name).includes(q) || s.code.toLowerCase().includes(q)
+    );
+  }, [search]);
 
   if (authLoading) {
     return (
@@ -66,7 +78,13 @@ const Index = () => {
             <h1 className="text-lg font-bold text-primary">Álbum da Copa 2026</h1>
           </div>
           <div className="flex items-center gap-1">
-            <PrivacySettings />
+            <Link
+              to="/profile"
+              className="p-2 rounded-full hover:bg-muted transition-colors"
+              title="Meu Perfil"
+            >
+              <User className="w-4 h-4 text-muted-foreground" />
+            </Link>
             <ShareCollection collection={collection} />
             <button
               onClick={signOut}
@@ -135,7 +153,27 @@ const Index = () => {
         </div>
 
         {tab === "album" && (
-          <FilterButtons activeFilter={filter} onFilterChange={setFilter} />
+          <>
+            <div className="relative mb-2">
+              <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar seleção (ex: Brasil, BRA, FWC)"
+                className="w-full pl-9 pr-9 py-2 text-sm rounded-full bg-muted text-foreground placeholder:text-muted-foreground border-none focus:ring-2 focus:ring-primary outline-none"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-background/50"
+                >
+                  <X className="w-3 h-3 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+            <FilterButtons activeFilter={filter} onFilterChange={setFilter} />
+          </>
         )}
       </header>
 
@@ -147,7 +185,7 @@ const Index = () => {
           </div>
         ) : tab === "album" ? (
           <div className="space-y-4">
-            {SECTIONS.map((section) => {
+            {filteredSections.map((section) => {
               const stickers = getSectionStickers(section.code);
               if (stickers.length === 0) return null;
 
