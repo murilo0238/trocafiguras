@@ -50,6 +50,7 @@ export const useTrading = () => {
               latitude,
               longitude,
               location_updated_at: new Date().toISOString(),
+              share_location: true,
             })
             .eq("user_id", user.id);
 
