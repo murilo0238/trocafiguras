@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -6,10 +6,10 @@ import { toast } from "sonner";
 interface TradeMatch {
   userId: string;
   displayName: string;
-  distance: number; // km
-  iCanGive: string[]; // stickers I have as duplicates that they need
-  theyCanGive: string[]; // stickers they have as duplicates that I need
-  tradeScore: number; // total possible trades
+  distance: number;
+  iCanGive: string[];
+  theyCanGive: string[];
+  tradeScore: number;
 }
 
 function haversineDistance(
@@ -31,20 +31,26 @@ export const useTrading = () => {
   const { user } = useAuth();
   const [matches, setMatches] = useState<TradeMatch[]>([]);
   const [loading, setLoading] = useState(false);
-  const [radius, setRadius] = useState(10); // km
+  const [radius, setRadius] = useState(10);
   const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
 
-  const updateLocation = useCallback(async () => {
-    if (!user) return;
+  const updateLocation = useCallback((): Promise<{ lat: number; lng: number }> => {
+    return new Promise((resolve, reject) => {
+      if (!user) { reject(new Error("no_user")); return; }
 
-    return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
+      if (!navigator.geolocation) {
+        toast.error("Seu navegador não suporta geolocalização.");
+        reject(new Error("no_geolocation"));
+        return;
+      }
+
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
           const loc = { lat: latitude, lng: longitude };
           setMyLocation(loc);
 
-          await supabase
+          const { error } = await supabase
             .from("profiles")
             .update({
               latitude,
@@ -54,13 +60,19 @@ export const useTrading = () => {
             })
             .eq("user_id", user.id);
 
+          if (error) {
+            toast.error("Erro ao salvar localização.");
+            reject(error);
+            return;
+          }
+
           resolve(loc);
         },
-        (error) => {
-          toast.error("Não foi possível obter sua localização. Verifique as permissões.");
-          reject(error);
+        () => {
+          toast.error("Permissão de localização negada. Ative nas configurações do navegador.");
+          reject(new Error("permission_denied"));
         },
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     });
   }, [user]);
@@ -70,32 +82,39 @@ export const useTrading = () => {
     setLoading(true);
 
     try {
-      // Get/update my location
+      // Step 1: get location
       let loc = myLocation;
       if (!loc) {
-        loc = await updateLocation();
-      }
-      if (!loc) {
-        setLoading(false);
-        return;
+        try {
+          loc = await updateLocation();
+        } catch {
+          setLoading(false);
+          return;
+        }
       }
 
-      // Get all profiles with location
-      const { data: profiles } = await supabase
+      // Step 2: get other users with location
+      const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("user_id, display_name, latitude, longitude")
         .not("latitude", "is", null)
         .not("longitude", "is", null)
         .neq("user_id", user.id);
 
-      if (!profiles || profiles.length === 0) {
-        setMatches([]);
+      if (profilesError) {
+        toast.error("Erro ao buscar colecionadores.");
         setLoading(false);
-        toast.info("Nenhum colecionador encontrado por perto.");
         return;
       }
 
-      // Filter by radius
+      if (!profiles || profiles.length === 0) {
+        setMatches([]);
+        setLoading(false);
+        toast.info("Nenhum colecionador com localização ativa encontrado.");
+        return;
+      }
+
+      // Step 3: filter by radius
       const nearbyProfiles = profiles
         .map((p) => ({
           ...p,
@@ -106,57 +125,60 @@ export const useTrading = () => {
       if (nearbyProfiles.length === 0) {
         setMatches([]);
         setLoading(false);
-        toast.info(`Nenhum colecionador num raio de ${radius}km.`);
+        toast.info(`Nenhum colecionador num raio de ${radius} km.`);
         return;
       }
 
-      // Get my stickers
-      const { data: myStickers } = await supabase
+      // Step 4: get my stickers
+      const { data: myStickers, error: myStickersError } = await supabase
         .from("user_stickers")
         .select("sticker_id, collected, duplicates")
         .eq("user_id", user.id);
 
-      const myNeeded = new Set<string>();
-      const myDuplicates = new Set<string>();
-
-      if (myStickers) {
-        for (const s of myStickers) {
-          if (!s.collected) myNeeded.add(s.sticker_id);
-          if (s.duplicates > 0) myDuplicates.add(s.sticker_id);
-        }
+      if (myStickersError) {
+        toast.error("Erro ao carregar suas figurinhas.");
+        setLoading(false);
+        return;
       }
 
-      // Get nearby users' stickers
+      const myNeeded = new Set<string>();
+      const myDuplicates = new Set<string>();
+      for (const s of myStickers || []) {
+        if (!s.collected) myNeeded.add(s.sticker_id);
+        if (s.duplicates > 0) myDuplicates.add(s.sticker_id);
+      }
+
+      // Step 5: get nearby users' stickers
       const nearbyUserIds = nearbyProfiles.map((p) => p.user_id);
-      const { data: otherStickers } = await supabase
+      const { data: otherStickers, error: otherStickersError } = await supabase
         .from("user_stickers")
         .select("user_id, sticker_id, collected, duplicates")
         .in("user_id", nearbyUserIds);
 
-      // Build matches
-      const userStickersMap: Record<string, { needed: Set<string>; duplicates: Set<string> }> = {};
-      
-      if (otherStickers) {
-        for (const s of otherStickers) {
-          if (!userStickersMap[s.user_id]) {
-            userStickersMap[s.user_id] = { needed: new Set(), duplicates: new Set() };
-          }
-          if (!s.collected) userStickersMap[s.user_id].needed.add(s.sticker_id);
-          if (s.duplicates > 0) userStickersMap[s.user_id].duplicates.add(s.sticker_id);
-        }
+      if (otherStickersError) {
+        toast.error("Erro ao carregar figurinhas dos colecionadores.");
+        setLoading(false);
+        return;
       }
 
-      const tradeMatches: TradeMatch[] = [];
+      // Step 6: build match map
+      const userStickersMap: Record<string, { needed: Set<string>; duplicates: Set<string> }> = {};
+      for (const s of otherStickers || []) {
+        if (!userStickersMap[s.user_id]) {
+          userStickersMap[s.user_id] = { needed: new Set(), duplicates: new Set() };
+        }
+        if (!s.collected) userStickersMap[s.user_id].needed.add(s.sticker_id);
+        if (s.duplicates > 0) userStickersMap[s.user_id].duplicates.add(s.sticker_id);
+      }
 
+      // Step 7: compute matches
+      const tradeMatches: TradeMatch[] = [];
       for (const profile of nearbyProfiles) {
         const theirData = userStickersMap[profile.user_id];
         if (!theirData) continue;
 
-        // Stickers I can give them (my duplicates that they need)
         const iCanGive = [...myDuplicates].filter((id) => theirData.needed.has(id));
-        // Stickers they can give me (their duplicates that I need)
         const theyCanGive = [...theirData.duplicates].filter((id) => myNeeded.has(id));
-
         const tradeScore = Math.min(iCanGive.length, theyCanGive.length);
 
         if (tradeScore > 0) {
@@ -171,28 +193,16 @@ export const useTrading = () => {
         }
       }
 
-      // Sort by trade score (most effective trades first)
       tradeMatches.sort((a, b) => b.tradeScore - a.tradeScore);
       setMatches(tradeMatches);
 
       if (tradeMatches.length === 0) {
-        toast.info("Nenhuma troca possível encontrada por perto.");
+        toast.info(`${nearbyProfiles.length} colecionador(es) por perto, mas nenhuma troca possível.`);
       }
-    } catch (error) {
-      console.error("Error finding matches:", error);
-      toast.error("Erro ao buscar trocas.");
     } finally {
       setLoading(false);
     }
   }, [user, myLocation, radius, updateLocation]);
 
-  return {
-    matches,
-    loading,
-    radius,
-    setRadius,
-    findMatches,
-    updateLocation,
-    myLocation,
-  };
+  return { matches, loading, radius, setRadius, findMatches, updateLocation, myLocation };
 };
