@@ -62,34 +62,64 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_messages: {
+        Row: {
+          id: string
+          trade_request_id: string
+          sender_id: string
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          trade_request_id: string
+          sender_id: string
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          trade_request_id?: string
+          sender_id?: string
+          content?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       trade_requests: {
         Row: {
           created_at: string
+          from_confirmed: boolean
           from_user_id: string
           id: string
           status: string
           stickers_offered: string[]
           stickers_requested: string[]
+          to_confirmed: boolean
           to_user_id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          from_confirmed?: boolean
           from_user_id: string
           id?: string
           status?: string
           stickers_offered?: string[]
           stickers_requested?: string[]
+          to_confirmed?: boolean
           to_user_id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          from_confirmed?: boolean
           from_user_id?: string
           id?: string
           status?: string
           stickers_offered?: string[]
           stickers_requested?: string[]
+          to_confirmed?: boolean
           to_user_id?: string
           updated_at?: string
         }

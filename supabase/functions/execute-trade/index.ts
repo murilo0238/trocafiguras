@@ -55,9 +55,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Only the recipient can accept
-    if (trade.to_user_id !== user.id) {
-      return new Response(JSON.stringify({ error: "Not authorized to accept this trade" }), {
+    // Both participants can trigger execution
+    if (![trade.from_user_id, trade.to_user_id].includes(user.id)) {
+      return new Response(JSON.stringify({ error: "Not authorized to execute this trade" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -65,6 +65,13 @@ Deno.serve(async (req) => {
 
     if (trade.status !== "accepted") {
       return new Response(JSON.stringify({ error: "Trade must be accepted first" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!trade.from_confirmed || !trade.to_confirmed) {
+      return new Response(JSON.stringify({ error: "Both parties must confirm before executing" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

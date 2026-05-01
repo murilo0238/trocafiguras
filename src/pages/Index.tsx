@@ -9,6 +9,7 @@ import FilterButtons from "@/components/FilterButtons";
 import TradingPanel from "@/components/TradingPanel";
 import StickerRanking from "@/components/StickerRanking";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
+import { useTradeRequests } from "@/hooks/useTradeRequests";
 import { useAuth } from "@/hooks/useAuth";
 import { SECTIONS, STICKERS_PER_SECTION } from "@/data/teams";
 import Auth from "./Auth";
@@ -19,6 +20,8 @@ type TabType = "album" | "trades" | "ranking";
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { collection, toggleCollected, addDuplicate, removeDuplicate, stats, loading: collectionLoading } = useStickerCollection();
+  const { pendingRequests } = useTradeRequests();
+  const pendingCount = pendingRequests.length;
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [tab, setTab] = useState<TabType>("album");
@@ -199,7 +202,20 @@ const Index = () => {
         <div className="flex">
           {([
             { key: "album", icon: <BookOpen className="w-5 h-5" />, label: "Álbum" },
-            { key: "trades", icon: <ArrowLeftRight className="w-5 h-5" />, label: "Trocas" },
+            {
+              key: "trades",
+              icon: (
+                <div className="relative">
+                  <ArrowLeftRight className="w-5 h-5" />
+                  {pendingCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5 ring-1 ring-background">
+                      {pendingCount > 9 ? "9+" : pendingCount}
+                    </span>
+                  )}
+                </div>
+              ),
+              label: "Trocas",
+            },
             { key: "ranking", icon: <BarChart3 className="w-5 h-5" />, label: "Ranking" },
           ] as { key: TabType; icon: React.ReactNode; label: string }[]).map(({ key, icon, label }) => (
             <button

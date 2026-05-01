@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(Select-String -Pattern \"sticker|player\")",
+      "Bash(Start-Process *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Murilo\\\\Desktop\\\\Site wilian\\\\trocafigurinha\\\\src\" -Recurse -File)",
+      "Bash(Select-Object FullName)"
     ]
   }
 }
