@@ -18,14 +18,7 @@ type TabType = "album" | "trades" | "ranking";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const {
-    collection,
-    toggleCollected,
-    addDuplicate,
-    removeDuplicate,
-    stats,
-    loading: collectionLoading,
-  } = useStickerCollection();
+  const { collection, toggleCollected, addDuplicate, removeDuplicate, stats, loading: collectionLoading } = useStickerCollection();
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [tab, setTab] = useState<TabType>("album");
@@ -37,16 +30,14 @@ const Index = () => {
   const filteredSections = useMemo(() => {
     const q = normalize(search.trim());
     if (!q) return SECTIONS;
-    return SECTIONS.filter(
-      (s) => normalize(s.name).includes(q) || s.code.toLowerCase().includes(q)
-    );
+    return SECTIONS.filter((s) => normalize(s.name).includes(q) || s.code.toLowerCase().includes(q));
   }, [search]);
 
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
         <div className="w-10 h-10 rounded-full border-[3px] border-primary border-t-transparent animate-spin" />
-        <p className="text-muted-foreground text-sm font-medium">Carregando...</p>
+        <p className="text-muted-foreground text-sm">Carregando...</p>
       </div>
     );
   }
@@ -72,32 +63,29 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
 
-      {/* ── HEADER com gradiente ── */}
-      <header className="sticky top-0 z-50 header-gradient px-4 pt-4 pb-3 shadow-2xl shadow-purple-900/30">
+      {/* ── HEADER VERMELHO ── */}
+      <header className="sticky top-0 z-50 header-gradient px-4 pt-4 pb-3 shadow-2xl shadow-black/50">
 
-        {/* Topo: logo + ações */}
+        {/* Topo */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 flex-shrink-0">
-              <div className="absolute inset-0 bg-white/20 rounded-xl blur-sm" />
-              <div className="relative w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
-                <img src={logo} alt="logo" className="w-7 h-7 object-contain drop-shadow" />
-              </div>
+            <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center border border-white/25 shadow-inner">
+              <img src={logo} alt="logo" className="w-7 h-7 object-contain" />
             </div>
             <div>
-              <h1 className="text-base font-bold text-white leading-tight tracking-tight">Copa 2026</h1>
-              <p className="text-[10px] text-white/60 leading-none mt-0.5">🇲🇽 · 🇺🇸 · 🇨🇦</p>
+              <h1 className="text-[15px] font-bold text-white leading-tight">Copa do Mundo 2026</h1>
+              <p className="text-[10px] text-white/55 leading-none">🇲🇽 · 🇺🇸 · 🇨🇦 Álbum oficial</p>
             </div>
           </div>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center">
             <Link to="/profile" className="p-2 rounded-full hover:bg-white/15 transition-colors">
-              <User className="w-4 h-4 text-white/80" />
+              <User className="w-4 h-4 text-white/75" />
             </Link>
-            <div className="[&_button]:text-white/80 [&_button]:hover:bg-white/15">
+            <div className="[&_button]:p-2 [&_button]:rounded-full [&_button]:text-white/75 [&_button]:hover:bg-white/15">
               <ShareCollection collection={collection} />
             </div>
             <button onClick={signOut} className="p-2 rounded-full hover:bg-white/15 transition-colors">
-              <LogOut className="w-4 h-4 text-white/80" />
+              <LogOut className="w-4 h-4 text-white/75" />
             </button>
           </div>
         </div>
@@ -105,12 +93,12 @@ const Index = () => {
         {/* Barra de progresso */}
         <div className="mb-4">
           <div className="flex justify-between items-baseline mb-1.5">
-            <span className="text-xs text-white/70 font-medium">Progresso do álbum</span>
-            <span className="text-lg font-bold text-white">{progressPct}%</span>
+            <span className="text-[10px] text-white/60 font-semibold uppercase tracking-widest">Progresso</span>
+            <span className="text-base font-bold text-amber-300">{progressPct}% completo</span>
           </div>
-          <div className="h-2.5 bg-white/20 rounded-full overflow-hidden">
+          <div className="h-3 bg-black/30 rounded-full overflow-hidden">
             <div
-              className="h-full bg-white rounded-full transition-all duration-700 ease-out shadow-sm"
+              className="h-full progress-bar-fill rounded-full transition-all duration-700 ease-out shadow-sm"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -118,44 +106,26 @@ const Index = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-2 mb-3">
-          <StatCard
-            label="Tenho"
-            value={`${stats.collected}/${stats.total}`}
-            icon={<CheckCircle className="w-4 h-4" />}
-            variant="primary"
-          />
-          <StatCard
-            label="Faltam"
-            value={stats.missing}
-            icon={<XCircle className="w-4 h-4" />}
-            variant="secondary"
-          />
-          <StatCard
-            label="Repetidas"
-            value={stats.duplicates}
-            icon={<Copy className="w-4 h-4" />}
-            variant="accent"
-          />
+          <StatCard label="Tenho" value={`${stats.collected}/${stats.total}`} icon={<CheckCircle className="w-3.5 h-3.5" />} variant="primary" />
+          <StatCard label="Faltam" value={stats.missing} icon={<XCircle className="w-3.5 h-3.5" />} variant="secondary" />
+          <StatCard label="Repetidas" value={stats.duplicates} icon={<Copy className="w-3.5 h-3.5" />} variant="accent" />
         </div>
 
-        {/* Busca + filtros — apenas na aba Álbum */}
+        {/* Busca + filtros */}
         {tab === "album" && (
           <>
             <div className="relative">
-              <Search className="w-4 h-4 text-white/60 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-white/50 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar seleção (ex: Brasil, BRA...)"
-                className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-white/15 text-white placeholder:text-white/50 border border-white/20 focus:border-white/50 focus:bg-white/20 outline-none transition-all"
+                placeholder="Buscar seleção..."
+                className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-black/25 text-white placeholder:text-white/40 border border-white/15 focus:border-amber-400/50 outline-none transition-all"
               />
               {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-white/20"
-                >
-                  <X className="w-3.5 h-3.5 text-white/70" />
+                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                  <X className="w-3.5 h-3.5 text-white/60" />
                 </button>
               )}
             </div>
@@ -176,25 +146,20 @@ const Index = () => {
             {filteredSections.map((section) => {
               const stickers = getSectionStickers(section.code);
               if (stickers.length === 0) return null;
-
               return (
                 <div key={section.code}>
-                  {/* Cabeçalho da seleção */}
-                  <div className="flex items-center gap-3 mb-3 px-0.5">
-                    <span className="text-3xl drop-shadow-sm">{section.flag}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h2 className="text-sm font-bold text-foreground">{section.name}</h2>
-                        {section.group && (
-                          <span className="text-[9px] font-bold bg-primary/12 text-primary px-2 py-0.5 rounded-full border border-primary/20">
-                            Grupo {section.group}
-                          </span>
-                        )}
-                      </div>
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <span className="text-2xl">{section.flag}</span>
+                    <div className="flex items-center gap-2 flex-wrap flex-1">
+                      <h2 className="text-sm font-bold text-foreground">{section.name}</h2>
+                      {section.group && (
+                        <span className="text-[9px] font-bold bg-primary/15 text-primary px-2 py-0.5 rounded-full border border-primary/25">
+                          Grupo {section.group}
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="h-px bg-gradient-to-r from-primary/30 to-transparent mb-3" />
-
+                  <div className="h-px bg-gradient-to-r from-primary/40 to-transparent mb-3" />
                   <div className="grid grid-cols-4 gap-2">
                     {stickers.map((id) => (
                       <StickerCard
@@ -216,15 +181,9 @@ const Index = () => {
               <div className="text-center py-20 flex flex-col items-center gap-3">
                 <span className="text-6xl">{search ? "🔍" : filter === "missing" ? "🏆" : "🔁"}</span>
                 <p className="text-foreground font-bold text-lg">
-                  {search
-                    ? "Nenhuma seleção encontrada"
-                    : filter === "missing"
-                    ? "Álbum completo!"
-                    : "Sem figurinhas repetidas"}
+                  {search ? "Nenhuma seleção encontrada" : filter === "missing" ? "Álbum completo!" : "Sem figurinhas repetidas"}
                 </p>
-                {filter === "missing" && (
-                  <p className="text-muted-foreground text-sm">Parabéns, você colou tudo! 🎉</p>
-                )}
+                {filter === "missing" && <p className="text-muted-foreground text-sm">Você colou tudo! 🎉</p>}
               </div>
             )}
           </div>
@@ -236,27 +195,23 @@ const Index = () => {
       </main>
 
       {/* ── BOTTOM NAV ── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border shadow-2xl shadow-black/20">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border/60 shadow-2xl shadow-black/40">
         <div className="flex">
-          {[
-            { key: "album" as TabType, icon: <BookOpen className="w-5 h-5" />, label: "Álbum" },
-            { key: "trades" as TabType, icon: <ArrowLeftRight className="w-5 h-5" />, label: "Trocas" },
-            { key: "ranking" as TabType, icon: <BarChart3 className="w-5 h-5" />, label: "Ranking" },
-          ].map(({ key, icon, label }) => (
+          {([
+            { key: "album", icon: <BookOpen className="w-5 h-5" />, label: "Álbum" },
+            { key: "trades", icon: <ArrowLeftRight className="w-5 h-5" />, label: "Trocas" },
+            { key: "ranking", icon: <BarChart3 className="w-5 h-5" />, label: "Ranking" },
+          ] as { key: TabType; icon: React.ReactNode; label: string }[]).map(({ key, icon, label }) => (
             <button
               key={key}
               onClick={() => setTab(key)}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-all ${
-                tab === key
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-3 relative transition-colors ${
+                tab === key ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <div className={`transition-all ${tab === key ? "scale-110" : ""}`}>{icon}</div>
-              <span className="text-[10px] font-semibold">{label}</span>
-              {tab === key && (
-                <div className="absolute bottom-0 w-8 h-0.5 bg-primary rounded-full" />
-              )}
+              <div className={`transition-transform ${tab === key ? "scale-110" : ""}`}>{icon}</div>
+              <span className="text-[10px] font-bold">{label}</span>
+              {tab === key && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-primary rounded-full" />}
             </button>
           ))}
         </div>

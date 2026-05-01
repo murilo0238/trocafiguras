@@ -21,33 +21,32 @@ const StickerCard = ({
 
   return (
     <div
-      className={`sticker-card relative aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer select-none transition-all duration-200 ${
+      className={`sticker-card relative aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer select-none ${
         collected
-          ? "bg-gradient-to-br from-orange-400 via-amber-400 to-yellow-400 collected-glow"
-          : "bg-card border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5"
+          ? "bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 collected-glow"
+          : "bg-card border border-border/60 hover:border-primary/40"
       }`}
       onClick={onToggle}
     >
+      {/* Brilho no canto para as coletadas */}
       {collected && (
-        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-          <div className="absolute -top-2 -right-2 w-12 h-12 bg-white/20 rounded-full blur-md" />
-        </div>
+        <div className="absolute top-0 left-0 right-0 h-1/3 rounded-t-2xl bg-white/20 pointer-events-none" />
       )}
 
       <span
-        className={`text-[11px] leading-tight font-bold text-center px-0.5 z-10 ${
-          collected ? "text-white drop-shadow" : "text-muted-foreground"
+        className={`text-[11px] leading-tight font-bold text-center px-1 z-10 ${
+          collected ? "text-amber-900 drop-shadow-sm" : "text-muted-foreground"
         }`}
       >
         {label}
       </span>
 
       {!collected && (
-        <span className="text-[18px] opacity-20 mt-0.5">⭐</span>
+        <span className="text-base opacity-15 mt-0.5 select-none">⬜</span>
       )}
 
       {duplicates > 0 && (
-        <div className="absolute -top-2 -right-2 bg-violet-600 text-white text-[8px] font-bold rounded-full w-5 h-5 flex items-center justify-center bounce-in shadow-lg shadow-violet-600/50 z-20">
+        <div className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[8px] font-bold rounded-full w-5 h-5 flex items-center justify-center bounce-in shadow-lg shadow-red-500/60 z-20 ring-2 ring-background">
           {duplicates}
         </div>
       )}
@@ -55,27 +54,19 @@ const StickerCard = ({
       {collected && (
         <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1 px-1 z-10">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (duplicates > 0) onRemoveDuplicate();
-            }}
+            onClick={(e) => { e.stopPropagation(); if (duplicates > 0) onRemoveDuplicate(); }}
             className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-              duplicates > 0
-                ? "bg-white/30 hover:bg-red-400/50 active:scale-90"
-                : "bg-white/15 cursor-not-allowed opacity-40"
+              duplicates > 0 ? "bg-amber-900/30 hover:bg-red-500/40 active:scale-90" : "opacity-30 cursor-not-allowed"
             }`}
             disabled={duplicates === 0}
           >
-            <Minus className="w-2.5 h-2.5 text-white" />
+            <Minus className="w-2.5 h-2.5 text-amber-900" />
           </button>
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddDuplicate();
-            }}
-            className="w-5 h-5 rounded-full bg-white/30 hover:bg-white/50 active:scale-90 flex items-center justify-center transition-all"
+            onClick={(e) => { e.stopPropagation(); onAddDuplicate(); }}
+            className="w-5 h-5 rounded-full bg-amber-900/30 hover:bg-amber-900/50 active:scale-90 flex items-center justify-center transition-all"
           >
-            <Plus className="w-2.5 h-2.5 text-white" />
+            <Plus className="w-2.5 h-2.5 text-amber-900" />
           </button>
         </div>
       )}

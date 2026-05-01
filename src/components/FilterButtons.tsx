@@ -7,7 +7,7 @@ interface FilterButtonsProps {
 
 const filters: { key: FilterType; label: string; emoji: string }[] = [
   { key: "all", label: "Todas", emoji: "🗂️" },
-  { key: "missing", label: "Faltam", emoji: "❌" },
+  { key: "missing", label: "Faltam", emoji: "🎯" },
   { key: "duplicates", label: "Repetidas", emoji: "🔁" },
 ];
 
@@ -18,10 +18,10 @@ const FilterButtons = ({ activeFilter, onFilterChange }: FilterButtonsProps) => 
         <button
           key={key}
           onClick={() => onFilterChange(key)}
-          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 border ${
+          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 border ${
             activeFilter === key
-              ? "bg-white text-violet-700 border-white shadow-md shadow-white/20 scale-105"
-              : "bg-white/10 text-white/80 border-white/20 hover:bg-white/20"
+              ? "bg-amber-400 text-amber-900 border-amber-300 shadow-md shadow-amber-400/30 scale-105"
+              : "bg-white/10 text-white/75 border-white/15 hover:bg-white/20"
           }`}
         >
           <span>{emoji}</span>
