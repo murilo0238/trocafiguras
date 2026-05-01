@@ -141,10 +141,10 @@ export const useTrading = () => {
         return;
       }
 
-      const myNeeded = new Set<string>();
+      const myCollected = new Set<string>();
       const myDuplicates = new Set<string>();
       for (const s of myStickers || []) {
-        if (!s.collected) myNeeded.add(s.sticker_id);
+        if (s.collected) myCollected.add(s.sticker_id);
         if (s.duplicates > 0) myDuplicates.add(s.sticker_id);
       }
 
@@ -161,24 +161,27 @@ export const useTrading = () => {
         return;
       }
 
-      // Step 6: build match map
-      const userStickersMap: Record<string, { needed: Set<string>; duplicates: Set<string> }> = {};
+      // Step 6: build match map using collected sets (not "needed" — stickers never
+      // touched have no row in the table, so checking !collected would miss them)
+      const userStickersMap: Record<string, { collected: Set<string>; duplicates: Set<string> }> = {};
       for (const s of otherStickers || []) {
         if (!userStickersMap[s.user_id]) {
-          userStickersMap[s.user_id] = { needed: new Set(), duplicates: new Set() };
+          userStickersMap[s.user_id] = { collected: new Set(), duplicates: new Set() };
         }
-        if (!s.collected) userStickersMap[s.user_id].needed.add(s.sticker_id);
+        if (s.collected) userStickersMap[s.user_id].collected.add(s.sticker_id);
         if (s.duplicates > 0) userStickersMap[s.user_id].duplicates.add(s.sticker_id);
       }
 
       // Step 7: compute matches
+      // iCanGive  = my duplicates the other hasn't collected yet
+      // theyCanGive = their duplicates I haven't collected yet
       const tradeMatches: TradeMatch[] = [];
       for (const profile of nearbyProfiles) {
         const theirData = userStickersMap[profile.user_id];
         if (!theirData) continue;
 
-        const iCanGive = [...myDuplicates].filter((id) => theirData.needed.has(id));
-        const theyCanGive = [...theirData.duplicates].filter((id) => myNeeded.has(id));
+        const iCanGive = [...myDuplicates].filter((id) => !theirData.collected.has(id));
+        const theyCanGive = [...theirData.duplicates].filter((id) => !myCollected.has(id));
         const tradeScore = Math.min(iCanGive.length, theyCanGive.length);
 
         if (tradeScore > 0) {
