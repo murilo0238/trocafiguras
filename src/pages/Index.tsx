@@ -32,7 +32,7 @@ const Index = () => {
   const [search, setSearch] = useState("");
 
   const normalize = (s: string) =>
-    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
   const filteredSections = useMemo(() => {
     const q = normalize(search.trim());
@@ -44,8 +44,9 @@ const Index = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground animate-pulse text-lg">Carregando...</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        <p className="text-muted-foreground text-sm">Carregando...</p>
       </div>
     );
   }
@@ -68,14 +69,23 @@ const Index = () => {
     return ids;
   };
 
+  const progressPct = stats.total > 0 ? Math.round((stats.collected / stats.total) * 100) : 0;
+
   return (
     <div className="min-h-screen bg-background pb-8">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b-2 border-gold px-4 py-3">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="Troca Figurinha" className="w-8 h-8 object-contain" />
-            <h1 className="text-lg font-bold text-primary">Álbum da Copa 2026</h1>
+      <header className="sticky top-0 z-50 glass border-b border-border/50 px-4 pt-4 pb-3">
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="absolute -inset-1.5 bg-primary/20 rounded-full blur-md" />
+              <img src={logo} alt="Troca Figurinha" className="relative w-9 h-9 object-contain drop-shadow-lg" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-foreground leading-tight">Álbum Copa 2026</h1>
+              <p className="text-[10px] text-muted-foreground">🇲🇽 · 🇺🇸 · 🇨🇦 &nbsp;México · EUA · Canadá</p>
+            </div>
           </div>
           <div className="flex items-center gap-1">
             <Link
@@ -96,56 +106,70 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Stats Dashboard */}
+        {/* Progress bar */}
+        <div className="mb-3">
+          <div className="flex justify-between items-center mb-1.5">
+            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Progresso do álbum</span>
+            <span className="text-xs font-bold text-primary">{progressPct}%</span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full progress-bar-fill rounded-full transition-all duration-700 ease-out"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Stats */}
         <div className="grid grid-cols-3 gap-2 mb-3">
           <StatCard
             label="Tenho"
             value={`${stats.collected}/${stats.total}`}
-            icon={<CheckCircle className="w-5 h-5" />}
+            icon={<CheckCircle className="w-4 h-4" />}
             variant="primary"
           />
           <StatCard
             label="Faltam"
             value={stats.missing}
-            icon={<XCircle className="w-5 h-5" />}
+            icon={<XCircle className="w-4 h-4" />}
             variant="secondary"
           />
           <StatCard
             label="Repetidas"
             value={stats.duplicates}
-            icon={<Copy className="w-5 h-5" />}
+            icon={<Copy className="w-4 h-4" />}
             variant="accent"
           />
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1.5 mb-3">
+        <div className="flex gap-1.5 mb-3 p-1 bg-muted rounded-xl">
           <button
             onClick={() => setTab("album")}
-            className={`flex-1 py-2 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
               tab === "album"
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "bg-muted text-muted-foreground"
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/30"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             📒 Álbum
           </button>
           <button
             onClick={() => setTab("trades")}
-            className={`flex-1 py-2 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
               tab === "trades"
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "bg-muted text-muted-foreground"
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/30"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <ArrowLeftRight className="w-3 h-3" /> Trocas
           </button>
           <button
             onClick={() => setTab("ranking")}
-            className={`flex-1 py-2 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-1 ${
+            className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
               tab === "ranking"
-                ? "bg-primary text-primary-foreground shadow-md"
-                : "bg-muted text-muted-foreground"
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/30"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <BarChart3 className="w-3 h-3" /> Ranking
@@ -154,19 +178,19 @@ const Index = () => {
 
         {tab === "album" && (
           <>
-            <div className="relative mb-2">
+            <div className="relative mb-2.5">
               <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar seleção (ex: Brasil, BRA, FWC)"
-                className="w-full pl-9 pr-9 py-2 text-sm rounded-full bg-muted text-foreground placeholder:text-muted-foreground border-none focus:ring-2 focus:ring-primary outline-none"
+                placeholder="Buscar seleção (ex: Brasil, BRA...)"
+                className="w-full pl-9 pr-9 py-2 text-sm rounded-xl bg-muted text-foreground placeholder:text-muted-foreground border border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-all"
               />
               {search && (
                 <button
                   onClick={() => setSearch("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-background/50"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted-foreground/20 transition-colors"
                 >
                   <X className="w-3 h-3 text-muted-foreground" />
                 </button>
@@ -180,31 +204,35 @@ const Index = () => {
       {/* Content */}
       <main className="px-3 pt-4">
         {collectionLoading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground animate-pulse">Carregando coleção...</p>
+          <div className="text-center py-16 flex flex-col items-center gap-3">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <p className="text-muted-foreground text-sm">Carregando coleção...</p>
           </div>
         ) : tab === "album" ? (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {filteredSections.map((section) => {
               const stickers = getSectionStickers(section.code);
               if (stickers.length === 0) return null;
 
               return (
                 <div key={section.code}>
-                  <div className="flex items-center gap-2 mb-2 px-1">
-                    <span className="text-2xl drop-shadow-sm">{section.flag}</span>
-                    <h2 className="text-sm font-bold text-primary">{section.name}</h2>
-                    {section.group && (
-                      <span className="text-[10px] font-medium bg-gold/20 text-primary px-1.5 py-0.5 rounded-full border border-gold/30">
-                        Grupo {section.group}
-                      </span>
-                    )}
+                  {/* Section header */}
+                  <div className="flex items-center gap-2.5 mb-2.5 px-0.5">
+                    <span className="text-2xl drop-shadow">{section.flag}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-sm font-bold text-foreground truncate">{section.name}</h2>
+                        {section.group && (
+                          <span className="text-[9px] font-bold bg-primary/15 text-primary px-1.5 py-0.5 rounded-full border border-primary/25 flex-shrink-0">
+                            G {section.group}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                  <div className="section-divider mb-2.5" />
 
-                  <div
-                    className="grid gap-2"
-                    style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}
-                  >
+                  <div className="grid grid-cols-4 gap-2">
                     {stickers.map((id) => (
                       <StickerCard
                         key={id}
@@ -222,13 +250,19 @@ const Index = () => {
             })}
 
             {filteredSections.every((s) => getSectionStickers(s.code).length === 0) && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground text-lg">
+              <div className="text-center py-16 flex flex-col items-center gap-3">
+                <span className="text-5xl">
+                  {search ? "🔍" : filter === "missing" ? "🏆" : "🔁"}
+                </span>
+                <p className="text-foreground font-semibold">
                   {search
                     ? "Nenhuma seleção encontrada"
                     : filter === "missing"
-                    ? "🎉 Você completou o álbum!"
-                    : "Nenhuma figurinha repetida ainda"}
+                    ? "Álbum completo!"
+                    : "Nenhuma figurinha repetida"}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {filter === "missing" ? "Você colou todas as figurinhas 🎉" : ""}
                 </p>
               </div>
             )}

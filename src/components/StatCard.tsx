@@ -5,31 +5,44 @@ interface StatCardProps {
   variant?: "primary" | "secondary" | "accent";
 }
 
-const FLAGS: Record<string, string> = {
-  primary: "🇲🇽",
-  secondary: "🇺🇸",
-  accent: "🇨🇦",
+const variantConfig = {
+  primary: {
+    bg: "bg-gradient-to-br from-emerald-500/20 to-green-600/10 border border-emerald-500/25",
+    value: "text-emerald-400",
+    label: "text-emerald-300/70",
+    icon: "text-emerald-400",
+    glow: "shadow-emerald-500/20",
+    dot: "bg-emerald-400",
+  },
+  secondary: {
+    bg: "bg-gradient-to-br from-blue-500/20 to-indigo-600/10 border border-blue-500/25",
+    value: "text-blue-400",
+    label: "text-blue-300/70",
+    icon: "text-blue-400",
+    glow: "shadow-blue-500/20",
+    dot: "bg-blue-400",
+  },
+  accent: {
+    bg: "bg-gradient-to-br from-amber-400/20 to-orange-500/10 border border-amber-400/25",
+    value: "text-amber-400",
+    label: "text-amber-300/70",
+    icon: "text-amber-400",
+    glow: "shadow-amber-400/20",
+    dot: "bg-amber-400",
+  },
 };
 
 const StatCard = ({ label, value, icon, variant = "primary" }: StatCardProps) => {
-  const variantStyles = {
-    primary: "bg-[hsl(145,63%,35%)] text-white",
-    secondary: "bg-[hsl(220,60%,45%)] text-white",
-    accent: "bg-[hsl(0,80%,50%)] text-white",
-  };
+  const cfg = variantConfig[variant];
 
   return (
-    <div
-      className={`stat-card rounded-lg p-3 flex items-center gap-3 relative overflow-hidden ${variantStyles[variant]}`}
-    >
-      <span className="absolute inset-0 flex items-center justify-center text-5xl opacity-15 pointer-events-none select-none">
-        {FLAGS[variant]}
-      </span>
-      <div className="flex-shrink-0 opacity-80 relative z-10">{icon}</div>
-      <div className="flex flex-col relative z-10">
-        <span className="text-xs font-medium opacity-90">{label}</span>
-        <span className="text-lg font-bold">{value}</span>
+    <div className={`stat-card rounded-xl p-3 flex flex-col gap-1.5 relative overflow-hidden shadow-lg ${cfg.bg} ${cfg.glow}`}>
+      <div className={`flex items-center gap-1.5 ${cfg.icon}`}>
+        <div className="w-4 h-4 flex-shrink-0">{icon}</div>
+        <span className={`text-[10px] font-semibold uppercase tracking-wider ${cfg.label}`}>{label}</span>
       </div>
+      <span className={`text-xl font-bold leading-none ${cfg.value}`}>{value}</span>
+      <div className={`absolute -bottom-1 -right-1 w-12 h-12 rounded-full opacity-10 blur-xl ${cfg.dot}`} />
     </div>
   );
 };
