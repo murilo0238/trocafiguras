@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3 } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -24,6 +25,25 @@ const Index = () => {
   const [filter, setFilter] = useState<FilterType>("all");
   const [tab, setTab] = useState<TabType>("album");
   const [search, setSearch] = useState("");
+
+  // Detect section completion for celebration
+  const prevCompleted = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (collectionLoading) return;
+    SECTIONS.forEach((section) => {
+      const count = Array.from({ length: STICKERS_PER_SECTION }, (_, i) =>
+        collection[`${section.code}${i + 1}`]?.collected ? 1 : 0
+      ).reduce((a, b) => a + b, 0);
+      const isComplete = count === STICKERS_PER_SECTION;
+      const wasComplete = prevCompleted.current.has(section.code);
+      if (isComplete && !wasComplete) {
+        toast.success(`${section.flag} ${section.name} completa! 🎉`, { duration: 4000 });
+        prevCompleted.current.add(section.code);
+      } else if (!isComplete) {
+        prevCompleted.current.delete(section.code);
+      }
+    });
+  }, [collection, collectionLoading]);
 
   const normalize = (s: string) =>
     s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -147,6 +167,10 @@ const Index = () => {
             {filteredSections.map((section) => {
               const stickers = getSectionStickers(section.code);
               if (stickers.length === 0) return null;
+              const collectedCount = Array.from({ length: STICKERS_PER_SECTION }, (_, i) =>
+                collection[`${section.code}${i + 1}`]?.collected ? 1 : 0
+              ).reduce((a, b) => a + b, 0);
+              const sectionComplete = collectedCount === STICKERS_PER_SECTION;
               return (
                 <div key={section.code}>
                   <div className="flex items-center gap-2.5 mb-2.5">
@@ -159,6 +183,13 @@ const Index = () => {
                         </span>
                       )}
                     </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                      sectionComplete
+                        ? "bg-green-500/20 text-green-600"
+                        : "bg-muted text-muted-foreground"
+                    }`}>
+                      {sectionComplete ? "✓ " : ""}{collectedCount}/{STICKERS_PER_SECTION}
+                    </span>
                   </div>
                   <div className="h-px bg-gradient-to-r from-primary/40 to-transparent mb-3" />
                   <div className="grid grid-cols-4 gap-2">

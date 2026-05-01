@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Link2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import UserAvatar from "@/components/UserAvatar";
 
 interface ProfileData {
   display_name: string | null;
@@ -117,13 +118,7 @@ const Profile = () => {
         <div className="flex flex-col items-center gap-3">
           <div className="relative">
             <div className="w-24 h-24 rounded-full bg-muted overflow-hidden border-4 border-gold/40">
-              {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-3xl">
-                  👤
-                </div>
-              )}
+              <UserAvatar avatarUrl={profile.avatar_url} displayName={profile.display_name} className="w-full h-full" />
             </div>
             <button
               onClick={() => fileRef.current?.click()}
@@ -141,6 +136,16 @@ const Profile = () => {
             />
           </div>
           <p className="text-xs text-muted-foreground">Foto opcional (máx 2MB)</p>
+          <button
+            onClick={() => {
+              const link = `${window.location.origin}/trade/${user.id}`;
+              navigator.clipboard.writeText(link);
+              toast.success("Link de troca copiado!");
+            }}
+            className="flex items-center gap-2 text-xs text-primary font-bold px-3 py-1.5 rounded-lg border border-primary/30 hover:bg-primary/10 transition-colors"
+          >
+            <Link2 className="w-3.5 h-3.5" /> Copiar link de troca
+          </button>
         </div>
 
         {/* Dados */}

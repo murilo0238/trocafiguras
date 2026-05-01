@@ -109,14 +109,27 @@ export const useTradeRequests = () => {
   useEffect(() => {
     if (!user) return;
 
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
     supabase.realtime.setAuth();
 
     const channel = supabase.channel(`trade-requests:${user.id}`, {
       config: { private: true },
     });
     channel
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_requests", filter: `to_user_id=eq.${user.id}` },
-        () => { loadRequests(); loadHistory(); })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "trade_requests", filter: `to_user_id=eq.${user.id}` },
+        (payload) => {
+          loadRequests();
+          loadHistory();
+          if (typeof Notification !== "undefined" && Notification.permission === "granted" && document.visibilityState === "hidden") {
+            new Notification("Nova proposta de troca! 🔄", {
+              body: "Alguém quer trocar figurinhas com você.",
+              icon: "/favicon.ico",
+            });
+          }
+        })
       .on("postgres_changes", { event: "*", schema: "public", table: "trade_requests", filter: `from_user_id=eq.${user.id}` },
         () => { loadRequests(); loadHistory(); })
       .subscribe();
