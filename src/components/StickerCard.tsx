@@ -1,4 +1,4 @@
-import { Plus, Minus, Check } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 
 interface StickerCardProps {
   id: string;
@@ -21,33 +21,33 @@ const StickerCard = ({
 
   return (
     <div
-      className={`sticker-card relative aspect-square rounded-xl flex flex-col items-center justify-center cursor-pointer select-none transition-all duration-200 ${
+      className={`sticker-card relative aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer select-none transition-all duration-200 ${
         collected
-          ? "bg-gradient-to-br from-emerald-500 to-green-700 sticker-collected-glow ring-1 ring-emerald-400/50"
-          : "bg-card border border-border hover:border-primary/30 hover:bg-muted/60"
+          ? "bg-gradient-to-br from-orange-400 via-amber-400 to-yellow-400 collected-glow"
+          : "bg-card border-2 border-dashed border-border hover:border-primary/40 hover:bg-primary/5"
       }`}
       onClick={onToggle}
     >
       {collected && (
-        <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/8 rounded-t-xl" />
+        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+          <div className="absolute -top-2 -right-2 w-12 h-12 bg-white/20 rounded-full blur-md" />
         </div>
-      )}
-
-      {collected && (
-        <Check className="w-3 h-3 text-white/60 absolute top-1.5 left-1.5" strokeWidth={3} />
       )}
 
       <span
         className={`text-[11px] leading-tight font-bold text-center px-0.5 z-10 ${
-          collected ? "text-white drop-shadow-sm" : "text-muted-foreground"
+          collected ? "text-white drop-shadow" : "text-muted-foreground"
         }`}
       >
         {label}
       </span>
 
+      {!collected && (
+        <span className="text-[18px] opacity-20 mt-0.5">⭐</span>
+      )}
+
       {duplicates > 0 && (
-        <div className="absolute -top-1.5 -right-1.5 bg-amber-400 text-amber-900 text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center bounce-in shadow-md shadow-amber-400/40 z-20 ring-1 ring-background">
+        <div className="absolute -top-2 -right-2 bg-violet-600 text-white text-[8px] font-bold rounded-full w-5 h-5 flex items-center justify-center bounce-in shadow-lg shadow-violet-600/50 z-20">
           {duplicates}
         </div>
       )}
@@ -61,8 +61,8 @@ const StickerCard = ({
             }}
             className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
               duplicates > 0
-                ? "bg-white/20 hover:bg-red-500/40 active:scale-90"
-                : "bg-white/10 cursor-not-allowed opacity-40"
+                ? "bg-white/30 hover:bg-red-400/50 active:scale-90"
+                : "bg-white/15 cursor-not-allowed opacity-40"
             }`}
             disabled={duplicates === 0}
           >
@@ -73,7 +73,7 @@ const StickerCard = ({
               e.stopPropagation();
               onAddDuplicate();
             }}
-            className="w-5 h-5 rounded-full bg-white/20 hover:bg-white/35 active:scale-90 flex items-center justify-center transition-all"
+            className="w-5 h-5 rounded-full bg-white/30 hover:bg-white/50 active:scale-90 flex items-center justify-center transition-all"
           >
             <Plus className="w-2.5 h-2.5 text-white" />
           </button>

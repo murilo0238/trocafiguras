@@ -13,15 +13,15 @@ const filters: { key: FilterType; label: string; emoji: string }[] = [
 
 const FilterButtons = ({ activeFilter, onFilterChange }: FilterButtonsProps) => {
   return (
-    <div className="flex gap-2 justify-center">
+    <div className="flex gap-2 justify-center mt-2">
       {filters.map(({ key, label, emoji }) => (
         <button
           key={key}
           onClick={() => onFilterChange(key)}
-          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 border ${
             activeFilter === key
-              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
-              : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+              ? "bg-white text-violet-700 border-white shadow-md shadow-white/20 scale-105"
+              : "bg-white/10 text-white/80 border-white/20 hover:bg-white/20"
           }`}
         >
           <span>{emoji}</span>
