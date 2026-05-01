@@ -201,7 +201,10 @@ const Index = () => {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-4 gap-2">
+                  <div
+                    className="grid gap-2"
+                    style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}
+                  >
                     {stickers.map((id) => (
                       <StickerCard
                         key={id}
