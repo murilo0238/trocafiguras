@@ -9,7 +9,6 @@ import FilterButtons from "@/components/FilterButtons";
 import TradingPanel from "@/components/TradingPanel";
 import StickerRanking from "@/components/StickerRanking";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
-import { useTradeRequests } from "@/hooks/useTradeRequests";
 import { useAuth } from "@/hooks/useAuth";
 import { SECTIONS, STICKERS_PER_SECTION } from "@/data/teams";
 import Auth from "./Auth";
@@ -20,8 +19,7 @@ type TabType = "album" | "trades" | "ranking";
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { collection, toggleCollected, addDuplicate, removeDuplicate, stats, loading: collectionLoading } = useStickerCollection();
-  const { pendingRequests } = useTradeRequests();
-  const pendingCount = pendingRequests.length;
+  const [pendingCount, setPendingCount] = useState(0);
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [tab, setTab] = useState<TabType>("album");
@@ -191,7 +189,7 @@ const Index = () => {
             )}
           </div>
         ) : tab === "trades" ? (
-          <TradingPanel />
+          <TradingPanel onPendingCountChange={setPendingCount} />
         ) : (
           <StickerRanking />
         )}

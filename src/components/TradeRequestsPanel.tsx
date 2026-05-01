@@ -9,6 +9,7 @@ import TradeChatPanel from "@/components/TradeChatPanel";
 interface TradeRequestsPanelProps {
   scannedUserId: string | null;
   onClearScanned: () => void;
+  onPendingCountChange?: (count: number) => void;
 }
 
 const statusLabel: Record<string, { text: string; className: string }> = {
@@ -17,7 +18,7 @@ const statusLabel: Record<string, { text: string; className: string }> = {
   cancelled: { text: "Cancelada", className: "bg-orange-100 text-orange-700" },
 };
 
-const TradeRequestsPanel = ({ scannedUserId, onClearScanned }: TradeRequestsPanelProps) => {
+const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChange }: TradeRequestsPanelProps) => {
   const { user } = useAuth();
   const {
     pendingRequests,
@@ -127,6 +128,10 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned }: TradeRequestsPane
 
     return null;
   };
+
+  useEffect(() => {
+    onPendingCountChange?.(pendingRequests.length);
+  }, [pendingRequests.length, onPendingCountChange]);
 
   const allActive = [...pendingRequests, ...myRequests];
   const totalAtivas = allActive.length;

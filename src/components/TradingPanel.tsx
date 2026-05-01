@@ -7,7 +7,11 @@ import { toast } from "sonner";
 import QRCodePanel from "@/components/QRCodePanel";
 import TradeRequestsPanel from "@/components/TradeRequestsPanel";
 
-const TradingPanel = () => {
+interface TradingPanelProps {
+  onPendingCountChange?: (count: number) => void;
+}
+
+const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
   const { user } = useAuth();
   const { matches, loading, radius, setRadius, findMatches, myLocation } = useTrading();
   const [scannedUserId, setScannedUserId] = useState<string | null>(null);
@@ -41,6 +45,7 @@ const TradingPanel = () => {
       <TradeRequestsPanel
         scannedUserId={scannedUserId}
         onClearScanned={() => setScannedUserId(null)}
+        onPendingCountChange={onPendingCountChange}
       />
 
       {/* Radius control */}
