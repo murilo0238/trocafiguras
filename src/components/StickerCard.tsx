@@ -1,4 +1,4 @@
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Check } from "lucide-react";
 
 interface StickerCardProps {
   id: string;
@@ -17,59 +17,76 @@ const StickerCard = ({
   onAddDuplicate,
   onRemoveDuplicate,
 }: StickerCardProps) => {
-  const label = id ? id.replace(/(\D+)(\d+)/, "$1 $2") : "";
+  const match = id ? id.match(/^([A-Za-z]+)(\d+)$/) : null;
+  const code = match ? match[1] : id;
+  const number = match ? match[2] : "";
 
   return (
     <div
-      className={`sticker-card relative aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer select-none ${
+      className={`sticker-card relative rounded-xl cursor-pointer select-none transition-all duration-150 active:scale-95 ${
         collected
-          ? "bg-gradient-to-br from-gold-light via-gold to-[#9e844a] collected-glow"
-          : "bg-card border border-border/60 hover:border-primary/40"
+          ? "bg-gradient-to-b from-gold-light via-gold to-[#b8973a] collected-glow shadow-md"
+          : "bg-card border border-border/50 hover:border-primary/30 shadow-sm"
       }`}
       onClick={onToggle}
     >
-      {/* Brilho no canto para as coletadas */}
+      {/* Shine strip */}
       {collected && (
-        <div className="absolute top-0 left-0 right-0 h-1/3 rounded-t-2xl bg-white/20 pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-2/5 rounded-t-xl bg-white/25 pointer-events-none" />
       )}
 
-      <span
-        className={`text-[11px] leading-tight font-bold text-center px-1 z-10 ${
-          collected ? "text-[#1a3a4c] drop-shadow-sm" : "text-muted-foreground"
-        }`}
-      >
-        {label}
-      </span>
-
-      {!collected && (
-        <span className="text-base opacity-15 mt-0.5 select-none">⬜</span>
-      )}
-
+      {/* Duplicate badge */}
       {duplicates > 0 && (
-        <div className="absolute -top-1.5 -right-1.5 bg-[#2a5671] text-white text-[8px] font-bold rounded-full w-5 h-5 flex items-center justify-center bounce-in shadow-lg shadow-[#2a5671]/60 z-20 ring-2 ring-background">
-          {duplicates}
+        <div className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[9px] font-black rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-0.5 bounce-in shadow-md ring-2 ring-background z-20">
+          {duplicates > 9 ? "9+" : duplicates}
         </div>
       )}
 
-      {collected && (
-        <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1 px-1 z-10">
-          <button
-            onClick={(e) => { e.stopPropagation(); if (duplicates > 0) onRemoveDuplicate(); }}
-            className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-              duplicates > 0 ? "bg-[#1a3a4c]/20 hover:bg-[#2a5671]/40 active:scale-90" : "opacity-30 cursor-not-allowed"
-            }`}
-            disabled={duplicates === 0}
-          >
-            <Minus className="w-2.5 h-2.5 text-[#1a3a4c]" />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onAddDuplicate(); }}
-            className="w-5 h-5 rounded-full bg-[#1a3a4c]/20 hover:bg-[#1a3a4c]/40 active:scale-90 flex items-center justify-center transition-all"
-          >
-            <Plus className="w-2.5 h-2.5 text-[#1a3a4c]" />
-          </button>
-        </div>
-      )}
+      <div className="flex flex-col items-center pt-2.5 pb-2 px-1 gap-0.5">
+        {/* Team code */}
+        <span className={`text-[9px] font-black uppercase tracking-widest leading-none ${
+          collected ? "text-[#3a2000]/70" : "text-muted-foreground/60"
+        }`}>
+          {code}
+        </span>
+
+        {/* Sticker number — big and bold */}
+        <span className={`text-[22px] font-black leading-none tabular-nums ${
+          collected ? "text-[#1a1000] drop-shadow-sm" : "text-foreground/25"
+        }`}>
+          {number}
+        </span>
+
+        {/* Collected check */}
+        {collected && (
+          <div className="w-4 h-4 rounded-full bg-[#1a3a1a]/20 flex items-center justify-center mt-0.5">
+            <Check className="w-2.5 h-2.5 text-[#1a3a1a]" strokeWidth={3} />
+          </div>
+        )}
+
+        {/* +/- duplicates controls */}
+        {collected && (
+          <div className="flex items-center gap-1 mt-1" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => { if (duplicates > 0) onRemoveDuplicate(); }}
+              disabled={duplicates === 0}
+              className={`w-6 h-6 rounded-md flex items-center justify-center transition-all active:scale-90 ${
+                duplicates > 0
+                  ? "bg-[#1a3a4c]/20 hover:bg-[#1a3a4c]/35 text-[#1a3a4c]"
+                  : "bg-[#1a3a4c]/10 text-[#1a3a4c]/30 cursor-not-allowed"
+              }`}
+            >
+              <Minus className="w-3 h-3" strokeWidth={2.5} />
+            </button>
+            <button
+              onClick={onAddDuplicate}
+              className="w-6 h-6 rounded-md bg-[#1a3a4c]/20 hover:bg-[#1a3a4c]/35 text-[#1a3a4c] flex items-center justify-center transition-all active:scale-90"
+            >
+              <Plus className="w-3 h-3" strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

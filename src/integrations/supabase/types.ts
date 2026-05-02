@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      direct_messages: {
+        Row: {
+          id: string
+          sender_id: string
+          receiver_id: string
+          content: string
+          created_at: string
+          read_at: string | null
+        }
+        Insert: {
+          id?: string
+          sender_id: string
+          receiver_id: string
+          content: string
+          created_at?: string
+          read_at?: string | null
+        }
+        Update: {
+          id?: string
+          sender_id?: string
+          receiver_id?: string
+          content?: string
+          created_at?: string
+          read_at?: string | null
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          id: string
+          requester_id: string
+          addressee_id: string
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          requester_id: string
+          addressee_id: string
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          requester_id?: string
+          addressee_id?: string
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

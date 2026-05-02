@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3 } from "lucide-react";
+import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users } from "lucide-react";
 import logo from "@/assets/logo.png";
 import StickerCard from "@/components/StickerCard";
 import ShareCollection from "@/components/ShareCollection";
@@ -9,17 +9,20 @@ import StatCard from "@/components/StatCard";
 import FilterButtons from "@/components/FilterButtons";
 import TradingPanel from "@/components/TradingPanel";
 import StickerRanking from "@/components/StickerRanking";
+import FriendsPanel from "@/components/FriendsPanel";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
+import { useFriends } from "@/hooks/useFriends";
 import { useAuth } from "@/hooks/useAuth";
 import { SECTIONS, STICKERS_PER_SECTION } from "@/data/teams";
 import Auth from "./Auth";
 
 type FilterType = "all" | "missing" | "duplicates";
-type TabType = "album" | "trades" | "ranking";
+type TabType = "album" | "trades" | "ranking" | "friends";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { collection, toggleCollected, addDuplicate, removeDuplicate, stats, loading: collectionLoading } = useStickerCollection();
+  const { pendingReceived } = useFriends();
   const [pendingCount, setPendingCount] = useState(0);
 
   const [filter, setFilter] = useState<FilterType>("all");
@@ -221,6 +224,8 @@ const Index = () => {
           </div>
         ) : tab === "trades" ? (
           <TradingPanel onPendingCountChange={setPendingCount} />
+        ) : tab === "friends" ? (
+          <FriendsPanel />
         ) : (
           <StickerRanking />
         )}
@@ -244,6 +249,20 @@ const Index = () => {
                 </div>
               ),
               label: "Trocas",
+            },
+            {
+              key: "friends",
+              icon: (
+                <div className="relative">
+                  <Users className="w-5 h-5" />
+                  {pendingReceived.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 bg-destructive text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5 ring-1 ring-background">
+                      {pendingReceived.length > 9 ? "9+" : pendingReceived.length}
+                    </span>
+                  )}
+                </div>
+              ),
+              label: "Amigos",
             },
             { key: "ranking", icon: <BarChart3 className="w-5 h-5" />, label: "Ranking" },
           ] as { key: TabType; icon: React.ReactNode; label: string }[]).map(({ key, icon, label }) => (

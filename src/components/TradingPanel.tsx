@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { MapPin, RefreshCw, Users, Send } from "lucide-react";
+import { MapPin, RefreshCw, Users, Send, UserPlus, UserCheck, Clock } from "lucide-react";
 import { useTrading } from "@/hooks/useTrading";
+import { useFriends } from "@/hooks/useFriends";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ interface TradingPanelProps {
 const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
   const { user } = useAuth();
   const { matches, loading, radius, setRadius, findMatches, myLocation } = useTrading();
+  const { sendRequest, getFriendshipStatus } = useFriends();
   const [scannedUserId, setScannedUserId] = useState<string | null>(null);
   const [proposing, setProposing] = useState<string | null>(null);
 
@@ -148,17 +150,44 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
                 <p className="text-[10px] font-bold text-primary">
                   ⚡ {match.tradeScore} troca{match.tradeScore > 1 ? "s" : ""} possíve{match.tradeScore > 1 ? "is" : "l"}
                 </p>
-                <button
-                  onClick={() => handleProposeTrade(match)}
-                  disabled={proposing === match.userId}
-                  className="py-1.5 px-3 rounded-lg bg-primary text-primary-foreground font-bold text-[10px] flex items-center gap-1 hover:opacity-90 disabled:opacity-50"
-                >
-                  <Send className="w-3 h-3" /> {proposing === match.userId ? "Enviando..." : "Propor Troca"}
-                </button>
+                <div className="flex gap-1.5">
+                  {(() => {
+                    const fs = getFriendshipStatus(match.userId);
+                    if (fs?.status === "accepted") {
+                      return (
+                        <span className="py-1.5 px-2.5 rounded-lg bg-green-500/15 text-green-600 font-bold text-[10px] flex items-center gap-1">
+                          <UserCheck className="w-3 h-3" /> Amigo
+                        </span>
+                      );
+                    }
+                    if (fs?.status === "pending") {
+                      return (
+                        <span className="py-1.5 px-2.5 rounded-lg bg-muted text-muted-foreground font-bold text-[10px] flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> Pendente
+                        </span>
+                      );
+                    }
+                    return (
+                      <button
+                        onClick={() => sendRequest(match.userId, match.displayName)}
+                        className="py-1.5 px-2.5 rounded-lg bg-muted hover:bg-primary/15 text-muted-foreground hover:text-primary font-bold text-[10px] flex items-center gap-1 transition-colors"
+                      >
+                        <UserPlus className="w-3 h-3" /> Adicionar
+                      </button>
+                    );
+                  })()}
+                  <button
+                    onClick={() => handleProposeTrade(match)}
+                    disabled={proposing === match.userId}
+                    className="py-1.5 px-3 rounded-lg bg-primary text-primary-foreground font-bold text-[10px] flex items-center gap-1 hover:opacity-90 disabled:opacity-50"
+                  >
+                    <Send className="w-3 h-3" /> {proposing === match.userId ? "Enviando..." : "Propor Troca"}
+                  </button>
+                </div>
               </div>
             </div>
           ))}
