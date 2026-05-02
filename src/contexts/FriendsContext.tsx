@@ -81,17 +81,6 @@ export const FriendsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => { load(); }, [load]);
 
-  // Single realtime subscription at the context level
-  useEffect(() => {
-    if (!user) return;
-    const channelName = `friendships-ctx-${user.id}`;
-    const channel = supabase
-      .channel(channelName)
-      .on("postgres_changes", { event: "*", schema: "public", table: "friendships" }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const sendRequest = useCallback(async (addresseeId: string, displayName: string) => {
     if (!user) return;
     const { error } = await supabase.from("friendships").insert({
@@ -105,7 +94,8 @@ export const FriendsProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     toast.success(`Pedido enviado para ${displayName}!`);
-  }, [user]);
+    await load();
+  }, [user, load]);
 
   const acceptRequest = useCallback(async (friendshipId: string) => {
     const { error } = await supabase
@@ -114,20 +104,23 @@ export const FriendsProvider = ({ children }: { children: ReactNode }) => {
       .eq("id", friendshipId);
     if (error) { toast.error("Erro ao aceitar."); return; }
     toast.success("Amizade aceita!");
-  }, []);
+    await load();
+  }, [load]);
 
   const rejectRequest = useCallback(async (friendshipId: string) => {
     const { error } = await supabase
       .from("friendships")
       .update({ status: "rejected", updated_at: new Date().toISOString() })
       .eq("id", friendshipId);
-    if (error) toast.error("Erro ao recusar.");
-  }, []);
+    if (error) { toast.error("Erro ao recusar."); return; }
+    await load();
+  }, [load]);
 
   const removeFriend = useCallback(async (friendshipId: string) => {
     const { error } = await supabase.from("friendships").delete().eq("id", friendshipId);
-    if (error) toast.error("Erro ao remover amigo.");
-  }, []);
+    if (error) { toast.error("Erro ao remover amigo."); return; }
+    await load();
+  }, [load]);
 
   const getFriendshipStatus = useCallback(
     (otherUserId: string) => friends.find((f) => f.userId === otherUserId) ?? null,
