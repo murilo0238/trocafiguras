@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Users, Check, X, MessageCircle, UserMinus, Clock } from "lucide-react";
-import { useFriends, Friend } from "@/hooks/useFriends";
+import { useFriends, Friend } from "@/contexts/FriendsContext";
 import UserAvatar from "@/components/UserAvatar";
 import DirectChatPanel from "@/components/DirectChatPanel";
 

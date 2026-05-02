@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MapPin, RefreshCw, Users, Send, UserPlus, UserCheck, Clock } from "lucide-react";
 import { useTrading } from "@/hooks/useTrading";
-import { useFriends } from "@/hooks/useFriends";
+import { useFriends } from "@/contexts/FriendsContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";

@@ -11,7 +11,7 @@ import TradingPanel from "@/components/TradingPanel";
 import StickerRanking from "@/components/StickerRanking";
 import FriendsPanel from "@/components/FriendsPanel";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
-import { useFriends } from "@/hooks/useFriends";
+import { useFriends } from "@/contexts/FriendsContext";
 import { useAuth } from "@/hooks/useAuth";
 import { SECTIONS, STICKERS_PER_SECTION } from "@/data/teams";
 import Auth from "./Auth";
