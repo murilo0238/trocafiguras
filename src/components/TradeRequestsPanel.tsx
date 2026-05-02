@@ -14,7 +14,7 @@ interface TradeRequestsPanelProps {
 
 const statusLabel: Record<string, { text: string; className: string }> = {
   completed: { text: "Concluída", className: "bg-green-100 text-green-700" },
-  rejected:  { text: "Recusada",  className: "bg-red-100 text-red-700" },
+  rejected:  { text: "Recusada",  className: "bg-destructive/10 text-destructive" },
   cancelled: { text: "Cancelada", className: "bg-orange-100 text-orange-700" },
 };
 
@@ -294,7 +294,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                           ? "bg-yellow-100 text-yellow-700"
                           : req.status === "accepted"
                           ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                          : "bg-destructive/10 text-destructive"
                       }`}>
                         {req.status === "pending" ? "Pendente" : req.status === "accepted" ? "Aceita" : "Recusada"}
                       </span>

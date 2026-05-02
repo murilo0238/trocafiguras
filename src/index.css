@@ -6,45 +6,48 @@
 
 @layer base {
   :root {
-    --background: 220 15% 8%;
-    --foreground: 45 20% 95%;
+    /* Base Colors based on Logo (#2a5671, #cdb87f) */
+    --background: 205 35% 8%;
+    --foreground: 44 20% 95%;
 
-    --card: 220 13% 12%;
-    --card-foreground: 45 20% 95%;
-    --card-uncollected: 220 12% 17%;
-    --card-collected: 43 95% 52%;
+    --card: 205 35% 12%;
+    --card-foreground: 44 20% 95%;
+    --card-uncollected: 205 30% 18%;
+    --card-collected: 44 45% 65%;
 
-    --popover: 220 13% 12%;
-    --popover-foreground: 45 20% 95%;
+    --popover: 205 35% 12%;
+    --popover-foreground: 44 20% 95%;
 
-    --primary: 4 88% 56%;
+    --primary: 203 46% 30%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 43 95% 52%;
-    --secondary-foreground: 220 15% 8%;
+    --secondary: 44 45% 65%;
+    --secondary-foreground: 205 35% 8%;
 
-    --muted: 220 12% 17%;
-    --muted-foreground: 220 8% 52%;
+    --muted: 205 25% 20%;
+    --muted-foreground: 205 15% 65%;
 
-    --accent: 43 95% 52%;
-    --accent-foreground: 220 15% 8%;
+    --accent: 41 36% 45%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 12% 20%;
-    --input: 220 12% 16%;
-    --ring: 4 88% 56%;
+    --border: 205 30% 20%;
+    --input: 205 30% 16%;
+    --ring: 44 45% 65%;
 
-    --radius: 0.875rem;
+    --radius: 1rem;
 
-    --gold: 43 95% 52%;
-    --gold-light: 43 95% 68%;
+    --gold: 44 45% 65%;
+    --gold-light: 44 55% 75%;
 
-    --sticker-shadow: 0 2px 8px -2px hsl(0 0% 0% / 0.5);
-    --sticker-shadow-hover: 0 8px 20px -4px hsl(43 95% 52% / 0.35);
-    --stat-card-shadow: 0 6px 20px -4px hsl(0 0% 0% / 0.4);
-    --header-gradient: linear-gradient(145deg, hsl(4 88% 46%) 0%, hsl(0 80% 35%) 60%, hsl(15 85% 28%) 100%);
+    --sticker-shadow: 0 4px 12px -2px hsl(0 0% 0% / 0.6);
+    --sticker-shadow-hover: 0 10px 25px -5px hsl(44 45% 65% / 0.4);
+    --stat-card-shadow: 0 8px 24px -4px hsl(0 0% 0% / 0.5);
+    
+    /* Elegant gradient using logo's dark teals */
+    --header-gradient: linear-gradient(145deg, hsl(203 46% 25%) 0%, hsl(205 40% 15%) 50%, hsl(205 45% 8%) 100%);
   }
 }
 
@@ -54,8 +57,8 @@
   body {
     @apply bg-background text-foreground font-fredoka;
     background-image:
-      radial-gradient(ellipse 80% 40% at 50% 0%, hsl(4 88% 56% / 0.08) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 35% at 100% 100%, hsl(43 95% 52% / 0.06) 0%, transparent 50%);
+      radial-gradient(ellipse 80% 40% at 50% 0%, hsl(203 46% 30% / 0.15) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 35% at 100% 100%, hsl(44 45% 65% / 0.1) 0%, transparent 50%);
     background-attachment: fixed;
   }
 }
@@ -88,7 +91,7 @@
   }
 
   .progress-bar-fill {
-    background: linear-gradient(90deg, hsl(43 95% 62%) 0%, hsl(43 95% 48%) 100%);
+    background: linear-gradient(90deg, hsl(44 55% 75%) 0%, hsl(44 45% 65%) 100%);
   }
 
   .bounce-in {

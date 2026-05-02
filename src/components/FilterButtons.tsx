@@ -18,10 +18,10 @@ const FilterButtons = ({ activeFilter, onFilterChange }: FilterButtonsProps) => 
         <button
           key={key}
           onClick={() => onFilterChange(key)}
-          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 border ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
             activeFilter === key
-              ? "bg-amber-400 text-amber-900 border-amber-300 shadow-md shadow-amber-400/30 scale-105"
-              : "bg-white/10 text-white/75 border-white/15 hover:bg-white/20"
+              ? "bg-gold text-[#1a3a4c] border-gold shadow-md shadow-gold/30 scale-105"
+              : "bg-black/20 text-white/70 border-white/10 hover:bg-white/10 hover:text-white"
           }`}
         >
           <span>{emoji}</span>

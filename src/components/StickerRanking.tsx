@@ -25,14 +25,14 @@ const StickerRanking = () => {
       {/* Easiest */}
       <div className="bg-card rounded-xl p-4 shadow-md">
         <div className="flex items-center gap-2 mb-3">
-          <TrendingUp className="w-5 h-5 text-green-500" />
-          <h3 className="font-bold text-foreground text-sm">🟢 10 Mais Fáceis</h3>
+          <TrendingUp className="w-5 h-5 text-gold" />
+          <h3 className="font-bold text-foreground text-sm">⭐ 10 Mais Fáceis</h3>
         </div>
         <div className="grid grid-cols-5 gap-1.5">
           {easiest.map((s, i) => (
             <div
               key={s.sticker_id}
-              className="bg-green-500/10 border border-green-500/20 rounded-lg p-2 text-center"
+              className="bg-gold/10 border border-gold/20 rounded-lg p-2 text-center"
             >
               <span className="text-[9px] text-muted-foreground">#{i + 1}</span>
               <p className="text-xs font-bold text-foreground">{s.sticker_id}</p>
@@ -45,14 +45,14 @@ const StickerRanking = () => {
       {/* Hardest */}
       <div className="bg-card rounded-xl p-4 shadow-md">
         <div className="flex items-center gap-2 mb-3">
-          <TrendingDown className="w-5 h-5 text-red-500" />
-          <h3 className="font-bold text-foreground text-sm">🔴 10 Mais Difíceis</h3>
+          <TrendingDown className="w-5 h-5 text-[#2a5671]" />
+          <h3 className="font-bold text-foreground text-sm">💎 10 Mais Difíceis</h3>
         </div>
         <div className="grid grid-cols-5 gap-1.5">
           {hardest.map((s, i) => (
             <div
               key={s.sticker_id}
-              className="bg-red-500/10 border border-red-500/20 rounded-lg p-2 text-center"
+              className="bg-[#2a5671]/10 border border-[#2a5671]/20 rounded-lg p-2 text-center"
             >
               <span className="text-[9px] text-muted-foreground">#{i + 1}</span>
               <p className="text-xs font-bold text-foreground">{s.sticker_id}</p>

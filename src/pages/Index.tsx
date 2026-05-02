@@ -115,7 +115,7 @@ const Index = () => {
         <div className="mb-4">
           <div className="flex justify-between items-baseline mb-1.5">
             <span className="text-[10px] text-white/60 font-semibold uppercase tracking-widest">Progresso</span>
-            <span className="text-base font-bold text-amber-300">{progressPct}% completo</span>
+            <span className="text-base font-bold text-gold-light">{progressPct}% completo</span>
           </div>
           <div className="h-3 bg-black/30 rounded-full overflow-hidden">
             <div
@@ -142,7 +142,7 @@ const Index = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar seleção..."
-                className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-black/25 text-white placeholder:text-white/40 border border-white/15 focus:border-amber-400/50 outline-none transition-all"
+                className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-black/25 text-white placeholder:text-white/40 border border-white/15 focus:border-gold/50 outline-none transition-all"
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
@@ -185,7 +185,7 @@ const Index = () => {
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
                       sectionComplete
-                        ? "bg-green-500/20 text-green-600"
+                        ? "bg-[#2a5671]/20 text-gold-light border border-[#2a5671]/30"
                         : "bg-muted text-muted-foreground"
                     }`}>
                       {sectionComplete ? "✓ " : ""}{collectedCount}/{STICKERS_PER_SECTION}
@@ -237,7 +237,7 @@ const Index = () => {
                 <div className="relative">
                   <ArrowLeftRight className="w-5 h-5" />
                   {pendingCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5 ring-1 ring-background">
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 bg-destructive text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5 ring-1 ring-background">
                       {pendingCount > 9 ? "9+" : pendingCount}
                     </span>
                   )}

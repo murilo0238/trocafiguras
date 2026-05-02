@@ -60,7 +60,7 @@ const Auth = () => {
       <div className="header-gradient flex flex-col items-center justify-center pt-16 pb-12 px-4 relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-16 -left-16 w-56 h-56 bg-white/5 rounded-full blur-3xl" />
-          <div className="absolute -bottom-8 right-8 w-40 h-40 bg-amber-300/10 rounded-full blur-2xl" />
+          <div className="absolute -bottom-8 right-8 w-40 h-40 bg-gold/10 rounded-full blur-2xl" />
           {/* Bola de futebol decorativa */}
           <div className="absolute top-6 right-6 text-7xl opacity-10 rotate-12 select-none">⚽</div>
           <div className="absolute bottom-6 left-6 text-5xl opacity-8 -rotate-12 select-none">🏆</div>
@@ -114,7 +114,7 @@ const Auth = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl header-gradient text-white font-bold text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-red-900/40 disabled:opacity-50 mt-1"
+                className="w-full py-3.5 rounded-xl header-gradient text-white font-bold text-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-[#2a5671]/40 disabled:opacity-50 mt-1"
               >
                 {loading ? "Aguarde..." : mode === "login" ? "Entrar" : mode === "signup" ? "Criar Conta" : "Enviar link"}
               </button>

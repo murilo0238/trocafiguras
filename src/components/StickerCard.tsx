@@ -23,7 +23,7 @@ const StickerCard = ({
     <div
       className={`sticker-card relative aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer select-none ${
         collected
-          ? "bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 collected-glow"
+          ? "bg-gradient-to-br from-gold-light via-gold to-[#9e844a] collected-glow"
           : "bg-card border border-border/60 hover:border-primary/40"
       }`}
       onClick={onToggle}
@@ -35,7 +35,7 @@ const StickerCard = ({
 
       <span
         className={`text-[11px] leading-tight font-bold text-center px-1 z-10 ${
-          collected ? "text-amber-900 drop-shadow-sm" : "text-muted-foreground"
+          collected ? "text-[#1a3a4c] drop-shadow-sm" : "text-muted-foreground"
         }`}
       >
         {label}
@@ -46,7 +46,7 @@ const StickerCard = ({
       )}
 
       {duplicates > 0 && (
-        <div className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[8px] font-bold rounded-full w-5 h-5 flex items-center justify-center bounce-in shadow-lg shadow-red-500/60 z-20 ring-2 ring-background">
+        <div className="absolute -top-1.5 -right-1.5 bg-[#2a5671] text-white text-[8px] font-bold rounded-full w-5 h-5 flex items-center justify-center bounce-in shadow-lg shadow-[#2a5671]/60 z-20 ring-2 ring-background">
           {duplicates}
         </div>
       )}
@@ -56,17 +56,17 @@ const StickerCard = ({
           <button
             onClick={(e) => { e.stopPropagation(); if (duplicates > 0) onRemoveDuplicate(); }}
             className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-              duplicates > 0 ? "bg-amber-900/30 hover:bg-red-500/40 active:scale-90" : "opacity-30 cursor-not-allowed"
+              duplicates > 0 ? "bg-[#1a3a4c]/20 hover:bg-[#2a5671]/40 active:scale-90" : "opacity-30 cursor-not-allowed"
             }`}
             disabled={duplicates === 0}
           >
-            <Minus className="w-2.5 h-2.5 text-amber-900" />
+            <Minus className="w-2.5 h-2.5 text-[#1a3a4c]" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onAddDuplicate(); }}
-            className="w-5 h-5 rounded-full bg-amber-900/30 hover:bg-amber-900/50 active:scale-90 flex items-center justify-center transition-all"
+            className="w-5 h-5 rounded-full bg-[#1a3a4c]/20 hover:bg-[#1a3a4c]/40 active:scale-90 flex items-center justify-center transition-all"
           >
-            <Plus className="w-2.5 h-2.5 text-amber-900" />
+            <Plus className="w-2.5 h-2.5 text-[#1a3a4c]" />
           </button>
         </div>
       )}

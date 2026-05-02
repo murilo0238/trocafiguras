@@ -7,18 +7,18 @@ interface StatCardProps {
 
 const variantConfig = {
   primary: {
-    bg: "bg-gradient-to-br from-emerald-500 to-green-700",
-    shadow: "shadow-emerald-900/60",
+    bg: "bg-gradient-to-br from-[#cdb87f] to-[#9e844a]",
+    shadow: "shadow-[#9e844a]/40",
     badge: "⚽",
   },
   secondary: {
-    bg: "bg-gradient-to-br from-sky-500 to-blue-700",
-    shadow: "shadow-blue-900/60",
+    bg: "bg-gradient-to-br from-[#8da4b4] to-[#2a5671]",
+    shadow: "shadow-[#2a5671]/40",
     badge: "🎯",
   },
   accent: {
-    bg: "bg-gradient-to-br from-amber-400 to-orange-600",
-    shadow: "shadow-orange-900/60",
+    bg: "bg-gradient-to-br from-[#3b6d8c] to-[#1a3a4c]",
+    shadow: "shadow-[#1a3a4c]/60",
     badge: "🔁",
   },
 };
