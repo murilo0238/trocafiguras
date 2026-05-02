@@ -258,7 +258,7 @@ const Profile = () => {
             <div className="flex-1">
               <p className={`text-sm font-semibold ${profile.location_mode === "default" ? "text-primary" : "text-foreground"}`}>Localização padrão</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Ponto fixo de troca. Você sempre aparece nesse local, independente de onde estiver.
+                Ponto fixo de localização. Você sempre aparece nesse local, independentemente de onde estiver.
               </p>
               {profile.location_mode === "default" && (
                 <button

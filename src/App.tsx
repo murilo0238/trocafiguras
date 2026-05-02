@@ -11,6 +11,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import TradeLinkPage from "./pages/TradeLinkPage";
 import NotFound from "./pages/NotFound";
+import InstallBanner from "./components/InstallBanner";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
         <FriendsProvider>
         <Toaster />
         <Sonner />
+        <InstallBanner />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
