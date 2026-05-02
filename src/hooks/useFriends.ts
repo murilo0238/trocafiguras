@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ export const useFriends = () => {
   const { user } = useAuth();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(false);
+  const channelId = useRef(`friendships-${Math.random().toString(36).slice(2)}`);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -79,7 +80,7 @@ export const useFriends = () => {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel("friendships-realtime")
+      .channel(channelId.current)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "friendships" },
