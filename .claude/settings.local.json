@@ -6,7 +6,14 @@
       "Bash(Select-String -Pattern \"sticker|player\")",
       "Bash(Start-Process *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Murilo\\\\Desktop\\\\Site wilian\\\\trocafigurinha\\\\src\" -Recurse -File)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Murilo\\\\Desktop\\\\Site wilian\\\\trocafigurinha\" -Recurse -Directory)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Get-ChildItem *)",
+      "WebSearch",
+      "WebFetch(domain:football-sticker-album.fandom.com)",
+      "WebFetch(domain:www.checklistinsider.com)",
+      "WebFetch(domain:www.coca-cola.com)"
     ]
   }
 }

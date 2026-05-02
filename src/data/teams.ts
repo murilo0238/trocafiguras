@@ -3,11 +3,30 @@ export interface TeamSection {
   name: string;
   group?: string;
   flag?: string;
+  stickerCount?: number;
+  players?: string[];
 }
 
 export const SECTIONS: TeamSection[] = [
-  // Introdução (20 figurinhas: FWC01-FWC20)
+  // Introdução (20 figurinhas: FWC01-FWC19 + FWC00)
   { code: "FWC", name: "Copa do Mundo 2026", flag: "🏆" },
+  // Patrocinador (14 figurinhas — jogadores selecionados pela Coca-Cola)
+  { code: "COCA", name: "Coca-Cola", flag: "🥤", stickerCount: 14, players: [
+    "Lamine Yamal",      // COCA1
+    "Gabriel Magalhães", // COCA2
+    "Joshua Kimmich",    // COCA3
+    "Harry Kane",        // COCA4
+    "Santiago Giménez",  // COCA5
+    "Joško Gvardiol",    // COCA6
+    "Federico Valverde", // COCA7
+    "Jefferson Lerma",   // COCA8
+    "Enner Valencia",    // COCA9
+    "Emiliano Martínez", // COCA10
+    "Virgil van Dijk",   // COCA11
+    "Alphonso Davies",   // COCA12
+    "Raúl Jiménez",      // COCA13
+    "Lautaro Martínez",  // COCA14
+  ]},
 
   // Grupo A
   { code: "MEX", name: "México", group: "A", flag: "🇲🇽" },
@@ -84,14 +103,23 @@ export const SECTIONS: TeamSection[] = [
 ];
 
 export const STICKERS_PER_SECTION = 20;
-export const TOTAL_STICKERS = SECTIONS.length * STICKERS_PER_SECTION; // 1000
+export const TOTAL_STICKERS = SECTIONS.reduce(
+  (acc, s) => acc + (s.stickerCount ?? STICKERS_PER_SECTION), 0
+); // 1004
+
+// FWC20 é exibida como "00" (figurinha especial da capa)
+export function getStickerNumber(code: string, i: number): string {
+  if (code === "FWC" && i === 20) return "00";
+  return String(i);
+}
 
 // Generate all sticker IDs in order
 export const getAllStickerIds = (): string[] => {
   const ids: string[] = [];
   for (const section of SECTIONS) {
-    for (let i = 1; i <= STICKERS_PER_SECTION; i++) {
-      ids.push(`${section.code}${i}`);
+    const count = section.stickerCount ?? STICKERS_PER_SECTION;
+    for (let i = 1; i <= count; i++) {
+      ids.push(`${section.code}${getStickerNumber(section.code, i)}`);
     }
   }
   return ids;
@@ -101,4 +129,14 @@ export const getAllStickerIds = (): string[] => {
 export const getSectionForSticker = (id: string): TeamSection | undefined => {
   const code = id.replace(/\d+$/, "");
   return SECTIONS.find((s) => s.code === code);
+};
+
+// Get player name for a sticker ID (e.g. "BRA5" → "Vinícius Jr.")
+export const getPlayerName = (id: string): string | undefined => {
+  const section = getSectionForSticker(id);
+  if (!section?.players) return undefined;
+  const numStr = id.replace(/^[A-Z]+/, "");
+  const num = parseInt(numStr, 10);
+  if (isNaN(num) || num < 1) return undefined;
+  return section.players[num - 1];
 };

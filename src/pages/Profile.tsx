@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, Loader2, Link2 } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Link2, MapPin, Satellite, MapPinOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import UserAvatar from "@/components/UserAvatar";
+import LocationPickerMap from "@/components/LocationPickerMap";
+
+type LocationMode = "inactive" | "default" | "real";
 
 interface ProfileData {
   display_name: string | null;
@@ -14,6 +17,9 @@ interface ProfileData {
   state: string | null;
   share_location: boolean;
   share_collection: boolean;
+  location_mode: LocationMode;
+  default_latitude: number | null;
+  default_longitude: number | null;
 }
 
 const Profile = () => {
@@ -24,16 +30,21 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [settingDefaultLoc, setSettingDefaultLoc] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, avatar_url, city, state, share_location, share_collection")
+        .select("display_name, avatar_url, city, state, share_location, share_collection, location_mode, default_latitude, default_longitude")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (data) setProfile(data as ProfileData);
+      if (data) setProfile({
+        ...data,
+        location_mode: (data.location_mode as LocationMode) || "inactive",
+      } as ProfileData);
       setLoading(false);
     })();
   }, [user]);
@@ -48,6 +59,28 @@ const Profile = () => {
     setProfile({ ...profile, ...patch });
     const { error } = await supabase.from("profiles").update(patch).eq("user_id", user.id);
     if (error) toast.error("Erro ao salvar");
+  };
+
+  const setLocationMode = async (mode: LocationMode) => {
+    await update({ location_mode: mode, share_location: mode !== "inactive" });
+  };
+
+  const captureDefaultLocation = () => {
+    setMapOpen(true);
+  };
+
+  const handleMapConfirm = async (lat: number, lng: number) => {
+    setSettingDefaultLoc(true);
+    await update({
+      default_latitude: lat,
+      default_longitude: lng,
+      latitude: lat,
+      longitude: lng,
+      location_mode: "default",
+      share_location: true,
+    });
+    setSettingDefaultLoc(false);
+    toast.success("Ponto de troca definido!");
   };
 
   const saveDetails = async () => {
@@ -191,21 +224,80 @@ const Profile = () => {
           </button>
         </div>
 
+        {/* Localização */}
+        <div className="space-y-3 bg-card rounded-xl p-4 shadow-sm">
+          <h2 className="font-bold text-foreground">Localização</h2>
+          <p className="text-xs text-muted-foreground">Escolha como sua localização é usada nas buscas de troca.</p>
+
+          {/* Opção: Inativa */}
+          <button
+            onClick={() => setLocationMode("inactive")}
+            className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-colors ${
+              profile.location_mode === "inactive"
+                ? "border-primary bg-primary/5"
+                : "border-border bg-muted/30 hover:bg-muted/60"
+            }`}
+          >
+            <MapPinOff className={`w-5 h-5 mt-0.5 flex-shrink-0 ${profile.location_mode === "inactive" ? "text-primary" : "text-muted-foreground"}`} />
+            <div>
+              <p className={`text-sm font-semibold ${profile.location_mode === "inactive" ? "text-primary" : "text-foreground"}`}>Localização inativa</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Você não aparece nas buscas de trocas por localização.</p>
+            </div>
+          </button>
+
+          {/* Opção: Padrão */}
+          <button
+            onClick={() => setLocationMode("default")}
+            className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-colors ${
+              profile.location_mode === "default"
+                ? "border-primary bg-primary/5"
+                : "border-border bg-muted/30 hover:bg-muted/60"
+            }`}
+          >
+            <MapPin className={`w-5 h-5 mt-0.5 flex-shrink-0 ${profile.location_mode === "default" ? "text-primary" : "text-muted-foreground"}`} />
+            <div className="flex-1">
+              <p className={`text-sm font-semibold ${profile.location_mode === "default" ? "text-primary" : "text-foreground"}`}>Localização padrão</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Ponto fixo de troca. Você sempre aparece nesse local, independente de onde estiver.
+              </p>
+              {profile.location_mode === "default" && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); captureDefaultLocation(); }}
+                  disabled={settingDefaultLoc}
+                  className="mt-2 flex items-center gap-1.5 text-xs font-bold text-primary border border-primary/30 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {settingDefaultLoc ? <Loader2 className="w-3 h-3 animate-spin" /> : <MapPin className="w-3 h-3" />}
+                  {profile.default_latitude ? "Atualizar ponto de troca" : "Definir como ponto de troca"}
+                </button>
+              )}
+              {profile.location_mode === "default" && profile.default_latitude && (
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Ponto salvo: {profile.default_latitude.toFixed(4)}, {profile.default_longitude?.toFixed(4)}
+                </p>
+              )}
+            </div>
+          </button>
+
+          {/* Opção: Real */}
+          <button
+            onClick={() => setLocationMode("real")}
+            className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 text-left transition-colors ${
+              profile.location_mode === "real"
+                ? "border-primary bg-primary/5"
+                : "border-border bg-muted/30 hover:bg-muted/60"
+            }`}
+          >
+            <Satellite className={`w-5 h-5 mt-0.5 flex-shrink-0 ${profile.location_mode === "real" ? "text-primary" : "text-muted-foreground"}`} />
+            <div>
+              <p className={`text-sm font-semibold ${profile.location_mode === "real" ? "text-primary" : "text-foreground"}`}>Localização real</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Sua posição GPS atual, atualizada cada vez que você busca trocas.</p>
+            </div>
+          </button>
+        </div>
+
         {/* Privacidade */}
         <div className="space-y-4 bg-card rounded-xl p-4 shadow-sm">
           <h2 className="font-bold text-foreground">Privacidade</h2>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="font-medium text-sm text-foreground">Compartilhar localização</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Posição arredondada para ~100m. Necessária para encontrar trocas próximas.
-              </p>
-            </div>
-            <Switch
-              checked={profile.share_location}
-              onCheckedChange={(v) => update({ share_location: v })}
-            />
-          </div>
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="font-medium text-sm text-foreground">Compartilhar coleção</p>
@@ -220,6 +312,14 @@ const Profile = () => {
           </div>
         </div>
       </main>
+
+      <LocationPickerMap
+        open={mapOpen}
+        initialLat={profile.default_latitude}
+        initialLng={profile.default_longitude}
+        onConfirm={handleMapConfirm}
+        onClose={() => setMapOpen(false)}
+      />
     </div>
   );
 };

@@ -13,7 +13,7 @@ import FriendsPanel from "@/components/FriendsPanel";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
 import { useFriends } from "@/contexts/FriendsContext";
 import { useAuth } from "@/hooks/useAuth";
-import { SECTIONS, STICKERS_PER_SECTION } from "@/data/teams";
+import { SECTIONS, STICKERS_PER_SECTION, getStickerNumber, TeamSection } from "@/data/teams";
 import Auth from "./Auth";
 
 type FilterType = "all" | "missing" | "duplicates";
@@ -34,10 +34,11 @@ const Index = () => {
   useEffect(() => {
     if (collectionLoading) return;
     SECTIONS.forEach((section) => {
-      const count = Array.from({ length: STICKERS_PER_SECTION }, (_, i) =>
-        collection[`${section.code}${i + 1}`]?.collected ? 1 : 0
+      const sCount = section.stickerCount ?? STICKERS_PER_SECTION;
+      const count = Array.from({ length: sCount }, (_, i) =>
+        collection[`${section.code}${getStickerNumber(section.code, i + 1)}`]?.collected ? 1 : 0
       ).reduce((a, b) => a + b, 0);
-      const isComplete = count === STICKERS_PER_SECTION;
+      const isComplete = count === sCount;
       const wasComplete = prevCompleted.current.has(section.code);
       if (isComplete && !wasComplete) {
         toast.success(`${section.flag} ${section.name} completa! 🎉`, { duration: 4000 });
@@ -68,10 +69,11 @@ const Index = () => {
 
   if (!user) return <Auth />;
 
-  const getSectionStickers = (code: string) => {
+  const getSectionStickers = (section: TeamSection) => {
+    const count = section.stickerCount ?? STICKERS_PER_SECTION;
     const ids: string[] = [];
-    for (let i = 1; i <= STICKERS_PER_SECTION; i++) {
-      const id = `${code}${i}`;
+    for (let i = 1; i <= count; i++) {
+      const id = `${section.code}${getStickerNumber(section.code, i)}`;
       const data = collection[id];
       const show =
         filter === "all" ||
@@ -97,7 +99,7 @@ const Index = () => {
               <img src={logo} alt="logo" className="w-7 h-7 object-contain" />
             </div>
             <div>
-              <h1 className="text-[15px] font-bold text-white leading-tight">Copa do Mundo 2026</h1>
+              <h1 className="text-[15px] font-bold text-white leading-tight">Controle da coleção troca figurinha</h1>
               <p className="text-[10px] text-white/55 leading-none">🇲🇽 · 🇺🇸 · 🇨🇦 Álbum oficial</p>
             </div>
           </div>
@@ -168,12 +170,13 @@ const Index = () => {
         ) : tab === "album" ? (
           <div className="space-y-6">
             {filteredSections.map((section) => {
-              const stickers = getSectionStickers(section.code);
+              const stickers = getSectionStickers(section);
               if (stickers.length === 0) return null;
-              const collectedCount = Array.from({ length: STICKERS_PER_SECTION }, (_, i) =>
-                collection[`${section.code}${i + 1}`]?.collected ? 1 : 0
+              const sCount = section.stickerCount ?? STICKERS_PER_SECTION;
+              const collectedCount = Array.from({ length: sCount }, (_, i) =>
+                collection[`${section.code}${getStickerNumber(section.code, i + 1)}`]?.collected ? 1 : 0
               ).reduce((a, b) => a + b, 0);
-              const sectionComplete = collectedCount === STICKERS_PER_SECTION;
+              const sectionComplete = collectedCount === sCount;
               return (
                 <div key={section.code}>
                   <div className="flex items-center gap-2.5 mb-2.5">
@@ -191,7 +194,7 @@ const Index = () => {
                         ? "bg-[#2a5671]/20 text-gold-light border border-[#2a5671]/30"
                         : "bg-muted text-muted-foreground"
                     }`}>
-                      {sectionComplete ? "✓ " : ""}{collectedCount}/{STICKERS_PER_SECTION}
+                      {sectionComplete ? "✓ " : ""}{collectedCount}/{sCount}
                     </span>
                   </div>
                   <div className="h-px bg-gradient-to-r from-primary/40 to-transparent mb-3" />
@@ -212,7 +215,7 @@ const Index = () => {
               );
             })}
 
-            {filteredSections.every((s) => getSectionStickers(s.code).length === 0) && (
+            {filteredSections.every((s) => getSectionStickers(s).length === 0) && (
               <div className="text-center py-20 flex flex-col items-center gap-3">
                 <span className="text-6xl">{search ? "🔍" : filter === "missing" ? "🏆" : "🔁"}</span>
                 <p className="text-foreground font-bold text-lg">

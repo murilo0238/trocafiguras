@@ -73,9 +73,12 @@ export type Database = {
           avatar_url: string | null
           city: string | null
           created_at: string
+          default_latitude: number | null
+          default_longitude: number | null
           display_name: string | null
           id: string
           latitude: number | null
+          location_mode: string
           location_updated_at: string | null
           longitude: number | null
           share_collection: boolean
@@ -88,9 +91,12 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           created_at?: string
+          default_latitude?: number | null
+          default_longitude?: number | null
           display_name?: string | null
           id?: string
           latitude?: number | null
+          location_mode?: string
           location_updated_at?: string | null
           longitude?: number | null
           share_collection?: boolean
@@ -103,9 +109,12 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           created_at?: string
+          default_latitude?: number | null
+          default_longitude?: number | null
           display_name?: string | null
           id?: string
           latitude?: number | null
+          location_mode?: string
           location_updated_at?: string | null
           longitude?: number | null
           share_collection?: boolean

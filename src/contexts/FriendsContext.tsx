@@ -12,6 +12,12 @@ export interface Friend {
   iAmRequester: boolean;
 }
 
+export interface UserSearchResult {
+  userId: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
 interface FriendsContextValue {
   friends: Friend[];
   accepted: Friend[];
@@ -24,6 +30,7 @@ interface FriendsContextValue {
   removeFriend: (friendshipId: string) => Promise<void>;
   getFriendshipStatus: (otherUserId: string) => Friend | null;
   reload: () => Promise<void>;
+  searchUsers: (username: string) => Promise<UserSearchResult[]>;
 }
 
 const FriendsContext = createContext<FriendsContextValue | null>(null);
@@ -127,6 +134,25 @@ export const FriendsProvider = ({ children }: { children: ReactNode }) => {
     [friends]
   );
 
+  const searchUsers = useCallback(async (username: string): Promise<UserSearchResult[]> => {
+    if (!user || username.trim().length < 2) return [];
+    const { data } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, avatar_url")
+      .ilike("display_name", `%${username.trim()}%`)
+      .neq("user_id", user.id)
+      .limit(10);
+    if (!data) return [];
+    const existingIds = new Set(friends.map((f) => f.userId));
+    return data
+      .filter((p) => !existingIds.has(p.user_id))
+      .map((p) => ({
+        userId: p.user_id,
+        displayName: p.display_name || "Colecionador",
+        avatarUrl: p.avatar_url,
+      }));
+  }, [user, friends]);
+
   const pendingReceived = friends.filter((f) => f.status === "pending" && !f.iAmRequester);
   const pendingSent = friends.filter((f) => f.status === "pending" && f.iAmRequester);
   const accepted = friends.filter((f) => f.status === "accepted");
@@ -135,7 +161,7 @@ export const FriendsProvider = ({ children }: { children: ReactNode }) => {
     <FriendsContext.Provider value={{
       friends, accepted, pendingReceived, pendingSent, loading,
       sendRequest, acceptRequest, rejectRequest, removeFriend,
-      getFriendshipStatus, reload: load,
+      getFriendshipStatus, reload: load, searchUsers,
     }}>
       {children}
     </FriendsContext.Provider>

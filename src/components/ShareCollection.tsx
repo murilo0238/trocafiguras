@@ -1,6 +1,6 @@
 import { Share2 } from "lucide-react";
 import { useState } from "react";
-import { SECTIONS, STICKERS_PER_SECTION } from "@/data/teams";
+import { SECTIONS, STICKERS_PER_SECTION, getStickerNumber } from "@/data/teams";
 import {
   Dialog,
   DialogContent,
@@ -32,9 +32,10 @@ const generateText = (collection: StickerCollection, type: ShareType): string =>
   let total = 0;
 
   for (const section of SECTIONS) {
+    const count = section.stickerCount ?? STICKERS_PER_SECTION;
     const items: string[] = [];
-    for (let i = 1; i <= STICKERS_PER_SECTION; i++) {
-      const id = `${section.code}${i}`;
+    for (let i = 1; i <= count; i++) {
+      const id = `${section.code}${getStickerNumber(section.code, i)}`;
       const data = collection[id];
       if (type === "missing" && !data?.collected) {
         items.push(id);

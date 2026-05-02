@@ -1,4 +1,5 @@
 import { Plus, Minus, Check } from "lucide-react";
+import { getPlayerName } from "@/data/teams";
 
 interface StickerCardProps {
   id: string;
@@ -20,6 +21,7 @@ const StickerCard = ({
   const match = id ? id.match(/^([A-Za-z]+)(\d+)$/) : null;
   const code = match ? match[1] : id;
   const number = match ? match[2] : "";
+  const playerName = getPlayerName(id);
 
   return (
     <div
@@ -73,11 +75,17 @@ const StickerCard = ({
         </span>
       </div>
 
-      {/* Title/Name placeholder (since we don't have the exact name, we use the ID or leave space) */}
-      <div className="text-center">
-        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-          Figurinha {id}
-        </span>
+      {/* Nome do jogador ou ID da figurinha */}
+      <div className="text-center px-0.5">
+        {playerName ? (
+          <span className="text-[10px] font-semibold text-foreground leading-tight line-clamp-2 block">
+            {playerName}
+          </span>
+        ) : (
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            {id}
+          </span>
+        )}
       </div>
 
       {/* Bottom Controls */}
@@ -104,9 +112,14 @@ const StickerCard = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onAddDuplicate();
+            if (collected) onAddDuplicate();
           }}
-          className="w-7 h-7 rounded-full flex items-center justify-center bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 active:scale-90 cursor-pointer transition-all"
+          disabled={!collected}
+          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+            collected
+              ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 active:scale-90 cursor-pointer"
+              : "bg-white/5 text-white/20 cursor-not-allowed"
+          }`}
         >
           <Plus className="w-3.5 h-3.5" strokeWidth={3} />
         </button>

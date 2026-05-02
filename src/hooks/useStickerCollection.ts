@@ -96,6 +96,7 @@ export const useStickerCollection = () => {
   const addDuplicate = (id: string) => {
     setCollection((prev) => {
       const current = prev[id] || { collected: false, duplicates: 0 };
+      if (!current.collected) return prev; // precisa estar coletada primeiro
       const newData = { ...current, duplicates: current.duplicates + 1 };
       syncSticker(id, newData);
       return { ...prev, [id]: newData };

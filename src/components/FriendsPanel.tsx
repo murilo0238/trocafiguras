@@ -1,12 +1,32 @@
 import { useState } from "react";
-import { Users, Check, X, MessageCircle, UserMinus, Clock } from "lucide-react";
-import { useFriends, Friend } from "@/contexts/FriendsContext";
+import { Users, Check, X, MessageCircle, UserMinus, Clock, Search, UserPlus } from "lucide-react";
+import { useFriends, Friend, UserSearchResult } from "@/contexts/FriendsContext";
 import UserAvatar from "@/components/UserAvatar";
 import DirectChatPanel from "@/components/DirectChatPanel";
 
 const FriendsPanel = () => {
-  const { accepted, pendingReceived, pendingSent, loading, acceptRequest, rejectRequest, removeFriend } = useFriends();
+  const { accepted, pendingReceived, pendingSent, loading, acceptRequest, rejectRequest, removeFriend, sendRequest, searchUsers, reload } = useFriends();
   const [chat, setChat] = useState<{ userId: string; name: string; avatarUrl: string | null } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [addingId, setAddingId] = useState<string | null>(null);
+
+  const handleSearch = async () => {
+    if (searchTerm.trim().length < 2) return;
+    setSearching(true);
+    const results = await searchUsers(searchTerm);
+    setSearchResults(results);
+    setSearching(false);
+  };
+
+  const handleAdd = async (result: UserSearchResult) => {
+    setAddingId(result.userId);
+    await sendRequest(result.userId, result.displayName);
+    setSearchResults((prev) => prev.filter((r) => r.userId !== result.userId));
+    await reload();
+    setAddingId(null);
+  };
 
   if (chat) {
     return (
@@ -33,6 +53,54 @@ const FriendsPanel = () => {
 
   return (
     <div className="space-y-4">
+      {/* Busca por nome de usuário */}
+      <div className="bg-card rounded-xl p-4 shadow-md">
+        <h3 className="font-bold text-sm text-foreground mb-3 flex items-center gap-2">
+          <Search className="w-4 h-4 text-primary" />
+          Buscar amigo por nome
+        </h3>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            placeholder="Digite o nome de usuário..."
+            className="flex-1 px-3 py-2 text-sm rounded-lg bg-muted text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            onClick={handleSearch}
+            disabled={searching || searchTerm.trim().length < 2}
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+          >
+            {searching ? "..." : "Buscar"}
+          </button>
+        </div>
+        {searchResults.length > 0 && (
+          <div className="mt-3 space-y-1">
+            {searchResults.map((r) => (
+              <div key={r.userId} className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">
+                <div className="w-9 h-9 rounded-full overflow-hidden bg-muted flex-shrink-0">
+                  <UserAvatar avatarUrl={r.avatarUrl} displayName={r.displayName} className="w-full h-full" />
+                </div>
+                <span className="flex-1 text-sm font-medium text-foreground truncate">{r.displayName}</span>
+                <button
+                  onClick={() => handleAdd(r)}
+                  disabled={addingId === r.userId}
+                  className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors disabled:opacity-50"
+                  title="Adicionar amigo"
+                >
+                  <UserPlus className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {searchResults.length === 0 && searchTerm.length >= 2 && !searching && (
+          <p className="text-xs text-muted-foreground mt-2">Nenhum usuário encontrado. Tente outro nome.</p>
+        )}
+      </div>
+
       {/* Pending requests received */}
       {pendingReceived.length > 0 && (
         <div className="bg-card rounded-xl p-4 shadow-md">

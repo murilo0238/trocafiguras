@@ -82,15 +82,33 @@ export const useTrading = () => {
     setLoading(true);
 
     try {
-      // Step 1: get location
-      let loc = myLocation;
-      if (!loc) {
-        try {
-          loc = await updateLocation();
-        } catch {
-          setLoading(false);
-          return;
+      // Step 1: get location based on user's location_mode
+      const { data: myProfile } = await supabase
+        .from("profiles")
+        .select("location_mode, default_latitude, default_longitude")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      let loc: { lat: number; lng: number } | null = null;
+
+      if (myProfile?.location_mode === "default"
+          && myProfile.default_latitude != null
+          && myProfile.default_longitude != null) {
+        loc = { lat: myProfile.default_latitude, lng: myProfile.default_longitude };
+      } else if (myProfile?.location_mode === "real") {
+        loc = myLocation;
+        if (!loc) {
+          try {
+            loc = await updateLocation();
+          } catch {
+            setLoading(false);
+            return;
+          }
         }
+      } else {
+        toast.error("Ative a localização no seu perfil para buscar trocas.");
+        setLoading(false);
+        return;
       }
 
       // Step 2: get other users with location
