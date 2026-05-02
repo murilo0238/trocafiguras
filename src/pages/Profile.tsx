@@ -290,7 +290,7 @@ const Profile = () => {
             <Satellite className={`w-5 h-5 mt-0.5 flex-shrink-0 ${profile.location_mode === "real" ? "text-primary" : "text-muted-foreground"}`} />
             <div>
               <p className={`text-sm font-semibold ${profile.location_mode === "real" ? "text-primary" : "text-foreground"}`}>Localização real</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Sua posição GPS atual, atualizada cada vez que você busca trocas.</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Sua posição real, atualizada cada vez que você busca trocas.</p>
             </div>
           </button>
         </div>
