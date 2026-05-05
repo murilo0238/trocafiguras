@@ -9,7 +9,28 @@ export interface TeamSection {
 
 export const SECTIONS: TeamSection[] = [
   // Introdução (20 figurinhas: FWC01-FWC19 + FWC00)
-  { code: "FWC", name: "Copa do Mundo 2026", flag: "🏆" },
+  { code: "FWC", name: "Copa do Mundo 2026", flag: "🏆", players: [
+    "Emblema Oficial",      // FWC1
+    "Emblema Oficial",      // FWC2
+    "Mascotes Oficiais",    // FWC3
+    "Slogan Oficial",       // FWC4
+    "Bola Oficial",         // FWC5
+    "Canadá - Sede",        // FWC6
+    "México - Sede",        // FWC7
+    "EUA - Sede",           // FWC8
+    "Itália 1934",          // FWC9
+    "Uruguai 1950",         // FWC10
+    "Alemanha Ocid. 1954",  // FWC11
+    "Brasil 1962",          // FWC12
+    "Alemanha Ocid. 1974",  // FWC13
+    "Argentina 1986",       // FWC14
+    "Brasil 1994",          // FWC15
+    "Brasil 2002",          // FWC16
+    "Itália 2006",          // FWC17
+    "Alemanha 2014",        // FWC18
+    "Argentina 2022",       // FWC19
+    "Logo Panini",          // FWC00
+  ]},
   // Patrocinador (14 figurinhas — jogadores selecionados pela Coca-Cola)
   { code: "COCA", name: "Coca-Cola", flag: "🥤", stickerCount: 14, players: [
     "Lamine Yamal",      // COCA1
@@ -1144,6 +1165,7 @@ export const getPlayerName = (id: string): string | undefined => {
   const section = getSectionForSticker(id);
   if (!section?.players) return undefined;
   const numStr = id.replace(/^[A-Z]+/, "");
+  if (numStr === "00") return section.players[section.players.length - 1] ?? undefined;
   const num = parseInt(numStr, 10);
   if (isNaN(num) || num < 1) return undefined;
   return section.players[num - 1] ?? undefined;
