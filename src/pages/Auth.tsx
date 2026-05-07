@@ -64,17 +64,9 @@ const Auth = () => {
           <div className="absolute -bottom-8 right-8 w-40 h-40 bg-gold/10 rounded-full blur-2xl" />
           {/* Bola de futebol decorativa */}
           <div className="absolute top-6 right-6 text-7xl opacity-10 rotate-12 select-none">⚽</div>
-          <div className="absolute bottom-2 left-2 w-36 h-36 opacity-40 -rotate-6 select-none pointer-events-none">
-            <img src={trophy} alt="" className="w-full h-full object-contain drop-shadow-lg" />
-          </div>
         </div>
 
-        <div className="relative w-20 h-20 mb-5">
-          <div className="absolute inset-0 bg-white/20 rounded-2xl blur-lg scale-110" />
-          <div className="relative w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center border border-white/30 shadow-xl">
-            <img src={logo} alt="logo" className="w-14 h-14 object-contain drop-shadow-lg" />
-          </div>
-        </div>
+        <img src={trophy} alt="Troféu" className="w-36 h-36 object-contain drop-shadow-2xl mb-2" style={{ mixBlendMode: "multiply", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }} />
 
         <h1 className="text-3xl font-bold text-white text-center drop-shadow-md uppercase tracking-wide">Copa 2026 Troca Figurinhas</h1>
         <div className="flex gap-3 mt-4 text-2xl drop-shadow">
