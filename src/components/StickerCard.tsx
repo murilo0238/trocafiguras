@@ -76,7 +76,7 @@ const StickerCard = ({
           </span>
         ) : (
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-            {id}
+            {number}
           </span>
         )}
       </div>
