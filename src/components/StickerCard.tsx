@@ -64,13 +64,6 @@ const StickerCard = ({
             collected ? "text-[#1a1000] drop-shadow-sm" : "text-white/40"
           }`}
         >
-          {code}
-        </span>
-        <span
-          className={`text-[10px] font-bold mt-0.5 ${
-            collected ? "text-[#1a1000]/70" : "text-white/20"
-          }`}
-        >
           {number}
         </span>
       </div>
