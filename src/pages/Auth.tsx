@@ -66,7 +66,9 @@ const Auth = () => {
           <div className="absolute top-6 right-6 text-7xl opacity-10 rotate-12 select-none">⚽</div>
         </div>
 
-        <img src={trophy} alt="Troféu" className="w-36 h-36 object-contain drop-shadow-2xl mb-2" style={{ mixBlendMode: "multiply", filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.4))" }} />
+        <div className="w-32 h-32 rounded-full bg-white/90 flex items-center justify-center shadow-2xl mb-4 border-4 border-white/30">
+          <img src={trophy} alt="Troféu" className="w-24 h-24 object-contain" />
+        </div>
 
         <h1 className="text-3xl font-bold text-white text-center drop-shadow-md uppercase tracking-wide">Copa 2026 Troca Figurinhas</h1>
         <div className="flex gap-3 mt-4 text-2xl drop-shadow">
