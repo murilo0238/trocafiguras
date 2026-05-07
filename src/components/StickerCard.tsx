@@ -64,8 +64,17 @@ const StickerCard = ({
             collected ? "text-[#1a1000] drop-shadow-sm" : "text-white/40"
           }`}
         >
-          {number}
+          {code === "FWC" ? number : code}
         </span>
+        {code !== "FWC" && (
+          <span
+            className={`text-[10px] font-bold mt-0.5 ${
+              collected ? "text-[#1a1000]/70" : "text-white/20"
+            }`}
+          >
+            {id}
+          </span>
+        )}
       </div>
 
       {/* Nome do jogador ou ID da figurinha */}
@@ -76,7 +85,7 @@ const StickerCard = ({
           </span>
         ) : (
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-            {number}
+            {id}
           </span>
         )}
       </div>
