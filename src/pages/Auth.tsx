@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
+import trophy from "@/assets/trofeu-copa.png";
 
 const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
@@ -63,7 +64,9 @@ const Auth = () => {
           <div className="absolute -bottom-8 right-8 w-40 h-40 bg-gold/10 rounded-full blur-2xl" />
           {/* Bola de futebol decorativa */}
           <div className="absolute top-6 right-6 text-7xl opacity-10 rotate-12 select-none">⚽</div>
-          <div className="absolute bottom-6 left-6 text-5xl opacity-8 -rotate-12 select-none">🏆</div>
+          <div className="absolute bottom-4 left-4 w-20 h-20 opacity-20 -rotate-12 select-none pointer-events-none">
+            <img src={trophy} alt="" className="w-full h-full object-contain drop-shadow-lg" />
+          </div>
         </div>
 
         <div className="relative w-20 h-20 mb-5">
@@ -73,8 +76,7 @@ const Auth = () => {
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold text-white text-center drop-shadow-md">Copa 2026</h1>
-        <p className="text-white/65 text-sm mt-2 text-center">Álbum de Figurinhas Oficial</p>
+        <h1 className="text-3xl font-bold text-white text-center drop-shadow-md uppercase tracking-wide">Copa 2026 Troca Figurinhas</h1>
         <div className="flex gap-3 mt-4 text-2xl drop-shadow">
           <span>🇲🇽</span><span>🇺🇸</span><span>🇨🇦</span>
         </div>
