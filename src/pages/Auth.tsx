@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
-import trophy from "@/assets/trofeu-copa.png";
+import trophy from "@/assets/trofeu-copa-removebg.png";
 
 const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
@@ -64,7 +64,7 @@ const Auth = () => {
           <div className="absolute -bottom-8 right-8 w-40 h-40 bg-gold/10 rounded-full blur-2xl" />
           {/* Bola de futebol decorativa */}
           <div className="absolute top-6 right-6 text-7xl opacity-10 rotate-12 select-none">⚽</div>
-          <div className="absolute bottom-4 left-4 w-20 h-20 opacity-20 -rotate-12 select-none pointer-events-none">
+          <div className="absolute bottom-2 left-2 w-36 h-36 opacity-40 -rotate-6 select-none pointer-events-none">
             <img src={trophy} alt="" className="w-full h-full object-contain drop-shadow-lg" />
           </div>
         </div>
