@@ -71,7 +71,7 @@ const StickerCard = ({
             collected ? "text-[#1a1000]/70" : "text-white/20"
           }`}
         >
-          {id}
+          {number}
         </span>
       </div>
 

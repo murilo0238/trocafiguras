@@ -70,10 +70,9 @@ const Auth = () => {
           <img src={trophy} alt="Troféu" className="w-24 h-24 object-contain" />
         </div>
 
-        <h1 className="text-3xl font-bold text-white text-center drop-shadow-md uppercase tracking-wide">Copa 2026 Troca Figurinhas</h1>
-        <div className="flex gap-3 mt-4 text-2xl drop-shadow">
-          <span>🇲🇽</span><span>🇺🇸</span><span>🇨🇦</span>
-        </div>
+        <h1 className="text-3xl font-bold text-white text-center drop-shadow-md uppercase tracking-wide">Troca Figurinha</h1>
+        <p className="text-white/80 text-sm mt-1 text-center font-semibold">Controle da Coleção</p>
+        <p className="text-white/60 text-xs mt-1 text-center">Álbum da Copa 2026</p>
       </div>
 
       {/* Formulário */}

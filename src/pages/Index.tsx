@@ -99,9 +99,9 @@ const Index = () => {
               <img src={logo} alt="logo" className="w-7 h-7 object-contain" />
             </div>
             <div>
-              <h1 className="text-[15px] font-bold text-white leading-tight">Troca Figurinhas</h1>
-              <p className="text-[11px] text-white/75 leading-none">Coleção de controle</p>
-              <p className="text-[10px] text-white/55 leading-none">🇲🇽 · 🇺🇸 · 🇨🇦 Álbum oficial</p>
+              <h1 className="text-[15px] font-bold text-white leading-tight">Troca Figurinha</h1>
+              <p className="text-[11px] text-white/75 leading-none">Controle da Coleção</p>
+              <p className="text-[10px] text-white/55 leading-none">Álbum da Copa 2026</p>
             </div>
           </div>
           <div className="flex items-center">

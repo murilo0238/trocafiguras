@@ -13,7 +13,22 @@
       "WebSearch",
       "WebFetch(domain:football-sticker-album.fandom.com)",
       "WebFetch(domain:www.checklistinsider.com)",
-      "WebFetch(domain:www.coca-cola.com)"
+      "WebFetch(domain:www.coca-cola.com)",
+      "WebFetch(domain:cartophilic-info-exch.blogspot.com)",
+      "WebFetch(domain:www.diamondcardsonline.com)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "WebFetch(domain:www.pngall.com)",
+      "WebFetch(domain:www.nicepng.com)",
+      "WebFetch(domain:www.citypng.com)",
+      "PowerShell(Invoke-WebRequest -Uri \"https://city-png.b-cdn.net/thumbnail/thumbnail_public/uploads/preview/hd-official-fifa-world-cup-26-trophy-transparent-background-701751712076887htawzli3zs.png\" -OutFile \"C:\\\\Users\\\\Murilo\\\\Desktop\\\\Site wilian\\\\trocafigurinha\\\\src\\\\assets\\\\trophy.png\" -UserAgent \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36\")",
+      "PowerShell(Get-Item *)",
+      "Bash(Start-Sleep -Seconds 4)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Murilo\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Murilo-Desktop-Site-wilian-trocafigurinha\\\\be2e0b42-7e63-43ae-8816-9d815968a7e0\\\\tasks\\\\b6gry3mdi.output\" -Tail 10)",
+      "WebFetch(domain:www.pngwing.com)",
+      "Bash(Copy-Item *)",
+      "Bash(git *)"
     ]
   }
 }

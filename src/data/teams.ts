@@ -8,17 +8,18 @@ export interface TeamSection {
 }
 
 export const SECTIONS: TeamSection[] = [
-  // Introdução (20 figurinhas: FWC01-FWC19 + FWC00)
+  // Introdução (20 figurinhas: FWC00 + FWC01-FWC19)
   { code: "FWC", name: "Copa do Mundo 2026", flag: "🏆", players: [
-    "Emblema Oficial",      // FWC1
-    "Emblema Oficial",      // FWC2
-    "Mascotes Oficiais",    // FWC3
-    "Slogan Oficial",       // FWC4
-    "Bola Oficial",         // FWC5
-    "Canadá - Sede",        // FWC6
-    "México - Sede",        // FWC7
-    "EUA - Sede",           // FWC8
-    "Itália 1934",          // FWC9
+    "Logo Panini",          // FWC00
+    "Emblema Oficial",      // FWC01
+    "Emblema Oficial",      // FWC02
+    "Mascotes Oficiais",    // FWC03
+    "Slogan Oficial",       // FWC04
+    "Bola Oficial",         // FWC05
+    "Canadá - Sede",        // FWC06
+    "México - Sede",        // FWC07
+    "EUA - Sede",           // FWC08
+    "Itália 1934",          // FWC09
     "Uruguai 1950",         // FWC10
     "Alemanha Ocid. 1954",  // FWC11
     "Brasil 1962",          // FWC12
@@ -29,7 +30,6 @@ export const SECTIONS: TeamSection[] = [
     "Itália 2006",          // FWC17
     "Alemanha 2014",        // FWC18
     "Argentina 2022",       // FWC19
-    "Logo Panini",          // FWC00
   ]},
   // Patrocinador (14 figurinhas — jogadores selecionados pela Coca-Cola)
   { code: "COCA", name: "Coca-Cola", flag: "🥤", stickerCount: 14, players: [
@@ -1136,9 +1136,9 @@ export const TOTAL_STICKERS = SECTIONS.reduce(
   (acc, s) => acc + (s.stickerCount ?? STICKERS_PER_SECTION), 0
 ); // 1004
 
-// FWC20 é exibida como "00" (figurinha especial da capa)
 export function getStickerNumber(code: string, i: number): string {
-  if (code === "FWC" && i === 20) return "00";
+  if (code === "FWC" && i === 1) return "00";
+  if (code === "FWC" && i > 1) return String(i - 1).padStart(2, "0");
   return String(i);
 }
 
