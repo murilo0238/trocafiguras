@@ -31,23 +31,6 @@ export const SECTIONS: TeamSection[] = [
     "Alemanha 2014",        // FWC18
     "Argentina 2022",       // FWC19
   ]},
-  // Patrocinador (14 figurinhas — jogadores selecionados pela Coca-Cola)
-  { code: "COCA", name: "Coca-Cola", flag: "🥤", stickerCount: 14, players: [
-    "Lamine Yamal",      // COCA1
-    "Gabriel Magalhães", // COCA2
-    "Joshua Kimmich",    // COCA3
-    "Harry Kane",        // COCA4
-    "Santiago Giménez",  // COCA5
-    "Joško Gvardiol",    // COCA6
-    "Federico Valverde", // COCA7
-    "Jefferson Lerma",   // COCA8
-    "Enner Valencia",    // COCA9
-    "Emiliano Martínez", // COCA10
-    "Virgil van Dijk",   // COCA11
-    "Alphonso Davies",   // COCA12
-    "Raúl Jiménez",      // COCA13
-    "Lautaro Martínez",  // COCA14
-  ]},
 
   // Grupo A
   { code: "MEX", name: "México", group: "A", flag: "🇲🇽", players: [
