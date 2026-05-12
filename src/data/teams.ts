@@ -18,17 +18,17 @@ export const SECTIONS: TeamSection[] = [
     "Canadá - Sede",        // FWC06
     "México - Sede",        // FWC07
     "EUA - Sede",           // FWC08
-    "Itália 1934",          // FWC09
-    "Uruguai 1950",         // FWC10
-    "Alemanha Ocid. 1954",  // FWC11
-    "Brasil 1962",          // FWC12
-    "Alemanha Ocid. 1974",  // FWC13
-    "Argentina 1986",       // FWC14
-    "Brasil 1994",          // FWC15
-    "Brasil 2002",          // FWC16
-    "Itália 2006",          // FWC17
-    "Alemanha 2014",        // FWC18
-    "Argentina 2022",       // FWC19
+    "Meazza - Itália 1934",          // FWC09
+    "O. Varela - Uruguai 1950",      // FWC10
+    "F. Walter - Alemanha 1954",     // FWC11
+    "Garrincha - Brasil 1962",       // FWC12
+    "Beckenbauer - Alemanha 1974",   // FWC13
+    "Maradona - Argentina 1986",     // FWC14
+    "Romário - Brasil 1994",         // FWC15
+    "Ronaldo - Brasil 2002",         // FWC16
+    "Cannavaro - Itália 2006",       // FWC17
+    "Götze - Alemanha 2014",         // FWC18
+    "Messi - Argentina 2022",        // FWC19
     "Logo Panini",          // FWC00
   ]},
 
