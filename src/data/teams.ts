@@ -1166,6 +1166,14 @@ export const getPlayerName = (id: string): string | undefined => {
   const section = getSectionForSticker(id);
   if (!section?.players) return undefined;
   const numStr = id.replace(/^[A-Z]+/, "");
+
+  if (section.code === "FWC") {
+    // FWC numbering starts at 00 (index 0), so num maps directly to players index
+    const num = numStr === "00" ? 0 : parseInt(numStr, 10);
+    if (isNaN(num) || num < 0 || num >= section.players.length) return undefined;
+    return section.players[num] ?? undefined;
+  }
+
   if (numStr === "00") return section.players[section.players.length - 1] ?? undefined;
   const num = parseInt(numStr, 10);
   if (isNaN(num) || num < 1) return undefined;
