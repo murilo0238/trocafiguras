@@ -8,9 +8,8 @@ export interface TeamSection {
 }
 
 export const SECTIONS: TeamSection[] = [
-  // Introdução (20 figurinhas: FWC00 + FWC01-FWC19)
+  // Introdução (20 figurinhas: FWC01-FWC19 + FWC00)
   { code: "FWC", name: "Copa do Mundo 2026", flag: "🏆", players: [
-    "Logo Panini",          // FWC00
     "Emblema Oficial",      // FWC01
     "Emblema Oficial",      // FWC02
     "Mascotes Oficiais",    // FWC03
@@ -30,6 +29,7 @@ export const SECTIONS: TeamSection[] = [
     "Itália 2006",          // FWC17
     "Alemanha 2014",        // FWC18
     "Argentina 2022",       // FWC19
+    "Logo Panini",          // FWC00
   ]},
 
   // Grupo A
@@ -1166,14 +1166,6 @@ export const getPlayerName = (id: string): string | undefined => {
   const section = getSectionForSticker(id);
   if (!section?.players) return undefined;
   const numStr = id.replace(/^[A-Z]+/, "");
-
-  if (section.code === "FWC") {
-    // FWC numbering starts at 00 (index 0), so num maps directly to players index
-    const num = numStr === "00" ? 0 : parseInt(numStr, 10);
-    if (isNaN(num) || num < 0 || num >= section.players.length) return undefined;
-    return section.players[num] ?? undefined;
-  }
-
   if (numStr === "00") return section.players[section.players.length - 1] ?? undefined;
   const num = parseInt(numStr, 10);
   if (isNaN(num) || num < 1) return undefined;
