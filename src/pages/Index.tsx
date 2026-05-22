@@ -28,6 +28,19 @@ const Index = () => {
   const [filter, setFilter] = useState<FilterType>("all");
   const [tab, setTab] = useState<TabType>("album");
   const [search, setSearch] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .in("role", ["admin", "super_admin"]);
+      setIsAdmin((data || []).length > 0);
+    })();
+  }, [user]);
 
   // Detect section completion for celebration
   const prevCompleted = useRef<Set<string>>(new Set());
