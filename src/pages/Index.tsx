@@ -119,6 +119,11 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center">
+            {isAdmin && (
+              <Link to="/admin" className="p-2 rounded-full hover:bg-white/15 transition-colors" title="Painel Admin">
+                <Shield className="w-4 h-4 text-gold-light" />
+              </Link>
+            )}
             <Link to="/profile" className="p-2 rounded-full hover:bg-white/15 transition-colors">
               <User className="w-4 h-4 text-white/75" />
             </Link>
