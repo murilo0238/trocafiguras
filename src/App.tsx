@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import TradeLinkPage from "./pages/TradeLinkPage";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import InstallBanner from "./components/InstallBanner";
 
