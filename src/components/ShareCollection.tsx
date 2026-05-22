@@ -23,6 +23,12 @@ interface ShareCollectionProps {
 
 type ShareType = "missing" | "duplicates";
 
+const joinList = (items: string[]): string => {
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  return `${items.slice(0, -1).join(", ")} e ${items[items.length - 1]}`;
+};
+
 const generateText = (collection: StickerCollection, type: ShareType): string => {
   const lines: string[] = [];
   const title = type === "missing" ? "📋 FIGURINHAS FALTANTES" : "🔄 FIGURINHAS REPETIDAS";
@@ -37,19 +43,22 @@ const generateText = (collection: StickerCollection, type: ShareType): string =>
     for (let i = 1; i <= count; i++) {
       const id = `${section.code}${getStickerNumber(section.code, i)}`;
       const data = collection[id];
+      const numStr = id.replace(/^[A-Z]+/, "").padStart(2, "0");
       if (type === "missing" && !data?.collected) {
-        items.push(id);
+        items.push(numStr);
       } else if (type === "duplicates" && (data?.duplicates || 0) > 0) {
-        items.push(`${id} (${data!.duplicates}x)`);
+        items.push(`${numStr} (${data!.duplicates}x)`);
       }
     }
     if (items.length > 0) {
-      lines.push(`${section.flag} ${section.name}: ${items.join(", ")}`);
+      lines.push(`${section.flag} ${section.name} (${section.code})`);
+      lines.push(joinList(items));
+      lines.push("");
       total += items.length;
     }
   }
 
-  lines.push(`\nTotal: ${total}`);
+  lines.push(`Total: ${total}`);
   return lines.join("\n");
 };
 
