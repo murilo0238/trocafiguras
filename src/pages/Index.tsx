@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users } from "lucide-react";
+import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users, Shield } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { supabase } from "@/integrations/supabase/client";
 import StickerCard from "@/components/StickerCard";
 import ShareCollection from "@/components/ShareCollection";
 import StatCard from "@/components/StatCard";
@@ -28,6 +29,19 @@ const Index = () => {
   const [filter, setFilter] = useState<FilterType>("all");
   const [tab, setTab] = useState<TabType>("album");
   const [search, setSearch] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .in("role", ["admin", "super_admin"]);
+      setIsAdmin((data || []).length > 0);
+    })();
+  }, [user]);
 
   // Detect section completion for celebration
   const prevCompleted = useRef<Set<string>>(new Set());
@@ -105,6 +119,11 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center">
+            {isAdmin && (
+              <Link to="/admin" className="p-2 rounded-full hover:bg-white/15 transition-colors" title="Painel Admin">
+                <Shield className="w-4 h-4 text-gold-light" />
+              </Link>
+            )}
             <Link to="/profile" className="p-2 rounded-full hover:bg-white/15 transition-colors">
               <User className="w-4 h-4 text-white/75" />
             </Link>
