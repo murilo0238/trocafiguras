@@ -20,6 +20,8 @@ interface ProfileData {
   location_mode: LocationMode;
   default_latitude: number | null;
   default_longitude: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 const Profile = () => {
