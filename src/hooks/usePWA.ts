@@ -5,15 +5,32 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const isIOSDevice = () =>
+  /iphone|ipad|ipod/i.test(navigator.userAgent) &&
+  !(navigator as any).standalone;
+
 export const usePWA = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>("default");
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     // Verifica se já está instalado como PWA
-    if (window.matchMedia("(display-mode: standalone)").matches) {
+    const inStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as any).standalone === true;
+
+    if (inStandalone) {
       setIsInstalled(true);
+      return;
+    }
+
+    setIsIOS(isIOSDevice());
+
+    // Prompt pode ter sido capturado antes do React montar (main.tsx)
+    if ((window as any).__pwaInstallPrompt) {
+      setInstallPrompt((window as any).__pwaInstallPrompt);
     }
 
     const handler = (e: Event) => {
@@ -67,5 +84,5 @@ export const usePWA = () => {
     return permission;
   };
 
-  return { installPrompt, isInstalled, install, notifPermission, requestNotifications };
+  return { installPrompt, isInstalled, isIOS, install, notifPermission, requestNotifications };
 };

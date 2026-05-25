@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
-import { Download, Bell, X, Smartphone } from "lucide-react";
+import { Download, Bell, X, Smartphone, Share } from "lucide-react";
 import { usePWA } from "@/hooks/usePWA";
 
 const DISMISSED_KEY = "pwa-banner-dismissed";
 
 const InstallBanner = () => {
-  const { installPrompt, isInstalled, install, notifPermission, requestNotifications } = usePWA();
-  const [step, setStep] = useState<"install" | "notify" | "done" | "hidden">("hidden");
+  const { installPrompt, isInstalled, isIOS, install, notifPermission, requestNotifications } = usePWA();
+  const [step, setStep] = useState<"install" | "ios" | "notify" | "done" | "hidden">("hidden");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isInstalled) {
-      // App já instalado — só pede notificação se ainda não foi concedida
       if (notifPermission === "default") {
         const dismissed = sessionStorage.getItem(DISMISSED_KEY);
         if (!dismissed) setStep("notify");
@@ -19,15 +18,19 @@ const InstallBanner = () => {
       return;
     }
 
+    const dismissed = sessionStorage.getItem(DISMISSED_KEY);
+    if (dismissed) return;
+
     if (installPrompt) {
-      const dismissed = sessionStorage.getItem(DISMISSED_KEY);
-      if (!dismissed) {
-        // Pequeno delay para não aparecer imediatamente ao abrir
-        const t = setTimeout(() => setStep("install"), 1500);
-        return () => clearTimeout(t);
-      }
+      const t = setTimeout(() => setStep("install"), 1500);
+      return () => clearTimeout(t);
     }
-  }, [installPrompt, isInstalled, notifPermission]);
+
+    if (isIOS) {
+      const t = setTimeout(() => setStep("ios"), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [installPrompt, isInstalled, isIOS, notifPermission]);
 
   const dismiss = () => {
     sessionStorage.setItem(DISMISSED_KEY, "1");
@@ -103,6 +106,40 @@ const InstallBanner = () => {
                 {loading ? "Instalando..." : "Instalar"}
               </button>
             </div>
+          </>
+        )}
+
+        {step === "ios" && (
+          <>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Smartphone className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-bold text-sm text-foreground">Adicionar à tela inicial</p>
+                <p className="text-xs text-muted-foreground">Acesse como um app nativo</p>
+              </div>
+            </div>
+            <ol className="text-xs text-muted-foreground space-y-1.5 mb-4 pl-1">
+              <li className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold text-[10px] flex items-center justify-center flex-shrink-0">1</span>
+                Toque no botão <Share className="w-3.5 h-3.5 inline mx-0.5 text-primary" /> <strong>Compartilhar</strong> no Safari
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold text-[10px] flex items-center justify-center flex-shrink-0">2</span>
+                Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold text-[10px] flex items-center justify-center flex-shrink-0">3</span>
+                Toque em <strong>Adicionar</strong> no canto superior direito
+              </li>
+            </ol>
+            <button
+              onClick={dismiss}
+              className="w-full py-2.5 rounded-xl border border-border text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors"
+            >
+              Entendi
+            </button>
           </>
         )}
 
