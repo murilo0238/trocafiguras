@@ -1,204 +1,160 @@
-import { useState } from "react";
-import { MapPin, RefreshCw, Users, Send, UserPlus, UserCheck, Clock } from "lucide-react";
-import { useTrading } from "@/hooks/useTrading";
-import { useFriends } from "@/contexts/FriendsContext";
+import { useState, useEffect, useCallback } from "react";
+import { Users, RefreshCw, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import QRCodePanel from "@/components/QRCodePanel";
 import TradeRequestsPanel from "@/components/TradeRequestsPanel";
+import UserAvatar from "@/components/UserAvatar";
 
 interface TradingPanelProps {
   onPendingCountChange?: (count: number) => void;
 }
 
+interface FriendMatch {
+  userId: string;
+  displayName: string;
+  avatarUrl?: string | null;
+  iCanGive: number;
+  theyCanGive: number;
+  tradeScore: number;
+}
+
 const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
   const { user } = useAuth();
-  const { matches, loading, radius, setRadius, findMatches, myLocation } = useTrading();
-  const { sendRequest, getFriendshipStatus } = useFriends();
   const [scannedUserId, setScannedUserId] = useState<string | null>(null);
-  const [proposing, setProposing] = useState<string | null>(null);
+  const [friends, setFriends] = useState<FriendMatch[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleProposeTrade = async (match: typeof matches[0]) => {
+  const loadFriends = useCallback(async () => {
     if (!user) return;
-    setProposing(match.userId);
-    const count = Math.min(match.iCanGive.length, match.theyCanGive.length);
-    const { error } = await supabase.from("trade_requests").insert({
-      from_user_id: user.id,
-      to_user_id: match.userId,
-      stickers_offered: match.iCanGive.slice(0, count),
-      stickers_requested: match.theyCanGive.slice(0, count),
-      status: "pending",
-    });
-    setProposing(null);
-    if (error) {
-      toast.error("Erro ao enviar pedido de troca.");
-      return;
+    setLoading(true);
+    try {
+      const { data: profiles, error: pErr } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .neq("user_id", user.id);
+      if (pErr) throw pErr;
+
+      const { data: myStickers } = await supabase
+        .from("user_stickers")
+        .select("sticker_id, collected, duplicates")
+        .eq("user_id", user.id);
+
+      const myCollected = new Set<string>();
+      const myDuplicates = new Set<string>();
+      myStickers?.forEach((s) => {
+        if (s.collected) myCollected.add(s.sticker_id);
+        if ((s.duplicates ?? 0) > 0) myDuplicates.add(s.sticker_id);
+      });
+
+      const otherIds = (profiles || []).map((p) => p.user_id);
+      let othersMap: Record<string, { collected: Set<string>; duplicates: Set<string> }> = {};
+      if (otherIds.length > 0) {
+        const { data: others } = await supabase
+          .from("user_stickers")
+          .select("user_id, sticker_id, collected, duplicates")
+          .in("user_id", otherIds);
+        others?.forEach((s) => {
+          if (!othersMap[s.user_id]) {
+            othersMap[s.user_id] = { collected: new Set(), duplicates: new Set() };
+          }
+          if (s.collected) othersMap[s.user_id].collected.add(s.sticker_id);
+          if ((s.duplicates ?? 0) > 0) othersMap[s.user_id].duplicates.add(s.sticker_id);
+        });
+      }
+
+      const matches: FriendMatch[] = (profiles || []).map((p) => {
+        const their = othersMap[p.user_id] || { collected: new Set<string>(), duplicates: new Set<string>() };
+        const iCanGive = [...myDuplicates].filter((id) => !their.collected.has(id)).length;
+        const theyCanGive = [...their.duplicates].filter((id) => !myCollected.has(id)).length;
+        return {
+          userId: p.user_id,
+          displayName: p.display_name || "Amigo",
+          avatarUrl: p.avatar_url,
+          iCanGive,
+          theyCanGive,
+          tradeScore: Math.min(iCanGive, theyCanGive),
+        };
+      });
+
+      matches.sort((a, b) => b.tradeScore - a.tradeScore || b.theyCanGive - a.theyCanGive);
+      setFriends(matches);
+    } catch (e: any) {
+      toast.error("Erro ao carregar amigos.");
+    } finally {
+      setLoading(false);
     }
-    toast.success("Pedido de troca enviado!");
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadFriends();
+  }, [loadFriends]);
 
   return (
     <div className="space-y-4">
-      {/* QR Code Section */}
       <QRCodePanel onUserScanned={(userId) => setScannedUserId(userId)} />
 
-      {/* Trade Requests */}
       <TradeRequestsPanel
         scannedUserId={scannedUserId}
         onClearScanned={() => setScannedUserId(null)}
         onPendingCountChange={onPendingCountChange}
       />
 
-      {/* Radius control */}
       <div className="bg-card rounded-xl p-4 shadow-md space-y-3">
-        <div className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-foreground">Encontrar Trocas</h3>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm text-muted-foreground">
-            Raio de busca: <span className="font-bold text-foreground">{radius} km</span>
-          </label>
-          <input
-            type="range"
-            min={1}
-            max={100}
-            value={radius}
-            onChange={(e) => setRadius(Number(e.target.value))}
-            className="w-full accent-primary"
-          />
-          <div className="flex justify-between text-[10px] text-muted-foreground">
-            <span>1 km</span>
-            <span>50 km</span>
-            <span>100 km</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" />
+            <h3 className="font-bold text-foreground">Amigos do álbum</h3>
           </div>
+          <button
+            onClick={loadFriends}
+            disabled={loading}
+            className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
+            title="Atualizar"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
         </div>
 
-        <button
-          onClick={findMatches}
-          disabled={loading}
-          className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          {loading ? (
-            <RefreshCw className="w-4 h-4 animate-spin" />
-          ) : (
-            <Users className="w-4 h-4" />
-          )}
-          {loading ? "Buscando..." : "Buscar Trocas"}
-        </button>
-
-        {myLocation && (
-          <p className="text-[10px] text-muted-foreground text-center">
-            📍 Localização ativa
+        {loading && friends.length === 0 ? (
+          <p className="text-center text-sm text-muted-foreground py-4">Carregando...</p>
+        ) : friends.length === 0 ? (
+          <p className="text-center text-sm text-muted-foreground py-4">
+            Ainda não há outros amigos cadastrados.
           </p>
+        ) : (
+          <div className="space-y-2">
+            {friends.map((f) => (
+              <button
+                key={f.userId}
+                onClick={() => setScannedUserId(f.userId)}
+                className="w-full text-left bg-muted/40 hover:bg-muted rounded-lg p-3 flex items-center gap-3 transition-colors"
+              >
+                <UserAvatar
+                  src={f.avatarUrl}
+                  name={f.displayName}
+                  size="md"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-foreground truncate">{f.displayName}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Você dá <span className="font-bold text-foreground">{f.iCanGive}</span>
+                    {" · "}recebe <span className="font-bold text-foreground">{f.theyCanGive}</span>
+                  </p>
+                </div>
+                {f.tradeScore > 0 ? (
+                  <span className="text-[10px] font-bold bg-primary/15 text-primary px-2 py-1 rounded-full whitespace-nowrap">
+                    ⚡ {f.tradeScore} troca{f.tradeScore > 1 ? "s" : ""}
+                  </span>
+                ) : (
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+            ))}
+          </div>
         )}
       </div>
-
-      {/* Trade matches */}
-      {matches.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="font-bold text-foreground text-sm px-1">
-            🤝 {matches.length} colecionador{matches.length > 1 ? "es" : ""} encontrado{matches.length > 1 ? "s" : ""}
-          </h3>
-
-          {matches.map((match, idx) => (
-            <div
-              key={match.userId}
-              className="bg-card rounded-xl p-4 shadow-md space-y-2"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-xs bg-primary/20 text-primary font-bold px-2 py-0.5 rounded-full">
-                    #{idx + 1}
-                  </span>
-                  <span className="font-bold text-foreground ml-2">{match.displayName}</span>
-                </div>
-                <span className="text-xs text-muted-foreground">📍 {match.distance} km</span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-accent/30 rounded-lg p-2">
-                  <p className="font-bold text-accent-foreground">Você dá</p>
-                  <p className="text-foreground">{match.iCanGive.length} figurinha{match.iCanGive.length > 1 ? "s" : ""}</p>
-                  <div className="flex flex-wrap gap-0.5 mt-1 max-h-16 overflow-y-auto">
-                    {match.iCanGive.slice(0, 10).map((id) => (
-                      <span key={id} className="bg-secondary text-secondary-foreground text-[8px] px-1 rounded">
-                        {id}
-                      </span>
-                    ))}
-                    {match.iCanGive.length > 10 && (
-                      <span className="text-muted-foreground text-[8px]">+{match.iCanGive.length - 10}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-primary/10 rounded-lg p-2">
-                  <p className="font-bold text-primary">Você recebe</p>
-                  <p className="text-foreground">{match.theyCanGive.length} figurinha{match.theyCanGive.length > 1 ? "s" : ""}</p>
-                  <div className="flex flex-wrap gap-0.5 mt-1 max-h-16 overflow-y-auto">
-                    {match.theyCanGive.slice(0, 10).map((id) => (
-                      <span key={id} className="bg-primary/20 text-primary text-[8px] px-1 rounded">
-                        {id}
-                      </span>
-                    ))}
-                    {match.theyCanGive.length > 10 && (
-                      <span className="text-muted-foreground text-[8px]">+{match.theyCanGive.length - 10}</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <p className="text-[10px] font-bold text-primary">
-                  ⚡ {match.tradeScore} troca{match.tradeScore > 1 ? "s" : ""} possíve{match.tradeScore > 1 ? "is" : "l"}
-                </p>
-                <div className="flex gap-1.5">
-                  {(() => {
-                    const fs = getFriendshipStatus(match.userId);
-                    if (fs?.status === "accepted") {
-                      return (
-                        <span className="py-1.5 px-2.5 rounded-lg bg-green-500/15 text-green-600 font-bold text-[10px] flex items-center gap-1">
-                          <UserCheck className="w-3 h-3" /> Amigo
-                        </span>
-                      );
-                    }
-                    if (fs?.status === "pending") {
-                      return (
-                        <span className="py-1.5 px-2.5 rounded-lg bg-muted text-muted-foreground font-bold text-[10px] flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> Pendente
-                        </span>
-                      );
-                    }
-                    return (
-                      <button
-                        onClick={() => sendRequest(match.userId, match.displayName)}
-                        className="py-1.5 px-2.5 rounded-lg bg-muted hover:bg-primary/15 text-muted-foreground hover:text-primary font-bold text-[10px] flex items-center gap-1 transition-colors"
-                      >
-                        <UserPlus className="w-3 h-3" /> Adicionar
-                      </button>
-                    );
-                  })()}
-                  <button
-                    onClick={() => handleProposeTrade(match)}
-                    disabled={proposing === match.userId}
-                    className="py-1.5 px-3 rounded-lg bg-primary text-primary-foreground font-bold text-[10px] flex items-center gap-1 hover:opacity-90 disabled:opacity-50"
-                  >
-                    <Send className="w-3 h-3" /> {proposing === match.userId ? "Enviando..." : "Propor Troca"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {!loading && matches.length === 0 && (
-        <p className="text-center text-sm text-muted-foreground py-4">
-          Toque em "Buscar Trocas" para encontrar colecionadores por perto
-        </p>
-      )}
     </div>
   );
 };
