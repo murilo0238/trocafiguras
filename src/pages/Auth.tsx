@@ -18,15 +18,87 @@ const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, ".")
     .replace(/^\.+|\.+$/g, "");
 
+// Returns edit distance between two strings
+const levenshtein = (a: string, b: string): number => {
+  const m = a.length, n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+  );
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[m][n];
+};
+
+const findSimilarName = async (inputSlug: string): Promise<string | null> => {
+  const { data: profiles } = await supabase.from("profiles").select("display_name");
+  if (!profiles?.length) return null;
+  let best: string | null = null;
+  let bestDist = Infinity;
+  for (const p of profiles) {
+    if (!p.display_name) continue;
+    const dist = levenshtein(inputSlug, slugify(p.display_name));
+    if (dist > 0 && dist <= 2 && dist < bestDist) {
+      bestDist = dist;
+      best = p.display_name;
+    }
+  }
+  return best;
+};
+
 const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [suggestedName, setSuggestedName] = useState<string | null>(null);
+  const [pendingNewName, setPendingNewName] = useState<string | null>(null);
+
+  const doSignInOrCreate = async (cleanedName: string) => {
+    const slug = slugify(cleanedName);
+    const email = `${slug}@${FRIENDS_DOMAIN}`;
+    const password = `${FRIENDS_PWD_SALT}.${slug}`;
+
+    const signIn = await supabase.auth.signInWithPassword({ email, password });
+    if (!signIn.error) return true;
+    return false;
+  };
+
+  const doCreateAccount = async (cleanedName: string) => {
+    const slug = slugify(cleanedName);
+    const email = `${slug}@${FRIENDS_DOMAIN}`;
+    const password = `${FRIENDS_PWD_SALT}.${slug}`;
+    const parts = cleanedName.split(" ");
+
+    const signUp = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { display_name: cleanedName },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    if (signUp.error) {
+      toast.error("Não foi possível entrar. Tente outro nome.");
+      return;
+    }
+    const retry = await supabase.auth.signInWithPassword({ email, password });
+    if (retry.error) {
+      toast.error("Conta criada, mas não conseguimos entrar. Tente novamente.");
+    } else {
+      toast.success(`Bem-vindo, ${parts[0]}!`);
+    }
+  };
 
   const handleFriendSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSuggestedName(null);
+    setPendingNewName(null);
     const cleanedName = fullName.trim().replace(/\s+/g, " ");
     const parts = cleanedName.split(" ");
     if (parts.length < 2 || parts.some((p) => p.length < 2)) {
@@ -38,35 +110,48 @@ const Auth = () => {
       toast.error("Nome inválido.");
       return;
     }
-    const email = `${slug}@${FRIENDS_DOMAIN}`;
-    const password = `${FRIENDS_PWD_SALT}.${slug}`;
 
     setLoading(true);
     try {
-      // Try sign in first (existing friend)
-      const signIn = await supabase.auth.signInWithPassword({ email, password });
-      if (!signIn.error) return;
+      const ok = await doSignInOrCreate(cleanedName);
+      if (ok) return;
 
-      // If invalid credentials -> try sign up (new friend)
-      const signUp = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { display_name: cleanedName },
-          emailRedirectTo: window.location.origin,
-        },
-      });
-      if (signUp.error) {
-        toast.error("Não foi possível entrar. Tente outro nome.");
+      // Sign in failed — check for similar existing names before creating account
+      const similar = await findSimilarName(slug);
+      if (similar) {
+        setSuggestedName(similar);
+        setPendingNewName(cleanedName);
         return;
       }
-      // After signUp, auto sign-in (since email confirm is disabled)
-      const retry = await supabase.auth.signInWithPassword({ email, password });
-      if (retry.error) {
-        toast.error("Conta criada, mas não conseguimos entrar. Tente novamente.");
-      } else {
-        toast.success(`Bem-vindo, ${parts[0]}!`);
-      }
+
+      // No similar name found — create new account
+      await doCreateAccount(cleanedName);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmSuggestion = async () => {
+    if (!suggestedName) return;
+    setLoading(true);
+    setSuggestedName(null);
+    setPendingNewName(null);
+    try {
+      const ok = await doSignInOrCreate(suggestedName);
+      if (!ok) toast.error("Não foi possível entrar. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRejectSuggestion = async () => {
+    const name = pendingNewName;
+    setSuggestedName(null);
+    setPendingNewName(null);
+    if (!name) return;
+    setLoading(true);
+    try {
+      await doCreateAccount(name);
     } finally {
       setLoading(false);
     }
@@ -138,7 +223,7 @@ const Auth = () => {
                     type="text"
                     placeholder="Ex: João Silva"
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(e) => { setFullName(e.target.value); setSuggestedName(null); setPendingNewName(null); }}
                     className={inputCls}
                     autoCapitalize="words"
                     autoComplete="name"
@@ -152,6 +237,30 @@ const Auth = () => {
                     {loading ? "Aguarde..." : "Entrar no álbum"}
                   </button>
                 </form>
+
+                {suggestedName && (
+                  <div className="mt-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                    <p className="text-sm text-amber-700 dark:text-amber-400 font-semibold mb-1">Você quis dizer?</p>
+                    <p className="text-base font-bold text-foreground mb-3">"{suggestedName}"</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleConfirmSuggestion}
+                        disabled={loading}
+                        className="flex-1 py-2 rounded-lg bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50"
+                      >
+                        Sim, sou eu
+                      </button>
+                      <button
+                        onClick={handleRejectSuggestion}
+                        disabled={loading}
+                        className="flex-1 py-2 rounded-lg bg-muted text-muted-foreground font-semibold text-sm hover:bg-muted/80 active:scale-[0.98] transition-all disabled:opacity-50"
+                      >
+                        Não, criar conta
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <p className="text-[10px] text-muted-foreground text-center mt-4 leading-relaxed">
                   Sua coleção fica salva. Use sempre o mesmo nome para acessar de novo.
                 </p>
