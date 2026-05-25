@@ -132,10 +132,11 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
                 className="w-full text-left bg-muted/40 hover:bg-muted rounded-lg p-3 flex items-center gap-3 transition-colors"
               >
                 <UserAvatar
-                  src={f.avatarUrl}
-                  name={f.displayName}
-                  size="md"
+                  avatarUrl={f.avatarUrl}
+                  displayName={f.displayName}
+                  className="w-10 h-10"
                 />
+
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-foreground truncate">{f.displayName}</p>
                   <p className="text-[11px] text-muted-foreground">
