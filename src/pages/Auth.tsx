@@ -2,6 +2,8 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import trophy from "@/assets/trofeu-copa-removebg.png";
+import { usePWA } from "@/hooks/usePWA";
+import { Download, Share } from "lucide-react";
 
 // Closed friends-only app. We synthesize an email+password from the typed
 // full name so the user just types "Nome Sobrenome" to enter.
@@ -51,6 +53,8 @@ const findSimilarName = async (inputSlug: string): Promise<string | null> => {
 };
 
 const Auth = () => {
+  const { installPrompt, isInstalled, isIOS, install } = usePWA();
+  const [showIOSHint, setShowIOSHint] = useState(false);
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
@@ -311,6 +315,42 @@ const Auth = () => {
               </>
             )}
           </div>
+
+          {/* Botão instalar app */}
+          {!isInstalled && (installPrompt || isIOS) && (
+            <div className="mt-4">
+              <button
+                onClick={async () => {
+                  if (isIOS) {
+                    setShowIOSHint((v) => !v);
+                  } else {
+                    await install();
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-primary/40 text-primary text-sm font-semibold hover:bg-primary/5 active:scale-[0.98] transition-all"
+              >
+                {isIOS ? <Share className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                Adicionar à tela inicial
+              </button>
+
+              {isIOS && showIOSHint && (
+                <div className="mt-2 p-4 rounded-xl bg-card border border-border text-xs text-muted-foreground space-y-1.5">
+                  <p className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold text-[10px] flex items-center justify-center flex-shrink-0">1</span>
+                    Toque em <Share className="w-3.5 h-3.5 inline mx-0.5 text-primary" /> <strong className="text-foreground">Compartilhar</strong> no Safari
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold text-[10px] flex items-center justify-center flex-shrink-0">2</span>
+                    Toque em <strong className="text-foreground">"Adicionar à Tela de Início"</strong>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-primary/10 text-primary font-bold text-[10px] flex items-center justify-center flex-shrink-0">3</span>
+                    Toque em <strong className="text-foreground">Adicionar</strong> no canto superior direito
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
