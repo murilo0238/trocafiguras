@@ -11,6 +11,7 @@ import FilterButtons from "@/components/FilterButtons";
 import TradingPanel from "@/components/TradingPanel";
 import StickerRanking from "@/components/StickerRanking";
 import FriendsPanel from "@/components/FriendsPanel";
+import GroupsPanel from "@/components/GroupsPanel";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
 import { useFriends } from "@/contexts/FriendsContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,7 +19,7 @@ import { SECTIONS, STICKERS_PER_SECTION, getStickerNumber, TeamSection } from "@
 import Auth from "./Auth";
 
 type FilterType = "all" | "missing" | "duplicates";
-type TabType = "album" | "trades" | "ranking" | "friends";
+type TabType = "album" | "trades" | "groups" | "friends" | "ranking";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -247,6 +248,8 @@ const Index = () => {
           </div>
         ) : tab === "trades" ? (
           <TradingPanel onPendingCountChange={setPendingCount} />
+        ) : tab === "groups" ? (
+          <GroupsPanel />
         ) : tab === "friends" ? (
           <FriendsPanel />
         ) : (
@@ -273,6 +276,7 @@ const Index = () => {
               ),
               label: "Trocas",
             },
+            { key: "groups", icon: <Shield className="w-5 h-5" />, label: "Grupos" },
             {
               key: "friends",
               icon: (

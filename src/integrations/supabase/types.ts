@@ -143,6 +143,111 @@ export type Database = {
         }
         Relationships: []
       }
+      group_members: {
+        Row: {
+          group_id: string
+          user_id: string
+          joined_at: string
+        }
+        Insert: {
+          group_id: string
+          user_id: string
+          joined_at?: string
+        }
+        Update: {
+          group_id?: string
+          user_id?: string
+          joined_at?: string
+        }
+        Relationships: []
+      }
+      group_trade_confirmations: {
+        Row: {
+          trade_id: string
+          user_id: string
+          confirmed_at: string
+        }
+        Insert: {
+          trade_id: string
+          user_id: string
+          confirmed_at?: string
+        }
+        Update: {
+          trade_id?: string
+          user_id?: string
+          confirmed_at?: string
+        }
+        Relationships: []
+      }
+      group_trade_legs: {
+        Row: {
+          id: string
+          trade_id: string
+          from_user_id: string
+          to_user_id: string
+          sticker_id: string
+        }
+        Insert: {
+          id?: string
+          trade_id: string
+          from_user_id: string
+          to_user_id: string
+          sticker_id: string
+        }
+        Update: {
+          id?: string
+          trade_id?: string
+          from_user_id?: string
+          to_user_id?: string
+          sticker_id?: string
+        }
+        Relationships: []
+      }
+      group_trades: {
+        Row: {
+          id: string
+          group_id: string
+          proposed_by: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          group_id: string
+          proposed_by: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          group_id?: string
+          proposed_by?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      groups: {
+        Row: {
+          id: string
+          name: string
+          created_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_by?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           created_at: string
@@ -361,6 +466,11 @@ export type Database = {
     }
     Functions: {
       execute_trade: { Args: { trade_id: string }; Returns: undefined }
+      execute_group_trade: { Args: { p_trade_id: string }; Returns: undefined }
+      is_group_member: {
+        Args: { p_group_id: string; p_user_id: string }
+        Returns: boolean
+      }
       has_admin_permission: {
         Args: {
           _permission: Database["public"]["Enums"]["admin_permission"]
