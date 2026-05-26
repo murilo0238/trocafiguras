@@ -70,10 +70,15 @@ const PinGate = ({ userId, mode, storedHash, onSuccess }: Props) => {
   const handleVerify = async () => {
     const pin = getPin(digits);
     if (!pin) { setError("Digite seu PIN (4–6 dígitos)."); return; }
-    const h = await hashPin(pin);
-    if (h !== storedHash) { setError("PIN incorreto. Tente novamente."); setDigits(Array(6).fill("")); inputRefs.current[0]?.focus(); return; }
-    markPinVerified();
-    onSuccess();
+    try {
+      const h = await hashPin(pin);
+      if (h !== storedHash) { setError("PIN incorreto. Tente novamente."); setDigits(Array(6).fill("")); inputRefs.current[0]?.focus(); return; }
+      markPinVerified();
+      onSuccess();
+    } catch (err) {
+      console.error("Erro ao verificar PIN:", err);
+      setError("Erro ao verificar PIN. Tente novamente.");
+    }
   };
 
   const handleSetupNext = () => {
@@ -90,16 +95,22 @@ const PinGate = ({ userId, mode, storedHash, onSuccess }: Props) => {
     if (!pin || !pinConf) { setError("Mínimo 4 dígitos."); return; }
     if (pin !== pinConf) { setError("Os PINs não coincidem."); setConfirm(Array(6).fill("")); inputRefs.current[0]?.focus(); return; }
     setSaving(true);
-    const h = await hashPin(pin);
-    const { error: dbErr } = await (supabase as any)
-      .from("profiles")
-      .update({ pin_hash: h })
-      .eq("user_id", userId);
-    setSaving(false);
-    if (dbErr) { toast.error("Erro ao salvar PIN."); return; }
-    toast.success("PIN criado com sucesso!");
-    markPinVerified();
-    onSuccess();
+    try {
+      const h = await hashPin(pin);
+      const { error: dbErr } = await (supabase as any)
+        .from("profiles")
+        .update({ pin_hash: h })
+        .eq("user_id", userId);
+      if (dbErr) throw dbErr;
+      toast.success("PIN criado com sucesso!");
+      markPinVerified();
+      onSuccess();
+    } catch (err) {
+      console.error("Erro ao salvar PIN:", err);
+      toast.error("Erro ao salvar PIN. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const renderInputs = (
