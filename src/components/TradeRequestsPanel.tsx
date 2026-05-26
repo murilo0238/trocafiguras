@@ -6,6 +6,7 @@ import { Check, X, Send, ArrowRight, Loader2, MessageSquare, Clock, Maximize2 } 
 import { toast } from "sonner";
 import TradeChatPanel from "@/components/TradeChatPanel";
 import EventModePanel from "@/components/EventModePanel";
+import TradeBuilderSheet from "@/components/TradeBuilderSheet";
 
 interface TradeRequestsPanelProps {
   scannedUserId: string | null;
@@ -38,7 +39,13 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
   const [chatPartnerName, setChatPartnerName] = useState("");
   const [scannedName, setScannedName] = useState<string>("");
   const [eventMode, setEventMode] = useState(false);
-  const [matchData, setMatchData] = useState<{ iCanGive: string[]; theyCanGive: string[] } | null>(null);
+  const [showBuilder, setShowBuilder] = useState(false);
+  const [matchData, setMatchData] = useState<{
+    iCanGive: string[];
+    theyCanGive: string[];
+    myDuplicates: string[];
+    theirDuplicates: string[];
+  } | null>(null);
   const [sending, setSending] = useState(false);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
@@ -73,20 +80,26 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
       setMatchData({
         iCanGive: [...myDuplicates].filter((id) => theirNeeded.has(id)),
         theyCanGive: [...theirDuplicates].filter((id) => myNeeded.has(id)),
+        myDuplicates: [...myDuplicates],
+        theirDuplicates: [...theirDuplicates],
       });
     };
 
     computeMatch();
   }, [scannedUserId, user]);
 
-  const handleSendTrade = async () => {
+  const handleSendTrade = async (offered?: string[], requested?: string[]) => {
     if (!scannedUserId || !matchData) return;
     setSending(true);
     const count = Math.min(matchData.iCanGive.length, matchData.theyCanGive.length);
-    await sendTradeRequest(scannedUserId, matchData.iCanGive.slice(0, count), matchData.theyCanGive.slice(0, count));
+    const finalOffered = offered ?? matchData.iCanGive.slice(0, count);
+    const finalRequested = requested ?? matchData.theyCanGive.slice(0, count);
+    const ok = await sendTradeRequest(scannedUserId, finalOffered, finalRequested);
     setSending(false);
-    onClearScanned();
-    setMatchData(null);
+    if (ok !== false) {
+      onClearScanned();
+      setMatchData(null);
+    }
   };
 
   const handleConfirm = async (trade: TradeRequest) => {
@@ -206,16 +219,22 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={handleSendTrade}
+                      onClick={() => handleSendTrade()}
                       disabled={sending}
-                      className="flex-1 py-3 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-1.5 text-sm"
                     >
                       {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                      Enviar Pedido
+                      Enviar sugestão
+                    </button>
+                    <button
+                      onClick={() => setShowBuilder(true)}
+                      className="px-3 py-2.5 rounded-lg border border-border hover:bg-muted text-foreground font-bold transition-colors text-sm"
+                    >
+                      Personalizar
                     </button>
                     <button
                       onClick={() => setEventMode(true)}
-                      className="px-4 py-3 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-bold transition-colors flex items-center justify-center gap-1.5 text-sm"
+                      className="px-3 py-2.5 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-colors flex items-center justify-center"
                       title="Modo Evento"
                     >
                       <Maximize2 className="w-4 h-4" />
@@ -439,6 +458,22 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
           myName={user?.user_metadata?.display_name || "Você"}
           iCanGive={matchData.iCanGive}
           theyCanGive={matchData.theyCanGive}
+        />
+      )}
+
+      {/* Custom trade builder */}
+      {matchData && scannedUserId && (
+        <TradeBuilderSheet
+          open={showBuilder}
+          onClose={() => setShowBuilder(false)}
+          myDuplicates={matchData.myDuplicates}
+          theirDuplicates={matchData.theirDuplicates}
+          partnerName={scannedName}
+          initialOffered={matchData.iCanGive}
+          initialRequested={matchData.theyCanGive}
+          onSend={async (offered, requested) => {
+            await handleSendTrade(offered, requested);
+          }}
         />
       )}
     </div>

@@ -160,8 +160,8 @@ export const useTradeRequests = () => {
   }, [user, loadRequests, loadHistory]);
 
   const sendTradeRequest = useCallback(
-    async (toUserId: string, offered: string[], requested: string[]) => {
-      if (!user) return;
+    async (toUserId: string, offered: string[], requested: string[]): Promise<boolean> => {
+      if (!user) return false;
 
       const { data: existing } = await supabase
         .from("trade_requests")
@@ -173,7 +173,7 @@ export const useTradeRequests = () => {
 
       if (existing) {
         toast.warning("Você já tem um pedido pendente com este colecionador.");
-        return;
+        return false;
       }
 
       const { error } = await supabase.from("trade_requests").insert({
@@ -183,9 +183,10 @@ export const useTradeRequests = () => {
         stickers_requested: requested,
         status: "pending",
       });
-      if (error) { toast.error("Erro ao enviar pedido de troca."); return; }
+      if (error) { toast.error("Erro ao enviar pedido de troca."); return false; }
       toast.success("Pedido de troca enviado!");
       loadRequests();
+      return true;
     },
     [user, loadRequests]
   );
