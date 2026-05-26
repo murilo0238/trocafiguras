@@ -14,6 +14,7 @@ import FriendsPanel from "@/components/FriendsPanel";
 import GroupsPanel from "@/components/GroupsPanel";
 import ImportModal from "@/components/ImportModal";
 import ShareProgressCard from "@/components/ShareProgressCard";
+import PinGate, { isPinVerified } from "@/components/PinGate";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
 import { useFriends } from "@/contexts/FriendsContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,6 +37,9 @@ const Index = () => {
   const [tab, setTab] = useState<TabType>("album");
   const [search, setSearch] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pinHash, setPinHash] = useState<string | null | undefined>(undefined);
+  const [pinReady, setPinReady] = useState(false);
+  const [pinVerified, setPinVerified] = useState(() => isPinVerified());
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -45,6 +49,19 @@ const Index = () => {
     navigator.serviceWorker.addEventListener("message", handler);
     return () => navigator.serviceWorker.removeEventListener("message", handler);
   }, []);
+
+  useEffect(() => {
+    if (!user) { setPinHash(undefined); setPinReady(false); setPinVerified(false); sessionStorage.removeItem("pin_verified"); return; }
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("profiles")
+        .select("pin_hash")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setPinHash(data?.pin_hash ?? null);
+      setPinReady(true);
+    })();
+  }, [user]);
 
   useEffect(() => {
     if (!user) { setIsAdmin(false); return; }
@@ -97,6 +114,47 @@ const Index = () => {
   }
 
   if (!user) return <Auth />;
+
+  if (!pinReady) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
+        <div className="w-10 h-10 rounded-full border-[3px] border-primary border-t-transparent animate-spin" />
+        <p className="text-muted-foreground text-sm">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (pinHash === null) {
+    return (
+      <PinGate
+        userId={user.id}
+        mode="setup"
+        storedHash={null}
+        onSuccess={() => {
+          (async () => {
+            const { data } = await (supabase as any)
+              .from("profiles")
+              .select("pin_hash")
+              .eq("user_id", user.id)
+              .maybeSingle();
+            setPinHash(data?.pin_hash ?? null);
+            setPinVerified(true);
+          })();
+        }}
+      />
+    );
+  }
+
+  if (!pinVerified) {
+    return (
+      <PinGate
+        userId={user.id}
+        mode="verify"
+        storedHash={pinHash}
+        onSuccess={() => setPinVerified(true)}
+      />
+    );
+  }
 
   const getSectionStickers = (section: TeamSection) => {
     const count = section.stickerCount ?? STICKERS_PER_SECTION;
