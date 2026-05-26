@@ -64,7 +64,7 @@ const StickerSearch = () => {
           type="text"
           value={query}
           onChange={(e) => { setQuery(e.target.value); setSearched(false); }}
-          placeholder="Ex: BRA01, MEX05, FWC12…"
+          placeholder="Ex: BRA1, MEX5, FWC12…"
           className="flex-1 px-3 py-2 rounded-lg bg-muted text-foreground placeholder:text-muted-foreground text-sm border border-border focus:border-primary/50 outline-none transition-all"
           autoCapitalize="characters"
         />

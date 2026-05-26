@@ -28,7 +28,12 @@
       "Bash(Get-Content \"C:\\\\Users\\\\Murilo\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Murilo-Desktop-Site-wilian-trocafigurinha\\\\be2e0b42-7e63-43ae-8816-9d815968a7e0\\\\tasks\\\\b6gry3mdi.output\" -Tail 10)",
       "WebFetch(domain:www.pngwing.com)",
       "Bash(Copy-Item *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(gh pr create --title 'Login com tolerância a erros de digitação no nome' --body ' *)",
+      "Bash(gh pr create --title 'PWA: botão instalar no Android/iOS + fix race condition' --body ' *)",
+      "Bash(npx vite *)",
+      "Bash(node_modules\\\\.bin\\\\vite build *)",
+      "Bash(./node_modules/.bin/vite build *)"
     ]
   }
 }

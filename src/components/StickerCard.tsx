@@ -108,7 +108,7 @@ const StickerCard = ({
         </button>
 
         <span className="text-sm font-bold text-foreground w-6 text-center">
-          {duplicates}
+          {collected ? duplicates + 1 : 0}
         </span>
 
         <button
