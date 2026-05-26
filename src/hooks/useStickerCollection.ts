@@ -113,6 +113,24 @@ export const useStickerCollection = () => {
     });
   };
 
+  const resetCollection = useCallback(async () => {
+    if (!user) throw new Error("Não autenticado");
+    const rows = getAllStickerIds().map((id) => ({
+      user_id: user.id,
+      sticker_id: id,
+      collected: false,
+      duplicates: 0,
+    }));
+    const BATCH = 200;
+    for (let i = 0; i < rows.length; i += BATCH) {
+      const { error } = await supabase
+        .from("user_stickers")
+        .upsert(rows.slice(i, i + BATCH), { onConflict: "user_id,sticker_id" });
+      if (error) throw error;
+    }
+    setCollection(getDefaultCollection());
+  }, [user]);
+
   const importCollection = useCallback(
     async (text: string): Promise<{ imported: number; unknown: string[] }> => {
       if (!user) throw new Error("Não autenticado");
@@ -157,6 +175,7 @@ export const useStickerCollection = () => {
     addDuplicate,
     removeDuplicate,
     importCollection,
+    resetCollection,
     stats,
     allStickerIds: ALL_IDS,
     loading,

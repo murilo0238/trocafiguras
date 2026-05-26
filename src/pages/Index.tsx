@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users, Shield, Upload } from "lucide-react";
+import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users, Shield, Upload, RotateCcw } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import StickerCard from "@/components/StickerCard";
@@ -24,8 +24,10 @@ type TabType = "album" | "trades" | "groups" | "friends" | "ranking";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { collection, toggleCollected, addDuplicate, removeDuplicate, importCollection, stats, loading: collectionLoading } = useStickerCollection();
+  const { collection, toggleCollected, addDuplicate, removeDuplicate, importCollection, resetCollection, stats, loading: collectionLoading } = useStickerCollection();
   const [showImport, setShowImport] = useState(false);
+  const [resetConfirm, setResetConfirm] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const { pendingReceived } = useFriends();
   const [pendingCount, setPendingCount] = useState(0);
 
@@ -179,13 +181,41 @@ const Index = () => {
               )}
             </div>
             <FilterButtons activeFilter={filter} onFilterChange={setFilter} />
-            <button
-              onClick={() => setShowImport(true)}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold text-white/50 hover:text-white/80 hover:bg-white/5 transition-colors"
-            >
-              <Upload className="w-3 h-3" />
-              Importar de outro app
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowImport(true)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold text-white/50 hover:text-white/80 hover:bg-white/5 transition-colors"
+              >
+                <Upload className="w-3 h-3" />
+                Importar de outro app
+              </button>
+
+              {!resetConfirm ? (
+                <button
+                  onClick={() => setResetConfirm(true)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold text-white/50 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Resetar coleção
+                </button>
+              ) : (
+                <button
+                  disabled={resetting}
+                  onClick={async () => {
+                    setResetting(true);
+                    try { await resetCollection(); } finally {
+                      setResetting(false);
+                      setResetConfirm(false);
+                    }
+                  }}
+                  onBlur={() => setResetConfirm(false)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-bold text-red-400 bg-red-500/15 border border-red-500/30 hover:bg-red-500/25 transition-colors"
+                >
+                  <RotateCcw className={`w-3 h-3 ${resetting ? "animate-spin" : ""}`} />
+                  {resetting ? "Resetando..." : "Confirmar reset"}
+                </button>
+              )}
+            </div>
           </>
         )}
       </header>
