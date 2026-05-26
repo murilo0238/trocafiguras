@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import QRCodePanel from "@/components/QRCodePanel";
 import TradeRequestsPanel from "@/components/TradeRequestsPanel";
 import UserAvatar from "@/components/UserAvatar";
+import StickerSearch from "@/components/StickerSearch";
 
 interface TradingPanelProps {
   onPendingCountChange?: (count: number) => void;
@@ -100,6 +101,8 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
         onClearScanned={() => setScannedUserId(null)}
         onPendingCountChange={onPendingCountChange}
       />
+
+      <StickerSearch />
 
       <div className="bg-card rounded-xl p-4 shadow-md space-y-3">
         <div className="flex items-center justify-between">

@@ -13,6 +13,7 @@ import StickerRanking from "@/components/StickerRanking";
 import FriendsPanel from "@/components/FriendsPanel";
 import GroupsPanel from "@/components/GroupsPanel";
 import ImportModal from "@/components/ImportModal";
+import ShareProgressCard from "@/components/ShareProgressCard";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
 import { useFriends } from "@/contexts/FriendsContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -198,6 +199,12 @@ const Index = () => {
                 <Upload className="w-3 h-3" />
                 Importar de outro app
               </button>
+              <ShareProgressCard
+                displayName={user.user_metadata?.display_name || "Colecionador"}
+                collection={collection}
+                total={stats.total}
+                collected={stats.collected}
+              />
 
               {!resetConfirm ? (
                 <button

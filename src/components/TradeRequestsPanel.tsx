@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useTradeRequests, TradeRequest } from "@/hooks/useTradeRequests";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, X, Send, ArrowRight, Loader2, MessageSquare, Clock } from "lucide-react";
+import { Check, X, Send, ArrowRight, Loader2, MessageSquare, Clock, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import TradeChatPanel from "@/components/TradeChatPanel";
+import EventModePanel from "@/components/EventModePanel";
 
 interface TradeRequestsPanelProps {
   scannedUserId: string | null;
@@ -36,6 +37,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
   const [chatTradeId, setChatTradeId] = useState<string | null>(null);
   const [chatPartnerName, setChatPartnerName] = useState("");
   const [scannedName, setScannedName] = useState<string>("");
+  const [eventMode, setEventMode] = useState(false);
   const [matchData, setMatchData] = useState<{ iCanGive: string[]; theyCanGive: string[] } | null>(null);
   const [sending, setSending] = useState(false);
   const [confirming, setConfirming] = useState<string | null>(null);
@@ -202,14 +204,23 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={handleSendTrade}
-                    disabled={sending}
-                    className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    Enviar Pedido de Troca
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSendTrade}
+                      disabled={sending}
+                      className="flex-1 py-3 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                      Enviar Pedido
+                    </button>
+                    <button
+                      onClick={() => setEventMode(true)}
+                      className="px-4 py-3 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-bold transition-colors flex items-center justify-center gap-1.5 text-sm"
+                      title="Modo Evento"
+                    >
+                      <Maximize2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </>
               )}
             </div>
@@ -373,18 +384,37 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
               const date = new Date(req.updated_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
 
               return (
-                <div key={req.id} className="bg-card rounded-xl p-3 shadow-md">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-bold text-foreground">{partnerName}</p>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${s.className}`}>
+                <details key={req.id} className="bg-card rounded-xl shadow-md group">
+                  <summary className="p-3 flex items-center justify-between cursor-pointer list-none">
+                    <div>
+                      <p className="text-sm font-bold text-foreground">{partnerName}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {isFrom ? "Deu" : "Recebeu"} {req.stickers_offered.length} · {isFrom ? "Recebeu" : "Deu"} {req.stickers_requested.length} · {date}
+                      </p>
+                    </div>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold flex-shrink-0 ${s.className}`}>
                       {s.text}
                     </span>
+                  </summary>
+                  <div className="px-3 pb-3 grid grid-cols-2 gap-2 text-xs border-t border-border/40 pt-2 mt-0">
+                    <div className="bg-accent/30 rounded-lg p-2">
+                      <p className="font-bold text-accent-foreground mb-1">{isFrom ? "Você deu" : "Você recebeu"}</p>
+                      <div className="flex flex-wrap gap-0.5">
+                        {req.stickers_offered.map((id) => (
+                          <span key={id} className="bg-secondary text-secondary-foreground text-[8px] px-1 rounded">{id}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-primary/10 rounded-lg p-2">
+                      <p className="font-bold text-primary mb-1">{isFrom ? "Você recebeu" : "Você deu"}</p>
+                      <div className="flex flex-wrap gap-0.5">
+                        {req.stickers_requested.map((id) => (
+                          <span key={id} className="bg-primary/20 text-primary text-[8px] px-1 rounded">{id}</span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-muted-foreground">
-                    {isFrom ? "Você deu" : "Você recebeu"} {req.stickers_offered.length} · {isFrom ? "Você recebeu" : "Você deu"} {req.stickers_requested.length}
-                  </p>
-                  <p className="text-[9px] text-muted-foreground/60 mt-0.5">{date}</p>
-                </div>
+                </details>
               );
             })
           )}
@@ -399,6 +429,18 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
         open={!!chatTradeId}
         onClose={() => setChatTradeId(null)}
       />
+
+      {/* Event mode */}
+      {matchData && (
+        <EventModePanel
+          open={eventMode}
+          onClose={() => setEventMode(false)}
+          partnerName={scannedName}
+          myName={user?.user_metadata?.display_name || "Você"}
+          iCanGive={matchData.iCanGive}
+          theyCanGive={matchData.theyCanGive}
+        />
+      )}
     </div>
   );
 };
