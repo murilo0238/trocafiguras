@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as supabaseTyped } from "@/integrations/supabase/client";
+const supabase = supabaseTyped as any;
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { resolveProfileByName } from "@/lib/nameMatch";
