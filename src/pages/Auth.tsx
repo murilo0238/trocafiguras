@@ -55,7 +55,7 @@ const findSimilarName = async (inputSlug: string): Promise<string | null> => {
 const Auth = () => {
   const { installPrompt, isInstalled, isIOS, install } = usePWA();
   const [showIOSHint, setShowIOSHint] = useState(false);
-  const [fullName, setFullName] = useState("");
+  const [fullName, setFullName] = useState(() => localStorage.getItem("lastLoginName") ?? "");
   const [loading, setLoading] = useState(false);
   const [adminMode, setAdminMode] = useState(false);
   const [adminEmail, setAdminEmail] = useState("");
@@ -69,7 +69,10 @@ const Auth = () => {
     const password = `${FRIENDS_PWD_SALT}.${slug}`;
 
     const signIn = await supabase.auth.signInWithPassword({ email, password });
-    if (!signIn.error) return true;
+    if (!signIn.error) {
+      localStorage.setItem("lastLoginName", cleanedName);
+      return true;
+    }
     return false;
   };
 
@@ -95,6 +98,7 @@ const Auth = () => {
     if (retry.error) {
       toast.error("Conta criada, mas não conseguimos entrar. Tente novamente.");
     } else {
+      localStorage.setItem("lastLoginName", cleanedName);
       toast.success(`Bem-vindo, ${parts[0]}!`);
     }
   };
