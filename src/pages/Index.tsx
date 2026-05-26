@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users, Shield } from "lucide-react";
+import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users, Shield, Upload } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import StickerCard from "@/components/StickerCard";
@@ -12,6 +12,7 @@ import TradingPanel from "@/components/TradingPanel";
 import StickerRanking from "@/components/StickerRanking";
 import FriendsPanel from "@/components/FriendsPanel";
 import GroupsPanel from "@/components/GroupsPanel";
+import ImportModal from "@/components/ImportModal";
 import { useStickerCollection } from "@/hooks/useStickerCollection";
 import { useFriends } from "@/contexts/FriendsContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,7 +24,8 @@ type TabType = "album" | "trades" | "groups" | "friends" | "ranking";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { collection, toggleCollected, addDuplicate, removeDuplicate, stats, loading: collectionLoading } = useStickerCollection();
+  const { collection, toggleCollected, addDuplicate, removeDuplicate, importCollection, stats, loading: collectionLoading } = useStickerCollection();
+  const [showImport, setShowImport] = useState(false);
   const { pendingReceived } = useFriends();
   const [pendingCount, setPendingCount] = useState(0);
 
@@ -177,9 +179,23 @@ const Index = () => {
               )}
             </div>
             <FilterButtons activeFilter={filter} onFilterChange={setFilter} />
+            <button
+              onClick={() => setShowImport(true)}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-semibold text-white/50 hover:text-white/80 hover:bg-white/5 transition-colors"
+            >
+              <Upload className="w-3 h-3" />
+              Importar de outro app
+            </button>
           </>
         )}
       </header>
+
+      {showImport && (
+        <ImportModal
+          onClose={() => setShowImport(false)}
+          onImport={importCollection}
+        />
+      )}
 
       {/* ── CONTEÚDO ── */}
       <main className="px-3 pt-5">

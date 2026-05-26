@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getAllStickerIds, TOTAL_STICKERS } from "@/data/teams";
 import { useAuth } from "@/hooks/useAuth";
+import { parseImportText, buildCollectionFromImport } from "@/utils/parseImportText";
 
 interface StickerData {
   collected: boolean;
@@ -112,6 +113,36 @@ export const useStickerCollection = () => {
     });
   };
 
+  const importCollection = useCallback(
+    async (text: string): Promise<{ imported: number; unknown: string[] }> => {
+      if (!user) throw new Error("Não autenticado");
+      const parsed = parseImportText(text);
+      const rows = buildCollectionFromImport(parsed).map((r) => ({
+        ...r,
+        user_id: user.id,
+      }));
+
+      // Upsert in batches of 200 to stay within Supabase limits
+      const BATCH = 200;
+      for (let i = 0; i < rows.length; i += BATCH) {
+        const { error } = await supabase
+          .from("user_stickers")
+          .upsert(rows.slice(i, i + BATCH), { onConflict: "user_id,sticker_id" });
+        if (error) throw error;
+      }
+
+      // Rebuild local state from the upserted data
+      const newCol = getDefaultCollection();
+      for (const r of rows) {
+        newCol[r.sticker_id] = { collected: r.collected, duplicates: r.duplicates };
+      }
+      setCollection(newCol);
+
+      return { imported: rows.length, unknown: parsed.unknown };
+    },
+    [user]
+  );
+
   const values = Object.values(collection);
   const stats = {
     total: TOTAL_STICKERS,
@@ -125,6 +156,7 @@ export const useStickerCollection = () => {
     toggleCollected,
     addDuplicate,
     removeDuplicate,
+    importCollection,
     stats,
     allStickerIds: ALL_IDS,
     loading,
