@@ -46,7 +46,17 @@ const TradeBuilderSheet = ({
   const [offered, setOffered] = useState<Set<string>>(() => new Set(initialOffered));
   const [requested, setRequested] = useState<Set<string>>(() => new Set(initialRequested));
   const [sending, setSending] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
+    // Auto-expand sections that have pre-selected stickers
+    const expanded = new Set<string>();
+    for (const section of SECTIONS) {
+      const hasOffer = initialOffered.some((id) => getSectionForSticker(id)?.code === section.code);
+      const hasRequest = initialRequested.some((id) => getSectionForSticker(id)?.code === section.code);
+      if (hasOffer) expanded.add(`offer-${section.code}`);
+      if (hasRequest) expanded.add(`request-${section.code}`);
+    }
+    return expanded;
+  });
 
   const offeredGroups = useMemo(() => groupBySection(myDuplicates), [myDuplicates]);
   const requestedGroups = useMemo(() => groupBySection(theirDuplicates), [theirDuplicates]);
