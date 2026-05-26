@@ -11,12 +11,29 @@ export interface ParsedImport {
  *  FWC2  → FWC02   (add leading zero for single digit)
  *  CC1   → COCA1   (prefix rename)
  */
+// Mapeamento de códigos usados pelo app externo → códigos internos
+const CODE_ALIASES: Record<string, string> = {
+  CC:  "COCA", // Coca-Cola
+  GER: "ALE",  // Alemanha
+  NED: "HOL",  // Holanda
+  CUW: "CUR",  // Curaçao
+};
+
 function normalizeId(raw: string): string {
   const id = raw.trim().toUpperCase();
-  if (/^CC(\d+)$/.test(id)) return `COCA${id.slice(2)}`;
-  const fwc = id.match(/^FWC(\d+)$/);
-  if (fwc) return `FWC${fwc[1].padStart(2, "0")}`;
-  return id;
+
+  // Extrai prefixo (letras) e número
+  const match = id.match(/^([A-Z]+)(\d+)$/);
+  if (!match) return id;
+  const [, prefix, num] = match;
+
+  // Renomeia prefixo se houver alias
+  const code = CODE_ALIASES[prefix] ?? prefix;
+
+  // FWC precisa de zero à esquerda: FWC2 → FWC02
+  if (code === "FWC") return `FWC${num.padStart(2, "0")}`;
+
+  return `${code}${num}`;
 }
 
 /** Parse a sticker ID token that may include a count like "AUT16 (×2)" or "ENG5 (×2)".
