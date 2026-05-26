@@ -204,7 +204,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       <p className="font-bold text-accent-foreground">Você dá</p>
                       <div className="flex flex-wrap gap-0.5 mt-1 max-h-20 overflow-y-auto">
                         {matchData.iCanGive.slice(0, Math.min(matchData.iCanGive.length, matchData.theyCanGive.length)).map((id) => (
-                          <span key={id} className="bg-secondary text-secondary-foreground text-[8px] px-1 rounded">{id}</span>
+                          <span key={id} className="bg-amber-500/20 text-amber-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-amber-500/30">{id}</span>
                         ))}
                       </div>
                     </div>
@@ -212,7 +212,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       <p className="font-bold text-primary">Você recebe</p>
                       <div className="flex flex-wrap gap-0.5 mt-1 max-h-20 overflow-y-auto">
                         {matchData.theyCanGive.slice(0, Math.min(matchData.iCanGive.length, matchData.theyCanGive.length)).map((id) => (
-                          <span key={id} className="bg-primary/20 text-primary text-[8px] px-1 rounded">{id}</span>
+                          <span key={id} className="bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-emerald-500/30">{id}</span>
                         ))}
                       </div>
                     </div>
@@ -268,7 +268,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       <p className="font-bold text-primary">Você recebe</p>
                       <div className="flex flex-wrap gap-0.5 mt-1">
                         {req.stickers_offered.map((id) => (
-                          <span key={id} className="bg-primary/20 text-primary text-[8px] px-1 rounded">{id}</span>
+                          <span key={id} className="bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-emerald-500/30">{id}</span>
                         ))}
                       </div>
                     </div>
@@ -276,7 +276,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       <p className="font-bold text-accent-foreground">Você dá</p>
                       <div className="flex flex-wrap gap-0.5 mt-1">
                         {req.stickers_requested.map((id) => (
-                          <span key={id} className="bg-secondary text-secondary-foreground text-[8px] px-1 rounded">{id}</span>
+                          <span key={id} className="bg-amber-500/20 text-amber-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-amber-500/30">{id}</span>
                         ))}
                       </div>
                     </div>
@@ -343,7 +343,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       <p className="font-bold text-accent-foreground">Você dá</p>
                       <div className="flex flex-wrap gap-0.5 mt-1">
                         {req.stickers_offered.map((id) => (
-                          <span key={id} className="bg-secondary text-secondary-foreground text-[8px] px-1 rounded">{id}</span>
+                          <span key={id} className="bg-amber-500/20 text-amber-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-amber-500/30">{id}</span>
                         ))}
                       </div>
                     </div>
@@ -351,7 +351,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       <p className="font-bold text-primary">Você recebe</p>
                       <div className="flex flex-wrap gap-0.5 mt-1">
                         {req.stickers_requested.map((id) => (
-                          <span key={id} className="bg-primary/20 text-primary text-[8px] px-1 rounded">{id}</span>
+                          <span key={id} className="bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-emerald-500/30">{id}</span>
                         ))}
                       </div>
                     </div>
@@ -420,7 +420,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       <p className="font-bold text-accent-foreground mb-1">{isFrom ? "Você deu" : "Você recebeu"}</p>
                       <div className="flex flex-wrap gap-0.5">
                         {req.stickers_offered.map((id) => (
-                          <span key={id} className="bg-secondary text-secondary-foreground text-[8px] px-1 rounded">{id}</span>
+                          <span key={id} className="bg-amber-500/20 text-amber-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-amber-500/30">{id}</span>
                         ))}
                       </div>
                     </div>
@@ -428,7 +428,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       <p className="font-bold text-primary mb-1">{isFrom ? "Você recebeu" : "Você deu"}</p>
                       <div className="flex flex-wrap gap-0.5">
                         {req.stickers_requested.map((id) => (
-                          <span key={id} className="bg-primary/20 text-primary text-[8px] px-1 rounded">{id}</span>
+                          <span key={id} className="bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-emerald-500/30">{id}</span>
                         ))}
                       </div>
                     </div>
