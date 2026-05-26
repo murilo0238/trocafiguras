@@ -104,8 +104,8 @@ const TradeBuilderSheet = ({
   const activeSet = tab === "offer" ? offered : requested;
   const groups = tab === "offer" ? offeredGroups : requestedGroups;
   const emptyMsg = tab === "offer"
-    ? "Você não tem nenhuma figurinha repetida para oferecer."
-    : `${partnerName} não tem nenhuma figurinha repetida disponível.`;
+    ? `Você não tem repetidas que ${partnerName} ainda não possui.`
+    : `${partnerName} não tem repetidas que você ainda não possui.`;
 
   const renderGroups = (side: Tab) => {
     const grps = side === "offer" ? offeredGroups : requestedGroups;
@@ -252,8 +252,8 @@ const TradeBuilderSheet = ({
       <div className="px-4 py-2 bg-muted/20 flex-shrink-0">
         <p className="text-[11px] text-muted-foreground text-center">
           {tab === "offer"
-            ? `Suas figurinhas repetidas — toque para incluir na proposta`
-            : `Repetidas de ${partnerName} — toque para pedir`}
+            ? `Suas repetidas que ${partnerName} ainda não tem`
+            : `Repetidas de ${partnerName} que você ainda não tem`}
         </p>
       </div>
 
