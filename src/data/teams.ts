@@ -393,27 +393,27 @@ export const SECTIONS: TeamSection[] = [
   ]},
 
   // Grupo E
-  { code: "ALE", name: "Alemanha", group: "E", flag: "🇩🇪", players: [
-    null,                    // ALE1
-    "Marc-André ter Stegen", // ALE2
-    "Jonathan Tah",          // ALE3
-    "David Raum",            // ALE4
-    "Nico Schlotterbeck",    // ALE5
-    "Antonio Rüdiger",       // ALE6
-    "Waldemar Anton",        // ALE7
-    "Ridle Baku",            // ALE8
-    "Maximilian Mittelstadt", // ALE9
-    "Joshua Kimmich",        // ALE10
-    "Florian Wirtz",         // ALE11
-    "Felix Nmecha",          // ALE12
-    null,                    // ALE13
-    "Leon Goretzka",         // ALE14
-    "Jamal Musiala",         // ALE15
-    "Serge Gnabry",          // ALE16
-    "Kai Havertz",           // ALE17
-    "Leroy Sane",            // ALE18
-    "Karim Adeyemi",         // ALE19
-    "Nick Woltemade",        // ALE20
+  { code: "GER", name: "Alemanha", group: "E", flag: "🇩🇪", players: [
+    null,                    // GER1
+    "Marc-André ter Stegen", // GER2
+    "Jonathan Tah",          // GER3
+    "David Raum",            // GER4
+    "Nico Schlotterbeck",    // GER5
+    "Antonio Rüdiger",       // GER6
+    "Waldemar Anton",        // GER7
+    "Ridle Baku",            // GER8
+    "Maximilian Mittelstadt", // GER9
+    "Joshua Kimmich",        // GER10
+    "Florian Wirtz",         // GER11
+    "Felix Nmecha",          // GER12
+    null,                    // GER13
+    "Leon Goretzka",         // GER14
+    "Jamal Musiala",         // GER15
+    "Serge Gnabry",          // GER16
+    "Kai Havertz",           // GER17
+    "Leroy Sane",            // GER18
+    "Karim Adeyemi",         // GER19
+    "Nick Woltemade",        // GER20
   ]},
   { code: "ECU", name: "Equador", group: "E", flag: "🇪🇨", players: [
     null,                  // ECU1
@@ -459,51 +459,51 @@ export const SECTIONS: TeamSection[] = [
     "Evann Guessand",        // CIV19
     "Oumar Diakite",         // CIV20
   ]},
-  { code: "CUR", name: "Curaçao", group: "E", flag: "🇨🇼", players: [
-    null,                   // CUR1
-    "Eloy Room",            // CUR2
-    "Armando Obispo",       // CUR3
-    "Sherel Floranus",      // CUR4
-    "Jurien Gaari",         // CUR5
-    "Joshua Brenet",        // CUR6
-    "Roshon Van Eijma",     // CUR7
-    "Shurandy Sambo",       // CUR8
-    "Livano Comenencia",    // CUR9
-    "Godfried Roemeratoe",  // CUR10
-    "Juninho Bacuna",       // CUR11
-    "Leandro Bacuna",       // CUR12
-    null,                   // CUR13
-    "Tahith Chong",         // CUR14
-    "Kenji Gorre",          // CUR15
-    "Jearl Margaritha",     // CUR16
-    "Jurgen Locadia",       // CUR17
-    "Jeremy Antonisse",     // CUR18
-    "Gervane Kastaneer",    // CUR19
-    "Sontje Hansen",        // CUR20
+  { code: "CUW", name: "Curaçao", group: "E", flag: "🇨🇼", players: [
+    null,                   // CUW1
+    "Eloy Room",            // CUW2
+    "Armando Obispo",       // CUW3
+    "Sherel Floranus",      // CUW4
+    "Jurien Gaari",         // CUW5
+    "Joshua Brenet",        // CUW6
+    "Roshon Van Eijma",     // CUW7
+    "Shurandy Sambo",       // CUW8
+    "Livano Comenencia",    // CUW9
+    "Godfried Roemeratoe",  // CUW10
+    "Juninho Bacuna",       // CUW11
+    "Leandro Bacuna",       // CUW12
+    null,                   // CUW13
+    "Tahith Chong",         // CUW14
+    "Kenji Gorre",          // CUW15
+    "Jearl Margaritha",     // CUW16
+    "Jurgen Locadia",       // CUW17
+    "Jeremy Antonisse",     // CUW18
+    "Gervane Kastaneer",    // CUW19
+    "Sontje Hansen",        // CUW20
   ]},
 
   // Grupo F
-  { code: "HOL", name: "Holanda", group: "F", flag: "🇳🇱", players: [
-    null,                  // HOL1
-    "Bart Verbruggen",     // HOL2
-    "Virgil van Dijk",     // HOL3
-    "Micky van de Ven",    // HOL4
-    "Jurrien Timber",      // HOL5
-    "Denzel Dumfries",     // HOL6
-    "Nathan Aké",          // HOL7
-    "Jeremie Frimpong",    // HOL8
-    "Jan Paul van Hecke",  // HOL9
-    "Tijjani Reijnders",   // HOL10
-    "Ryan Gravenberch",    // HOL11
-    "Teun Koopmeiners",    // HOL12
-    null,                  // HOL13
-    "Frenkie de Jong",     // HOL14
-    "Xavi Simons",         // HOL15
-    "Justin Kluivert",     // HOL16
-    "Memphis Depay",       // HOL17
-    "Donyell Malen",       // HOL18
-    "Wout Weghorst",       // HOL19
-    "Cody Gakpo",          // HOL20
+  { code: "NED", name: "Holanda", group: "F", flag: "🇳🇱", players: [
+    null,                  // NED1
+    "Bart Verbruggen",     // NED2
+    "Virgil van Dijk",     // NED3
+    "Micky van de Ven",    // NED4
+    "Jurrien Timber",      // NED5
+    "Denzel Dumfries",     // NED6
+    "Nathan Aké",          // NED7
+    "Jeremie Frimpong",    // NED8
+    "Jan Paul van Hecke",  // NED9
+    "Tijjani Reijnders",   // NED10
+    "Ryan Gravenberch",    // NED11
+    "Teun Koopmeiners",    // NED12
+    null,                  // NED13
+    "Frenkie de Jong",     // NED14
+    "Xavi Simons",         // NED15
+    "Justin Kluivert",     // NED16
+    "Memphis Depay",       // NED17
+    "Donyell Malen",       // NED18
+    "Wout Weghorst",       // NED19
+    "Cody Gakpo",          // NED20
   ]},
   { code: "JPN", name: "Japão", group: "F", flag: "🇯🇵", players: [
     null,                       // JPN1

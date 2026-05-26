@@ -13,10 +13,7 @@ export interface ParsedImport {
  */
 // Mapeamento de códigos usados pelo app externo → códigos internos
 const CODE_ALIASES: Record<string, string> = {
-  CC:  "COCA", // Coca-Cola
-  GER: "ALE",  // Alemanha
-  NED: "HOL",  // Holanda
-  CUW: "CUR",  // Curaçao
+  CC: "COCA", // Coca-Cola (único alias que ainda diverge)
 };
 
 function normalizeId(raw: string): string {
