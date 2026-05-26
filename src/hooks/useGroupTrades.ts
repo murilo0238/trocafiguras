@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as supabaseTyped } from "@/integrations/supabase/client";
+// Group trade tables are not in the generated types yet — cast to any to bypass.
+const supabase = supabaseTyped as any;
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { findCycles, MemberInventory, TradeCycle, TradeLeg } from "@/lib/findCycles";
