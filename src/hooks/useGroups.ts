@@ -96,60 +96,26 @@ export const useGroups = () => {
   }, [user, load]);
 
   const createGroup = useCallback(
-    async (name: string, memberNames: string[]): Promise<string | null> => {
+    async (name: string, memberIds: string[]): Promise<string | null> => {
       if (!user) return null;
       const trimmed = name.trim();
-      if (!trimmed) {
-        toast.error("Dê um nome ao grupo.");
-        return null;
-      }
-
-      // Resolve member names
-      const resolved: { userId: string; displayName: string }[] = [];
-      const notFound: string[] = [];
-      for (const raw of memberNames) {
-        const n = raw.trim();
-        if (!n) continue;
-        const { exact, suggestion } = await resolveProfileByName(n);
-        const pick = exact || suggestion;
-        if (!pick) {
-          notFound.push(n);
-        } else if (pick.userId !== user.id && !resolved.some((r) => r.userId === pick.userId)) {
-          resolved.push(pick);
-        }
-      }
-
-      if (notFound.length) {
-        toast.error(`Não encontrei: ${notFound.join(", ")}`);
-        return null;
-      }
-      if (resolved.length === 0) {
-        toast.error("Adicione pelo menos um amigo.");
-        return null;
-      }
-      if (resolved.length > 3) {
-        toast.error("Máximo 3 amigos (4 contando você).");
-        return null;
-      }
+      if (!trimmed) { toast.error("Dê um nome ao grupo."); return null; }
+      if (memberIds.length === 0) { toast.error("Adicione pelo menos um amigo."); return null; }
+      if (memberIds.length > 3) { toast.error("Máximo 3 amigos (4 contando você)."); return null; }
 
       const { data: g, error } = await supabase
         .from("groups")
         .insert({ name: trimmed, created_by: user.id })
         .select("id")
         .single();
-      if (error || !g) {
-        toast.error("Erro ao criar grupo.");
-        return null;
-      }
+      if (error || !g) { toast.error("Erro ao criar grupo."); return null; }
 
-      // Insert creator + members
       const rows = [
         { group_id: g.id, user_id: user.id },
-        ...resolved.map((r) => ({ group_id: g.id, user_id: r.userId })),
+        ...memberIds.map((id) => ({ group_id: g.id, user_id: id })),
       ];
       const { error: memErr } = await supabase.from("group_members").insert(rows);
       if (memErr) {
-        // Rollback
         await supabase.from("groups").delete().eq("id", g.id);
         toast.error("Erro ao adicionar membros.");
         return null;
