@@ -50,6 +50,8 @@ export const useStickerCollection = () => {
       const col = getDefaultCollection();
       if (data) {
         for (const row of data) {
+          // Ignore stale sticker IDs that no longer exist in the current album
+          if (!(row.sticker_id in col)) continue;
           col[row.sticker_id] = {
             collected: row.collected,
             duplicates: row.duplicates,
