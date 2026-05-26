@@ -25,22 +25,26 @@ self.addEventListener('push', (e) => {
   e.waitUntil(
     self.registration.showNotification(data.title || 'Troca Figurinha', {
       body: data.body || 'Você tem uma nova notificação.',
-      icon: '/favicon.ico',
+      icon: '/icon-192.svg',
       badge: '/favicon.ico',
       tag: data.tag || 'default',
       data: { url: data.url || '/' },
+      vibrate: [100, 50, 100],
     })
   );
 });
 
-// Abre o app ao clicar na notificação
+// Abre o app na aba de trocas ao clicar na notificação
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
   const url = e.notification.data?.url || '/';
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
       for (const client of list) {
-        if (client.url === url && 'focus' in client) return client.focus();
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.postMessage({ type: 'OPEN_TRADES' });
+          return client.focus();
+        }
       }
       return self.clients.openWindow(url);
     })

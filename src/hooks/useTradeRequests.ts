@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { sendNotification } from "@/lib/notify";
 
 export interface TradeRequest {
   id: string;
@@ -120,18 +121,39 @@ export const useTradeRequests = () => {
     });
     channel
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "trade_requests", filter: `to_user_id=eq.${user.id}` },
+        () => {
+          loadRequests();
+          loadHistory();
+          sendNotification(
+            "Nova proposta de troca! 📩",
+            "Alguém quer trocar figurinhas com você.",
+            "trade-new"
+          );
+        })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "trade_requests", filter: `to_user_id=eq.${user.id}` },
         (payload) => {
           loadRequests();
           loadHistory();
-          if (typeof Notification !== "undefined" && Notification.permission === "granted" && document.visibilityState === "hidden") {
-            new Notification("Nova proposta de troca! 🔄", {
-              body: "Alguém quer trocar figurinhas com você.",
-              icon: "/favicon.ico",
-            });
+          const r = payload.new as any;
+          if (r.status === "completed") {
+            sendNotification("Troca concluída! 🎉", "Sua coleção foi atualizada.", `trade-done-${r.id}`);
+          } else if (r.status === "accepted" && r.from_confirmed) {
+            sendNotification("Parceiro confirmou! 🤝", "Confirme sua parte para efetivar a troca.", `trade-confirm-${r.id}`);
           }
         })
-      .on("postgres_changes", { event: "*", schema: "public", table: "trade_requests", filter: `from_user_id=eq.${user.id}` },
-        () => { loadRequests(); loadHistory(); })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "trade_requests", filter: `from_user_id=eq.${user.id}` },
+        (payload) => {
+          loadRequests();
+          loadHistory();
+          const r = payload.new as any;
+          if (r.status === "accepted") {
+            sendNotification("Troca aceita! ✅", "Sua proposta foi aceita. Confirme para efetivar.", `trade-accepted-${r.id}`);
+          } else if (r.status === "completed") {
+            sendNotification("Troca concluída! 🎉", "Sua coleção foi atualizada.", `trade-done-${r.id}`);
+          } else if (r.status === "accepted" && r.to_confirmed) {
+            sendNotification("Parceiro confirmou! 🤝", "Confirme sua parte para efetivar a troca.", `trade-confirm-${r.id}`);
+          }
+        })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -140,6 +162,20 @@ export const useTradeRequests = () => {
   const sendTradeRequest = useCallback(
     async (toUserId: string, offered: string[], requested: string[]) => {
       if (!user) return;
+
+      const { data: existing } = await supabase
+        .from("trade_requests")
+        .select("id")
+        .eq("from_user_id", user.id)
+        .eq("to_user_id", toUserId)
+        .eq("status", "pending")
+        .maybeSingle();
+
+      if (existing) {
+        toast.warning("Você já tem um pedido pendente com este colecionador.");
+        return;
+      }
+
       const { error } = await supabase.from("trade_requests").insert({
         from_user_id: user.id,
         to_user_id: toUserId,
@@ -172,6 +208,17 @@ export const useTradeRequests = () => {
     toast.info("Troca rejeitada.");
     loadRequests();
   }, [loadRequests]);
+
+  const cancelTrade = useCallback(async (tradeId: string) => {
+    const { error } = await supabase
+      .from("trade_requests")
+      .update({ status: "cancelled" })
+      .eq("id", tradeId);
+    if (error) { toast.error("Erro ao cancelar troca."); return; }
+    toast.info("Pedido cancelado.");
+    loadRequests();
+    loadHistory();
+  }, [loadRequests, loadHistory]);
 
   const confirmMyPart = useCallback(async (tradeId: string) => {
     if (!user) return;
@@ -212,6 +259,7 @@ export const useTradeRequests = () => {
     sendTradeRequest,
     acceptTrade,
     rejectTrade,
+    cancelTrade,
     confirmMyPart,
     refreshRequests: loadRequests,
   };

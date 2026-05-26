@@ -37,6 +37,15 @@ const Index = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === "OPEN_TRADES") setTab("trades");
+    };
+    navigator.serviceWorker.addEventListener("message", handler);
+    return () => navigator.serviceWorker.removeEventListener("message", handler);
+  }, []);
+
+  useEffect(() => {
     if (!user) { setIsAdmin(false); return; }
     (async () => {
       const { data } = await supabase

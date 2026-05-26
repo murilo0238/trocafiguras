@@ -27,6 +27,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
     sendTradeRequest,
     acceptTrade,
     rejectTrade,
+    cancelTrade,
     confirmMyPart,
     loading,
   } = useTradeRequests();
@@ -38,6 +39,7 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
   const [matchData, setMatchData] = useState<{ iCanGive: string[]; theyCanGive: string[] } | null>(null);
   const [sending, setSending] = useState(false);
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState<string | null>(null);
 
   useEffect(() => {
     if (!scannedUserId || !user) return;
@@ -89,6 +91,12 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
     setConfirming(trade.id);
     await confirmMyPart(trade.id);
     setConfirming(null);
+  };
+
+  const handleCancel = async (trade: TradeRequest) => {
+    setCancelling(trade.id);
+    await cancelTrade(trade.id);
+    setCancelling(null);
   };
 
   const openChat = (trade: TradeRequest) => {
@@ -300,11 +308,41 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
                       </span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-muted-foreground">
-                    Dando {req.stickers_offered.length} · Recebendo {req.stickers_requested.length}
-                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-accent/30 rounded-lg p-2">
+                      <p className="font-bold text-accent-foreground">Você dá</p>
+                      <div className="flex flex-wrap gap-0.5 mt-1">
+                        {req.stickers_offered.map((id) => (
+                          <span key={id} className="bg-secondary text-secondary-foreground text-[8px] px-1 rounded">{id}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-primary/10 rounded-lg p-2">
+                      <p className="font-bold text-primary">Você recebe</p>
+                      <div className="flex flex-wrap gap-0.5 mt-1">
+                        {req.stickers_requested.map((id) => (
+                          <span key={id} className="bg-primary/20 text-primary text-[8px] px-1 rounded">{id}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  {req.status === "pending" && (
+                    <button
+                      onClick={() => handleCancel(req)}
+                      disabled={cancelling === req.id}
+                      className="w-full py-1.5 rounded-lg border border-destructive/40 text-destructive font-bold text-xs flex items-center justify-center gap-1 hover:bg-destructive/5 transition-colors disabled:opacity-50"
+                    >
+                      {cancelling === req.id
+                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                        : <X className="w-3 h-3" />}
+                      Cancelar pedido
+                    </button>
+                  )}
                   {req.status === "accepted" && (
                     <div className="space-y-1">
+                      <p className="text-center text-xs font-bold text-green-600">
+                        ✅ Aceita! Confirme para efetivar a troca:
+                      </p>
                       {renderConfirmSection(req)}
                     </div>
                   )}
