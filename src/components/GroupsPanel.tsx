@@ -27,16 +27,26 @@ const GroupsPanel = () => {
     setCreating(true);
     setName(""); setSearch(""); setSelected([]);
     setLoadingUsers(true);
+    const { data: adminRoles } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .in("role", ["admin", "super_admin"]);
+    const adminIds = new Set((adminRoles || []).map((r: any) => r.user_id));
+
     const { data } = await supabase
       .from("profiles")
       .select("user_id, display_name, avatar_url")
       .neq("user_id", user?.id ?? "")
       .order("display_name");
-    setAllUsers((data || []).map((p) => ({
-      userId: p.user_id,
-      displayName: p.display_name || "Colecionador",
-      avatarUrl: p.avatar_url,
-    })));
+    setAllUsers(
+      (data || [])
+        .filter((p) => !adminIds.has(p.user_id))
+        .map((p) => ({
+          userId: p.user_id,
+          displayName: p.display_name || "Colecionador",
+          avatarUrl: p.avatar_url,
+        }))
+    );
     setLoadingUsers(false);
   };
 

@@ -103,17 +103,51 @@ export const useGroups = () => {
       if (memberIds.length === 0) { toast.error("Adicione pelo menos um amigo."); return null; }
       if (memberIds.length > 3) { toast.error("Máximo 3 amigos (4 contando você)."); return null; }
 
-      // Use SECURITY DEFINER RPC to create group atomically, bypassing RLS issues.
-      const { data: groupId, error: rpcErr } = await supabase
+      // Try server-side RPC first (atomic, bypasses RLS issues).
+      // Falls back to manual inserts if the function isn't deployed yet.
+      const { data: rpcId, error: rpcErr } = await supabase
         .rpc("create_group", { p_name: trimmed, p_member_ids: memberIds });
-      if (rpcErr || !groupId) {
-        toast.error(rpcErr?.message || "Erro ao criar grupo.");
+
+      if (!rpcErr && rpcId) {
+        toast.success(`Grupo "${trimmed}" criado!`);
+        await load();
+        return rpcId as string;
+      }
+
+      // --- Fallback: manual inserts with client-side UUID ---
+      // (avoids SELECT-after-INSERT which would fail RLS before members exist)
+      const groupId = crypto.randomUUID();
+
+      const { error: groupErr } = await supabase
+        .from("groups")
+        .insert({ id: groupId, name: trimmed, created_by: user.id });
+      if (groupErr) {
+        toast.error(`Erro ao criar grupo: ${groupErr.message}`);
+        return null;
+      }
+
+      // Insert creator first so the 2nd insert can verify ownership via RLS
+      const { error: creatorErr } = await supabase
+        .from("group_members")
+        .insert({ group_id: groupId, user_id: user.id });
+      if (creatorErr) {
+        await supabase.from("groups").delete().eq("id", groupId);
+        toast.error(`Erro ao criar grupo: ${creatorErr.message}`);
+        return null;
+      }
+
+      const { error: memErr } = await supabase
+        .from("group_members")
+        .insert(memberIds.map((id) => ({ group_id: groupId, user_id: id })));
+      if (memErr) {
+        await supabase.from("groups").delete().eq("id", groupId);
+        toast.error(`Erro ao adicionar membros: ${memErr.message}`);
         return null;
       }
 
       toast.success(`Grupo "${trimmed}" criado!`);
       await load();
-      return groupId as string;
+      return groupId;
     },
     [user, load]
   );
