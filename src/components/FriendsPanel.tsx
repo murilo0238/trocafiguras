@@ -85,6 +85,13 @@ const FriendsPanel = () => {
                   <UserAvatar avatarUrl={r.avatarUrl} displayName={r.displayName} className="w-full h-full" />
                 </div>
                 <span className="flex-1 text-sm font-medium text-foreground truncate">{r.displayName}</span>
+                <Link
+                  to={`/album/${r.userId}`}
+                  className="p-2 rounded-lg bg-muted hover:bg-primary/10 text-primary transition-colors"
+                  title="Ver álbum"
+                >
+                  <BookOpen className="w-4 h-4" />
+                </Link>
                 <button
                   onClick={() => handleAdd(r)}
                   disabled={addingId === r.userId}
