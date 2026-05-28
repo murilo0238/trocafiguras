@@ -111,14 +111,20 @@ export const useTrading = () => {
         return;
       }
 
-      // Step 2: get other users with location
+      // Step 2: get admin IDs to exclude, then get other users with location
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .in("role", ["admin", "super_admin"]);
+      const adminIds = new Set((adminRoles || []).map((r) => r.user_id));
+
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("user_id, display_name, latitude, longitude")
         .not("latitude", "is", null)
         .not("longitude", "is", null)
-        .neq("user_id", user.id)
-        .eq("show_in_trades", true);
+        .neq("user_id", user.id);
+      const filteredProfiles = (profiles || []).filter((p) => !adminIds.has(p.user_id));
 
       if (profilesError) {
         toast.error("Erro ao buscar colecionadores.");
@@ -126,7 +132,7 @@ export const useTrading = () => {
         return;
       }
 
-      if (!profiles || profiles.length === 0) {
+      if (filteredProfiles.length === 0) {
         setMatches([]);
         setLoading(false);
         toast.info("Nenhum colecionador com localização ativa encontrado.");
@@ -134,7 +140,7 @@ export const useTrading = () => {
       }
 
       // Step 3: filter by radius
-      const nearbyProfiles = profiles
+      const nearbyProfiles = filteredProfiles
         .map((p) => ({
           ...p,
           distance: haversineDistance(loc!.lat, loc!.lng, p.latitude!, p.longitude!),

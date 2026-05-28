@@ -31,12 +31,19 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
     if (!user) return;
     setLoading(true);
     try {
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .in("role", ["admin", "super_admin"]);
+      const adminIds = new Set((adminRoles || []).map((r) => r.user_id));
+
       const { data: profiles, error: pErr } = await supabase
         .from("profiles")
         .select("user_id, display_name, avatar_url")
-        .neq("user_id", user.id)
-        .eq("show_in_trades", true);
+        .neq("user_id", user.id);
       if (pErr) throw pErr;
+
+      const visibleProfiles = (profiles || []).filter((p) => !adminIds.has(p.user_id));
 
       const { data: myStickers } = await supabase
         .from("user_stickers")
@@ -50,7 +57,7 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
         if ((s.duplicates ?? 0) > 0) myDuplicates.add(s.sticker_id);
       });
 
-      const otherIds = (profiles || []).map((p) => p.user_id);
+      const otherIds = visibleProfiles.map((p) => p.user_id);
       let othersMap: Record<string, { collected: Set<string>; duplicates: Set<string> }> = {};
       if (otherIds.length > 0) {
         const { data: others } = await supabase
@@ -67,7 +74,7 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
         });
       }
 
-      const matches: FriendMatch[] = (profiles || []).map((p) => {
+      const matches: FriendMatch[] = visibleProfiles.map((p) => {
         const their = othersMap[p.user_id] || { collected: new Set<string>(), duplicates: new Set<string>() };
         const iCanGive = [...myDuplicates].filter((id) => !their.collected.has(id)).length;
         const theyCanGive = [...their.duplicates].filter((id) => !myCollected.has(id)).length;
