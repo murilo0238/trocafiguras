@@ -27,25 +27,32 @@ const GroupsPanel = () => {
     setCreating(true);
     setName(""); setSearch(""); setSelected([]);
     setLoadingUsers(true);
-    const { data: adminRoles } = await supabase
-      .from("user_roles")
-      .select("user_id")
-      .in("role", ["admin", "super_admin"]);
-    const adminIds = new Set((adminRoles || []).map((r: any) => r.user_id));
 
-    const { data } = await supabase
+    // Try filtering by show_in_trades (hides admin accounts once migration is applied).
+    // If the column doesn't exist yet, fall back to returning everyone (no admin filter).
+    let { data, error } = await supabase
       .from("profiles")
       .select("user_id, display_name, avatar_url")
       .neq("user_id", user?.id ?? "")
+      .eq("show_in_trades", true)
       .order("display_name");
+
+    if (error) {
+      // Column likely doesn't exist yet — fetch without the filter
+      const fallback = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .neq("user_id", user?.id ?? "")
+        .order("display_name");
+      data = fallback.data;
+    }
+
     setAllUsers(
-      (data || [])
-        .filter((p) => !adminIds.has(p.user_id))
-        .map((p) => ({
-          userId: p.user_id,
-          displayName: p.display_name || "Colecionador",
-          avatarUrl: p.avatar_url,
-        }))
+      (data || []).map((p) => ({
+        userId: p.user_id,
+        displayName: p.display_name || "Colecionador",
+        avatarUrl: p.avatar_url,
+      }))
     );
     setLoadingUsers(false);
   };

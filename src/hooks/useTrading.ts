@@ -111,21 +111,33 @@ export const useTrading = () => {
         return;
       }
 
-      // Step 2: get other users with location (excluding admins via show_in_trades flag)
-      const { data: profiles, error: profilesError } = await supabase
+      // Step 2: get other users with location (excluding admins via show_in_trades flag).
+      // If the column doesn't exist yet (migration pending), fall back to no filter.
+      let { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("user_id, display_name, latitude, longitude")
         .not("latitude", "is", null)
         .not("longitude", "is", null)
         .neq("user_id", user.id)
         .eq("show_in_trades", true);
-      const filteredProfiles = profiles || [];
 
       if (profilesError) {
-        toast.error("Erro ao buscar colecionadores.");
-        setLoading(false);
-        return;
+        // Retry without show_in_trades filter (column may not exist yet)
+        const fallback = await supabase
+          .from("profiles")
+          .select("user_id, display_name, latitude, longitude")
+          .not("latitude", "is", null)
+          .not("longitude", "is", null)
+          .neq("user_id", user.id);
+        if (fallback.error) {
+          toast.error("Erro ao buscar colecionadores.");
+          setLoading(false);
+          return;
+        }
+        profiles = fallback.data;
+        profilesError = null;
       }
+      const filteredProfiles = profiles || [];
 
       if (filteredProfiles.length === 0) {
         setMatches([]);

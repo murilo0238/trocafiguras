@@ -31,19 +31,95 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
     if (!user) return;
     setLoading(true);
     try {
-      // Server-side computation: both users always get fresh, consistent numbers
-      const { data, error } = await (supabase as any).rpc("get_all_trade_matches");
-      if (error) throw error;
+      // Prefer server-side RPC for consistent, accurate numbers
+      const { data: rpcData, error: rpcError } = await (supabase as any).rpc("get_all_trade_matches");
+      if (!rpcError && rpcData) {
+        const matches: FriendMatch[] = (rpcData || []).map((m: any) => ({
+          userId: m.other_user_id,
+          displayName: m.display_name || "Colecionador",
+          avatarUrl: m.avatar_url,
+          iCanGive: Number(m.i_can_give),
+          theyCanGive: Number(m.they_can_give),
+          tradeScore: Number(m.trade_score),
+        }));
+        setFriends(matches);
+        return;
+      }
 
-      const matches: FriendMatch[] = (data || []).map((m: any) => ({
-        userId: m.other_user_id,
-        displayName: m.display_name || "Colecionador",
-        avatarUrl: m.avatar_url,
-        iCanGive: Number(m.i_can_give),
-        theyCanGive: Number(m.they_can_give),
-        tradeScore: Number(m.trade_score),
-      }));
+      // Fallback: client-side computation
+      // 1. Get all other users (respecting show_in_trades when column exists)
+      let { data: otherProfiles, error: profErr } = await (supabase as any)
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .neq("user_id", user.id)
+        .eq("show_in_trades", true);
 
+      if (profErr) {
+        // Column may not exist yet — fetch without filter
+        const fallback = await (supabase as any)
+          .from("profiles")
+          .select("user_id, display_name, avatar_url")
+          .neq("user_id", user.id);
+        if (fallback.error) throw fallback.error;
+        otherProfiles = fallback.data;
+      }
+
+      if (!otherProfiles || otherProfiles.length === 0) {
+        setFriends([]);
+        return;
+      }
+
+      // 2. Get my stickers
+      const { data: myStickers, error: myErr } = await (supabase as any)
+        .from("user_stickers")
+        .select("sticker_id, collected, duplicates")
+        .eq("user_id", user.id)
+        .limit(10000);
+      if (myErr) throw myErr;
+
+      const myCollected = new Set<string>();
+      const myDuplicates = new Set<string>();
+      for (const s of myStickers || []) {
+        if (s.collected) myCollected.add(s.sticker_id);
+        if (s.duplicates > 0) myDuplicates.add(s.sticker_id);
+      }
+
+      // 3. Get other users' stickers
+      const otherIds = otherProfiles.map((p: any) => p.user_id);
+      const { data: theirStickers, error: theirErr } = await (supabase as any)
+        .from("user_stickers")
+        .select("user_id, sticker_id, collected, duplicates")
+        .in("user_id", otherIds)
+        .limit(10000);
+      if (theirErr) throw theirErr;
+
+      const stickerMap: Record<string, { collected: Set<string>; duplicates: Set<string> }> = {};
+      for (const s of theirStickers || []) {
+        if (!stickerMap[s.user_id]) stickerMap[s.user_id] = { collected: new Set(), duplicates: new Set() };
+        if (s.collected) stickerMap[s.user_id].collected.add(s.sticker_id);
+        if (s.duplicates > 0) stickerMap[s.user_id].duplicates.add(s.sticker_id);
+      }
+
+      // 4. Compute trade matches
+      const matches: FriendMatch[] = [];
+      for (const p of otherProfiles) {
+        const their = stickerMap[p.user_id];
+        if (!their) continue;
+        const iCanGive = [...myDuplicates].filter((id) => !their.collected.has(id)).length;
+        const theyCanGive = [...their.duplicates].filter((id) => !myCollected.has(id)).length;
+        const tradeScore = Math.min(iCanGive, theyCanGive);
+        if (iCanGive > 0 || theyCanGive > 0) {
+          matches.push({
+            userId: p.user_id,
+            displayName: p.display_name || "Colecionador",
+            avatarUrl: p.avatar_url,
+            iCanGive,
+            theyCanGive,
+            tradeScore,
+          });
+        }
+      }
+      matches.sort((a, b) => b.tradeScore - a.tradeScore);
       setFriends(matches);
     } catch (e: any) {
       toast.error("Erro ao carregar amigos.");

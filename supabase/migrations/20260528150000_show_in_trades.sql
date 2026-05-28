@@ -1,16 +1,16 @@
--- Add show_in_trades flag to profiles to hide admin accounts from the trading panel
+-- Add show_in_trades flag to profiles.
+-- Only hide accounts with 'admin' role — super_admin users (the real owner)
+-- keep show_in_trades = true and continue appearing in trades normally.
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS show_in_trades boolean NOT NULL DEFAULT true;
 
--- Hide any existing admin / super_admin users from trades
 UPDATE public.profiles
 SET show_in_trades = false
 WHERE user_id IN (
   SELECT user_id FROM public.user_roles
-  WHERE role IN ('admin'::public.app_role, 'super_admin'::public.app_role)
+  WHERE role = 'admin'::public.app_role  -- only admin, NOT super_admin
 );
 
--- Trigger: whenever a user is granted an admin role, hide them from trades automatically
 CREATE OR REPLACE FUNCTION public.hide_admin_from_trades()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -18,7 +18,8 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF NEW.role IN ('admin'::public.app_role, 'super_admin'::public.app_role) THEN
+  -- Only hide plain 'admin' accounts, not super_admin (app owner)
+  IF NEW.role = 'admin'::public.app_role THEN
     UPDATE public.profiles SET show_in_trades = false WHERE user_id = NEW.user_id;
   END IF;
   RETURN NEW;
