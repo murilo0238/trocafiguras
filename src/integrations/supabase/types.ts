@@ -192,6 +192,7 @@ export type Database = {
           location_mode: string
           location_updated_at: string | null
           longitude: number | null
+          pin_hash: string | null
           share_collection: boolean
           share_location: boolean
           state: string | null
@@ -210,6 +211,7 @@ export type Database = {
           location_mode?: string
           location_updated_at?: string | null
           longitude?: number | null
+          pin_hash?: string | null
           share_collection?: boolean
           share_location?: boolean
           state?: string | null
@@ -228,6 +230,7 @@ export type Database = {
           location_mode?: string
           location_updated_at?: string | null
           longitude?: number | null
+          pin_hash?: string | null
           share_collection?: boolean
           share_location?: boolean
           state?: string | null
