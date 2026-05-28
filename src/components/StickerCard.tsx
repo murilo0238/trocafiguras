@@ -8,6 +8,7 @@ interface StickerCardProps {
   onToggle: () => void;
   onAddDuplicate: () => void;
   onRemoveDuplicate: () => void;
+  readOnly?: boolean;
 }
 
 const StickerCard = ({
@@ -17,6 +18,7 @@ const StickerCard = ({
   onToggle,
   onAddDuplicate,
   onRemoveDuplicate,
+  readOnly = false,
 }: StickerCardProps) => {
   const match = id ? id.match(/^([A-Za-z]+)(\d+)$/) : null;
   const code = match ? match[1] : id;
