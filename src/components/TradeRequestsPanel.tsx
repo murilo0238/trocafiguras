@@ -466,8 +466,8 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
         <TradeBuilderSheet
           open={showBuilder}
           onClose={() => setShowBuilder(false)}
-          myDuplicates={matchData.iCanGive}
-          theirDuplicates={matchData.theyCanGive}
+          myDuplicates={matchData.myDuplicates}
+          theirDuplicates={matchData.theirDuplicates}
           partnerName={scannedName}
           initialOffered={matchData.iCanGive}
           initialRequested={matchData.theyCanGive}
