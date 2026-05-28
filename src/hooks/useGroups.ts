@@ -110,11 +110,20 @@ export const useGroups = () => {
         .single();
       if (error || !g) { toast.error("Erro ao criar grupo."); return null; }
 
-      const rows = [
-        { group_id: g.id, user_id: user.id },
-        ...memberIds.map((id) => ({ group_id: g.id, user_id: id })),
-      ];
-      const { error: memErr } = await supabase.from("group_members").insert(rows);
+      // Insert creator first so the group_members RLS can verify ownership
+      // when inserting the invited members in the second call.
+      const { error: creatorErr } = await supabase
+        .from("group_members")
+        .insert({ group_id: g.id, user_id: user.id });
+      if (creatorErr) {
+        await supabase.from("groups").delete().eq("id", g.id);
+        toast.error("Erro ao criar grupo.");
+        return null;
+      }
+
+      const { error: memErr } = await supabase
+        .from("group_members")
+        .insert(memberIds.map((id) => ({ group_id: g.id, user_id: id })));
       if (memErr) {
         await supabase.from("groups").delete().eq("id", g.id);
         toast.error("Erro ao adicionar membros.");

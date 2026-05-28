@@ -31,19 +31,14 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
     if (!user) return;
     setLoading(true);
     try {
-      const { data: adminRoles } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .in("role", ["admin", "super_admin"]);
-      const adminIds = new Set((adminRoles || []).map((r) => r.user_id));
-
       const { data: profiles, error: pErr } = await supabase
         .from("profiles")
         .select("user_id, display_name, avatar_url")
-        .neq("user_id", user.id);
+        .neq("user_id", user.id)
+        .eq("show_in_trades", true);
       if (pErr) throw pErr;
 
-      const visibleProfiles = (profiles || []).filter((p) => !adminIds.has(p.user_id));
+      const visibleProfiles = profiles || [];
 
       const { data: myStickers } = await supabase
         .from("user_stickers")

@@ -111,20 +111,15 @@ export const useTrading = () => {
         return;
       }
 
-      // Step 2: get admin IDs to exclude, then get other users with location
-      const { data: adminRoles } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .in("role", ["admin", "super_admin"]);
-      const adminIds = new Set((adminRoles || []).map((r) => r.user_id));
-
+      // Step 2: get other users with location (excluding admins via show_in_trades flag)
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("user_id, display_name, latitude, longitude")
         .not("latitude", "is", null)
         .not("longitude", "is", null)
-        .neq("user_id", user.id);
-      const filteredProfiles = (profiles || []).filter((p) => !adminIds.has(p.user_id));
+        .neq("user_id", user.id)
+        .eq("show_in_trades", true);
+      const filteredProfiles = profiles || [];
 
       if (profilesError) {
         toast.error("Erro ao buscar colecionadores.");
