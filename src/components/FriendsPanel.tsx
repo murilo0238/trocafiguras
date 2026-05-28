@@ -170,6 +170,13 @@ const FriendsPanel = () => {
             f={f}
             actions={
               <>
+                <Link
+                  to={`/album/${f.userId}`}
+                  className={`${btnBase} bg-muted hover:bg-primary/10 text-primary`}
+                  title="Ver álbum"
+                >
+                  <BookOpen className="w-4 h-4" />
+                </Link>
                 <button
                   onClick={() => setChat({ userId: f.userId, name: f.displayName, avatarUrl: f.avatarUrl })}
                   className={`${btnBase} bg-primary/10 hover:bg-primary/20 text-primary`}
