@@ -34,7 +34,8 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
       const { data: profiles, error: pErr } = await supabase
         .from("profiles")
         .select("user_id, display_name, avatar_url")
-        .neq("user_id", user.id);
+        .neq("user_id", user.id)
+        .eq("show_in_trades", true);
       if (pErr) throw pErr;
 
       const { data: myStickers } = await supabase
@@ -55,7 +56,8 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
         const { data: others } = await supabase
           .from("user_stickers")
           .select("user_id, sticker_id, collected, duplicates")
-          .in("user_id", otherIds);
+          .in("user_id", otherIds)
+          .limit(10000);
         others?.forEach((s) => {
           if (!othersMap[s.user_id]) {
             othersMap[s.user_id] = { collected: new Set(), duplicates: new Set() };

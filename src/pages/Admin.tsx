@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, Search, Shield, Ban, Trash2, KeyRound, UserCog, Plus, RefreshCw, ScrollText } from "lucide-react";
+import { ArrowLeft, Search, Shield, Ban, Trash2, KeyRound, UserCog, Plus, RefreshCw, ScrollText, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SECTIONS, STICKERS_PER_SECTION, getStickerNumber, TOTAL_STICKERS } from "@/data/teams";
 
 type Perm = "list_users" | "reset_password" | "ban_user" | "delete_user" | "edit_profile" | "manage_admins";
 const ALL_PERMS: { key: Perm; label: string }[] = [
@@ -70,6 +71,9 @@ const AdminPage = () => {
   const [grantTarget, setGrantTarget] = useState<AppUser | null>(null);
   const [grantPerms, setGrantPerms] = useState<Perm[]>([]);
   const [denied, setDenied] = useState(false);
+  const [collectionUser, setCollectionUser] = useState<AppUser | null>(null);
+  const [collectionData, setCollectionData] = useState<Record<string, { collected: boolean; duplicates: number }> | null>(null);
+  const [collectionLoading, setCollectionLoading] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -156,6 +160,28 @@ const AdminPage = () => {
     setGrantOpen(true);
   };
 
+  const openCollection = async (u: AppUser) => {
+    setCollectionUser(u);
+    setCollectionData(null);
+    setCollectionLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("user_stickers")
+        .select("sticker_id, collected, duplicates")
+        .eq("user_id", u.id);
+      if (error) throw error;
+      const map: Record<string, { collected: boolean; duplicates: number }> = {};
+      for (const row of data || []) {
+        map[row.sticker_id] = { collected: row.collected, duplicates: row.duplicates };
+      }
+      setCollectionData(map);
+    } catch (e) {
+      toast.error("Erro ao carregar coleção: " + (e as Error).message);
+      setCollectionUser(null);
+    }
+    setCollectionLoading(false);
+  };
+
   if (denied) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3 p-6 text-center">
@@ -218,6 +244,7 @@ const AdminPage = () => {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1.5 mt-3">
+                    <Button size="sm" variant="outline" onClick={() => openCollection(u)} className="h-7 text-[11px]"><BookOpen className="w-3 h-3 mr-1" />Ver coleção</Button>
                     {can("reset_password") && <Button size="sm" variant="outline" onClick={() => handleReset(u)} className="h-7 text-[11px]"><KeyRound className="w-3 h-3 mr-1" />Reset senha</Button>}
                     {can("ban_user") && !u.banned && <Button size="sm" variant="outline" onClick={() => handleBan(u)} className="h-7 text-[11px]"><Ban className="w-3 h-3 mr-1" />Banir</Button>}
                     {can("ban_user") && u.banned && <Button size="sm" variant="outline" onClick={() => handleUnban(u)} className="h-7 text-[11px]">Desbanir</Button>}
@@ -284,6 +311,77 @@ const AdminPage = () => {
           </div>
         )}
       </main>
+
+      <Dialog open={!!collectionUser} onOpenChange={(open) => { if (!open) setCollectionUser(null); }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Coleção de {collectionUser?.display_name || collectionUser?.email}
+            </DialogTitle>
+          </DialogHeader>
+          {collectionLoading && (
+            <div className="flex justify-center py-8">
+              <div className="w-8 h-8 rounded-full border-[3px] border-primary border-t-transparent animate-spin" />
+            </div>
+          )}
+          {!collectionLoading && collectionData !== null && (() => {
+            const totalCollected = Object.values(collectionData).filter((s) => s.collected).length;
+            const totalDuplicates = Object.values(collectionData).reduce((acc, s) => acc + s.duplicates, 0);
+            const pct = Math.round((totalCollected / TOTAL_STICKERS) * 100);
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-muted rounded-lg p-2">
+                    <p className="text-lg font-bold text-primary">{totalCollected}</p>
+                    <p className="text-[10px] text-muted-foreground">coletadas</p>
+                  </div>
+                  <div className="bg-muted rounded-lg p-2">
+                    <p className="text-lg font-bold">{TOTAL_STICKERS - totalCollected}</p>
+                    <p className="text-[10px] text-muted-foreground">faltando</p>
+                  </div>
+                  <div className="bg-muted rounded-lg p-2">
+                    <p className="text-lg font-bold text-amber-500">{totalDuplicates}</p>
+                    <p className="text-[10px] text-muted-foreground">repetidas</p>
+                  </div>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                </div>
+                <p className="text-center text-xs text-muted-foreground">{pct}% completo ({totalCollected}/{TOTAL_STICKERS})</p>
+                <div className="space-y-1">
+                  {SECTIONS.map((section) => {
+                    const count = section.stickerCount ?? STICKERS_PER_SECTION;
+                    const collected = Array.from({ length: count }, (_, i) => {
+                      const id = `${section.code}${getStickerNumber(section.code, i + 1)}`;
+                      return collectionData[id]?.collected ? 1 : 0;
+                    }).reduce((a, b) => a + b, 0);
+                    const dup = Array.from({ length: count }, (_, i) => {
+                      const id = `${section.code}${getStickerNumber(section.code, i + 1)}`;
+                      return collectionData[id]?.duplicates ?? 0;
+                    }).reduce((a, b) => a + b, 0);
+                    const sectionPct = Math.round((collected / count) * 100);
+                    return (
+                      <div key={section.code} className="flex items-center gap-2 text-xs">
+                        <span className="w-5 text-center">{section.flag || "🏴"}</span>
+                        <span className="w-24 truncate text-foreground/80">{section.name}</span>
+                        <div className="flex-1 bg-muted rounded-full h-1.5">
+                          <div
+                            className={`h-1.5 rounded-full ${collected === count ? "bg-gold" : "bg-primary"}`}
+                            style={{ width: `${sectionPct}%` }}
+                          />
+                        </div>
+                        <span className="w-10 text-right text-muted-foreground">{collected}/{count}</span>
+                        {dup > 0 && <span className="text-[10px] text-amber-500 w-8 text-right">+{dup}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={grantOpen} onOpenChange={setGrantOpen}>
         <DialogContent className="max-w-sm">

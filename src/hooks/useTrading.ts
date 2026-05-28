@@ -117,7 +117,8 @@ export const useTrading = () => {
         .select("user_id, display_name, latitude, longitude")
         .not("latitude", "is", null)
         .not("longitude", "is", null)
-        .neq("user_id", user.id);
+        .neq("user_id", user.id)
+        .eq("show_in_trades", true);
 
       if (profilesError) {
         toast.error("Erro ao buscar colecionadores.");
@@ -171,7 +172,8 @@ export const useTrading = () => {
       const { data: otherStickers, error: otherStickersError } = await supabase
         .from("user_stickers")
         .select("user_id, sticker_id, collected, duplicates")
-        .in("user_id", nearbyUserIds);
+        .in("user_id", nearbyUserIds)
+        .limit(10000);
 
       if (otherStickersError) {
         toast.error("Erro ao carregar figurinhas dos colecionadores.");
