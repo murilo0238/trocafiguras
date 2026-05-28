@@ -31,59 +31,19 @@ const TradingPanel = ({ onPendingCountChange }: TradingPanelProps) => {
     if (!user) return;
     setLoading(true);
     try {
-      const { data: profiles, error: pErr } = await supabase
-        .from("profiles")
-        .select("user_id, display_name, avatar_url")
-        .neq("user_id", user.id)
-        .eq("show_in_trades", true);
-      if (pErr) throw pErr;
+      // Server-side computation: both users always get fresh, consistent numbers
+      const { data, error } = await (supabase as any).rpc("get_all_trade_matches");
+      if (error) throw error;
 
-      const visibleProfiles = profiles || [];
+      const matches: FriendMatch[] = (data || []).map((m: any) => ({
+        userId: m.other_user_id,
+        displayName: m.display_name || "Colecionador",
+        avatarUrl: m.avatar_url,
+        iCanGive: Number(m.i_can_give),
+        theyCanGive: Number(m.they_can_give),
+        tradeScore: Number(m.trade_score),
+      }));
 
-      const { data: myStickers } = await supabase
-        .from("user_stickers")
-        .select("sticker_id, collected, duplicates")
-        .eq("user_id", user.id);
-
-      const myCollected = new Set<string>();
-      const myDuplicates = new Set<string>();
-      myStickers?.forEach((s) => {
-        if (s.collected) myCollected.add(s.sticker_id);
-        if ((s.duplicates ?? 0) > 0) myDuplicates.add(s.sticker_id);
-      });
-
-      const otherIds = visibleProfiles.map((p) => p.user_id);
-      let othersMap: Record<string, { collected: Set<string>; duplicates: Set<string> }> = {};
-      if (otherIds.length > 0) {
-        const { data: others } = await supabase
-          .from("user_stickers")
-          .select("user_id, sticker_id, collected, duplicates")
-          .in("user_id", otherIds)
-          .limit(10000);
-        others?.forEach((s) => {
-          if (!othersMap[s.user_id]) {
-            othersMap[s.user_id] = { collected: new Set(), duplicates: new Set() };
-          }
-          if (s.collected) othersMap[s.user_id].collected.add(s.sticker_id);
-          if ((s.duplicates ?? 0) > 0) othersMap[s.user_id].duplicates.add(s.sticker_id);
-        });
-      }
-
-      const matches: FriendMatch[] = visibleProfiles.map((p) => {
-        const their = othersMap[p.user_id] || { collected: new Set<string>(), duplicates: new Set<string>() };
-        const iCanGive = [...myDuplicates].filter((id) => !their.collected.has(id)).length;
-        const theyCanGive = [...their.duplicates].filter((id) => !myCollected.has(id)).length;
-        return {
-          userId: p.user_id,
-          displayName: p.display_name || "Amigo",
-          avatarUrl: p.avatar_url,
-          iCanGive,
-          theyCanGive,
-          tradeScore: Math.min(iCanGive, theyCanGive),
-        };
-      });
-
-      matches.sort((a, b) => b.tradeScore - a.tradeScore || b.theyCanGive - a.theyCanGive);
       setFriends(matches);
     } catch (e: any) {
       toast.error("Erro ao carregar amigos.");
