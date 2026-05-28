@@ -1,9 +1,6 @@
 -- Server-side trade matching function.
--- SECURITY DEFINER runs as the function owner (bypasses RLS), so it can
--- safely read user_roles to exclude admin accounts without needing any
--- extra column on profiles.
--- Both users calling this function always get fresh, consistent numbers.
-
+-- Both users call this function and always get fresh, consistent numbers
+-- because the computation happens in the database at query time.
 CREATE OR REPLACE FUNCTION public.get_all_trade_matches()
 RETURNS TABLE(
   other_user_id uuid,
@@ -19,7 +16,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
   SELECT
-    p.user_id        AS other_user_id,
+    p.user_id                                     AS other_user_id,
     p.display_name,
     p.avatar_url,
 
@@ -34,7 +31,7 @@ AS $$
                  AND th.sticker_id = me.sticker_id
                  AND th.collected  = true
             )
-    ) AS i_can_give,
+    )                                             AS i_can_give,
 
     -- Their duplicates that I haven't collected yet
     (SELECT COUNT(*)
@@ -47,7 +44,7 @@ AS $$
                  AND me.sticker_id = th.sticker_id
                  AND me.collected  = true
             )
-    ) AS they_can_give,
+    )                                             AS they_can_give,
 
     -- trade_score = min(i_can_give, they_can_give)
     LEAST(
@@ -73,15 +70,10 @@ AS $$
                    AND me.collected  = true
               )
       )
-    ) AS trade_score
+    )                                             AS trade_score
 
   FROM profiles p
   WHERE p.user_id != auth.uid()
-    -- Exclude admin/super_admin accounts (SECURITY DEFINER can read user_roles freely)
-    AND NOT EXISTS (
-      SELECT 1 FROM user_roles ur
-       WHERE ur.user_id = p.user_id
-         AND ur.role IN ('admin', 'super_admin')
-    )
+    AND COALESCE(p.show_in_trades, true) = true
   ORDER BY trade_score DESC, they_can_give DESC
 $$;
