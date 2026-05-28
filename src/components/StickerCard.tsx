@@ -35,12 +35,14 @@ const StickerCard = ({
     >
       {/* Inner Card (Sticker Graphic) */}
       <div
-        className={`relative aspect-[3/4] rounded-xl flex flex-col items-center justify-center cursor-pointer transition-transform active:scale-95 ${
+        className={`relative aspect-[3/4] rounded-xl flex flex-col items-center justify-center transition-transform ${
+          readOnly ? "cursor-default" : "cursor-pointer active:scale-95"
+        } ${
           collected
             ? "bg-gradient-to-br from-gold-light via-gold to-[#9e844a] shadow-inner"
             : "bg-white/5 hover:bg-white/10"
         }`}
-        onClick={onToggle}
+        onClick={readOnly ? undefined : onToggle}
       >
         {/* Shine effect for collected */}
         {collected && (
