@@ -33,6 +33,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/trade/:userId" element={<TradeLinkPage />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/album/:userId" element={<UserAlbum />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
