@@ -46,9 +46,18 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
     myDuplicates: string[];
     theirDuplicates: string[];
   } | null>(null);
+  // Custom selection set by the builder (null = use auto-suggestion)
+  const [customOffered, setCustomOffered] = useState<string[] | null>(null);
+  const [customRequested, setCustomRequested] = useState<string[] | null>(null);
   const [sending, setSending] = useState(false);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCustomOffered(null);
+    setCustomRequested(null);
+    setShowBuilder(false);
+  }, [scannedUserId]);
 
   useEffect(() => {
     if (!scannedUserId || !user) return;
@@ -88,17 +97,20 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
     computeMatch();
   }, [scannedUserId, user]);
 
-  const handleSendTrade = async (offered?: string[], requested?: string[]) => {
+  const handleSendTrade = async () => {
     if (!scannedUserId || !matchData) return;
     setSending(true);
     const count = Math.min(matchData.iCanGive.length, matchData.theyCanGive.length);
-    const finalOffered = offered ?? matchData.iCanGive.slice(0, count);
-    const finalRequested = requested ?? matchData.theyCanGive.slice(0, count);
+    // Use custom selection if set by builder, otherwise use auto-suggestion
+    const finalOffered = customOffered ?? matchData.iCanGive.slice(0, count);
+    const finalRequested = customRequested ?? matchData.theyCanGive.slice(0, count);
     const ok = await sendTradeRequest(scannedUserId, finalOffered, finalRequested);
     setSending(false);
     if (ok !== false) {
       onClearScanned();
       setMatchData(null);
+      setCustomOffered(null);
+      setCustomRequested(null);
     }
   };
 
@@ -184,66 +196,81 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
       {activeTab === "ativas" ? (
         <>
           {/* Scanned user proposal */}
-          {scannedUserId && matchData && (
-            <div className="bg-card rounded-xl p-4 shadow-md space-y-3 border-2 border-primary">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-foreground text-sm">📱 Troca com {scannedName}</h3>
-                <button onClick={() => { onClearScanned(); setMatchData(null); }} className="p-1 rounded-full hover:bg-muted">
-                  <X className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </div>
+          {scannedUserId && matchData && (() => {
+            const count = Math.min(matchData.iCanGive.length, matchData.theyCanGive.length);
+            const displayOffered = customOffered ?? matchData.iCanGive.slice(0, count);
+            const displayRequested = customRequested ?? matchData.theyCanGive.slice(0, count);
+            const isCustomized = customOffered !== null || customRequested !== null;
+            return (
+              <div className="bg-card rounded-xl p-4 shadow-md space-y-3 border-2 border-primary">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-foreground text-sm">📱 Troca com {scannedName}</h3>
+                    {isCustomized && (
+                      <p className="text-[10px] text-primary font-semibold mt-0.5">✏️ Seleção personalizada</p>
+                    )}
+                  </div>
+                  <button onClick={() => { onClearScanned(); setMatchData(null); setCustomOffered(null); setCustomRequested(null); }} className="p-1 rounded-full hover:bg-muted">
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </div>
 
-              {matchData.iCanGive.length === 0 && matchData.theyCanGive.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-2">
-                  Nenhuma troca possível com este colecionador.
-                </p>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="bg-accent/30 rounded-lg p-2">
-                      <p className="font-bold text-accent-foreground">Você dá</p>
-                      <div className="flex flex-wrap gap-0.5 mt-1 max-h-20 overflow-y-auto">
-                        {matchData.iCanGive.slice(0, Math.min(matchData.iCanGive.length, matchData.theyCanGive.length)).map((id) => (
-                          <span key={id} className="bg-amber-500/20 text-amber-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-amber-500/30">{id}</span>
-                        ))}
+                {displayOffered.length === 0 && displayRequested.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-2">
+                    Nenhuma troca possível com este colecionador.
+                  </p>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-accent/30 rounded-lg p-2">
+                        <p className="font-bold text-accent-foreground">Você dá ({displayOffered.length})</p>
+                        <div className="flex flex-wrap gap-0.5 mt-1 max-h-20 overflow-y-auto">
+                          {displayOffered.map((id) => (
+                            <span key={id} className="bg-amber-500/20 text-amber-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-amber-500/30">{id}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="bg-primary/10 rounded-lg p-2">
+                        <p className="font-bold text-primary">Você recebe ({displayRequested.length})</p>
+                        <div className="flex flex-wrap gap-0.5 mt-1 max-h-20 overflow-y-auto">
+                          {displayRequested.map((id) => (
+                            <span key={id} className="bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-emerald-500/30">{id}</span>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    <div className="bg-primary/10 rounded-lg p-2">
-                      <p className="font-bold text-primary">Você recebe</p>
-                      <div className="flex flex-wrap gap-0.5 mt-1 max-h-20 overflow-y-auto">
-                        {matchData.theyCanGive.slice(0, Math.min(matchData.iCanGive.length, matchData.theyCanGive.length)).map((id) => (
-                          <span key={id} className="bg-emerald-500/20 text-emerald-300 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-emerald-500/30">{id}</span>
-                        ))}
-                      </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSendTrade}
+                        disabled={sending}
+                        className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-1.5 text-sm"
+                      >
+                        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        Enviar
+                      </button>
+                      <button
+                        onClick={() => setShowBuilder(true)}
+                        className={`px-3 py-2.5 rounded-lg border font-bold transition-colors text-sm ${
+                          isCustomized
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border hover:bg-muted text-foreground"
+                        }`}
+                      >
+                        {isCustomized ? "✏️ Editar" : "Personalizar"}
+                      </button>
+                      <button
+                        onClick={() => setEventMode(true)}
+                        className="px-3 py-2.5 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-colors flex items-center justify-center"
+                        title="Modo Evento"
+                      >
+                        <Maximize2 className="w-4 h-4" />
+                      </button>
                     </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleSendTrade()}
-                      disabled={sending}
-                      className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-1.5 text-sm"
-                    >
-                      {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                      Enviar sugestão
-                    </button>
-                    <button
-                      onClick={() => setShowBuilder(true)}
-                      className="px-3 py-2.5 rounded-lg border border-border hover:bg-muted text-foreground font-bold transition-colors text-sm"
-                    >
-                      Personalizar
-                    </button>
-                    <button
-                      onClick={() => setEventMode(true)}
-                      className="px-3 py-2.5 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground transition-colors flex items-center justify-center"
-                      title="Modo Evento"
-                    >
-                      <Maximize2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
+                  </>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Incoming requests */}
           {pendingRequests.length > 0 && (
@@ -461,19 +488,20 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
         />
       )}
 
-      {/* Custom trade builder — só monta quando aberto para garantir estado fresco */}
+      {/* Custom trade builder — só monta quando aberto, retorna seleção ao fechar */}
       {matchData && scannedUserId && showBuilder && (
         <TradeBuilderSheet
           open={true}
-          onClose={() => setShowBuilder(false)}
+          onClose={(off, req) => {
+            setCustomOffered(off);
+            setCustomRequested(req);
+            setShowBuilder(false);
+          }}
           myDuplicates={matchData.myDuplicates}
           theirDuplicates={matchData.theirDuplicates}
           partnerName={scannedName}
-          initialOffered={matchData.iCanGive}
-          initialRequested={matchData.theyCanGive}
-          onSend={async (offered, requested) => {
-            await handleSendTrade(offered, requested);
-          }}
+          initialOffered={customOffered ?? matchData.iCanGive.slice(0, Math.min(matchData.iCanGive.length, matchData.theyCanGive.length))}
+          initialRequested={customRequested ?? matchData.theyCanGive.slice(0, Math.min(matchData.iCanGive.length, matchData.theyCanGive.length))}
         />
       )}
     </div>

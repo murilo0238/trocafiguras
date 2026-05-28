@@ -1,30 +1,24 @@
 import { useState, useMemo } from "react";
-import { X, Send, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { SECTIONS } from "@/data/teams";
 import { getSectionForSticker } from "@/data/teams";
 
 interface Props {
   open: boolean;
-  onClose: () => void;
+  onClose: (offered: string[], requested: string[]) => void;
   myDuplicates: string[];
   theirDuplicates: string[];
   partnerName: string;
   initialOffered: string[];
   initialRequested: string[];
-  onSend: (offered: string[], requested: string[]) => Promise<void>;
 }
 
 type Tab = "offer" | "request";
 
-// Group sticker IDs by section, preserving SECTIONS order
 const groupBySection = (ids: string[]) => {
-  const set = new Set(ids);
   const groups: { code: string; name: string; flag?: string; stickers: string[] }[] = [];
   for (const section of SECTIONS) {
-    const stickers = ids.filter((id) => {
-      const sec = getSectionForSticker(id);
-      return sec?.code === section.code;
-    });
+    const stickers = ids.filter((id) => getSectionForSticker(id)?.code === section.code);
     if (stickers.length > 0) {
       groups.push({ code: section.code, name: section.name, flag: section.flag, stickers });
     }
@@ -40,13 +34,10 @@ const TradeBuilderSheet = ({
   partnerName,
   initialOffered,
   initialRequested,
-  onSend,
 }: Props) => {
   const [tab, setTab] = useState<Tab>("offer");
-  // Use arrays instead of Sets to avoid React stale-state issues with Set mutations
   const [offered, setOffered] = useState<string[]>(initialOffered);
   const [requested, setRequested] = useState<string[]>(initialRequested);
-  const [sending, setSending] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>(() => {
     const expanded: string[] = [];
     for (const section of SECTIONS) {
@@ -97,21 +88,13 @@ const TradeBuilderSheet = ({
     }
   };
 
-  const handleSend = async () => {
-    if (offered.length === 0 && requested.length === 0) return;
-    setSending(true);
-    await onSend(offered, requested);
-    setSending(false);
-    onClose();
-  };
-
-  const emptyMsg = tab === "offer"
-    ? `Você não tem repetidas que ${partnerName} ainda não possui.`
-    : `${partnerName} não tem repetidas que você ainda não possui.`;
-
   const renderGroups = (side: Tab) => {
     const grps = side === "offer" ? offeredGroups : requestedGroups;
     const sel = side === "offer" ? offered : requested;
+
+    const emptyMsg = side === "offer"
+      ? `Você não tem repetidas que ${partnerName} ainda não possui.`
+      : `${partnerName} não tem repetidas que você ainda não possui.`;
 
     if (grps.length === 0) {
       return <p className="text-center text-sm text-muted-foreground py-8">{emptyMsg}</p>;
@@ -125,9 +108,10 @@ const TradeBuilderSheet = ({
 
       return (
         <div key={group.code} className="border border-border/50 rounded-xl overflow-hidden">
-          {/* Section header — use div to avoid nested button HTML issue */}
-          <div className="w-full flex items-center justify-between px-3 py-2.5 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-            onClick={() => toggleSection(`${side}-${group.code}`)}>
+          <div
+            className="w-full flex items-center justify-between px-3 py-2.5 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+            onClick={() => toggleSection(`${side}-${group.code}`)}
+          >
             <div className="flex items-center gap-2">
               <span className="text-base">{group.flag}</span>
               <span className="text-sm font-bold text-foreground">{group.name}</span>
@@ -156,15 +140,13 @@ const TradeBuilderSheet = ({
               >
                 {allSelected ? "Tirar tudo" : "Selec. todos"}
               </button>
-              {isExpanded ? (
-                <ChevronUp className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-              )}
+              {isExpanded
+                ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+              }
             </div>
           </div>
 
-          {/* Sticker chips */}
           {isExpanded && (
             <div className="flex flex-wrap gap-1.5 p-3">
               {group.stickers.map((id) => {
@@ -192,17 +174,15 @@ const TradeBuilderSheet = ({
     });
   };
 
-  const canSend = offered.length > 0 || requested.length > 0;
-
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
         <div>
-          <p className="font-bold text-foreground text-sm">Montar troca</p>
-          <p className="text-xs text-muted-foreground">com {partnerName}</p>
+          <p className="font-bold text-foreground text-sm">Personalizar troca</p>
+          <p className="text-xs text-muted-foreground">com {partnerName} — clique nas figurinhas para marcar/desmarcar</p>
         </div>
-        <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted transition-colors">
+        <button onClick={() => onClose(offered, requested)} className="p-2 rounded-lg hover:bg-muted transition-colors">
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
       </div>
@@ -217,11 +197,9 @@ const TradeBuilderSheet = ({
         >
           <span className="flex items-center justify-center gap-1.5">
             Eu ofereço
-            {offered.length > 0 && (
-              <span className="bg-orange-500/20 text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                {offered.length}
-              </span>
-            )}
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${offered.length > 0 ? "bg-orange-500/20 text-orange-400" : "bg-muted text-muted-foreground"}`}>
+              {offered.length}
+            </span>
           </span>
           {tab === "offer" && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-400 rounded-full" />
@@ -235,25 +213,14 @@ const TradeBuilderSheet = ({
         >
           <span className="flex items-center justify-center gap-1.5">
             Eu peço
-            {requested.length > 0 && (
-              <span className="bg-primary/20 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                {requested.length}
-              </span>
-            )}
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${requested.length > 0 ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
+              {requested.length}
+            </span>
           </span>
           {tab === "request" && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
           )}
         </button>
-      </div>
-
-      {/* Hint */}
-      <div className="px-4 py-2 bg-muted/20 flex-shrink-0">
-        <p className="text-[11px] text-muted-foreground text-center">
-          {tab === "offer"
-            ? `Suas repetidas que ${partnerName} ainda não tem`
-            : `Repetidas de ${partnerName} que você ainda não tem`}
-        </p>
       </div>
 
       {/* List */}
@@ -262,31 +229,13 @@ const TradeBuilderSheet = ({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border p-4 space-y-3 flex-shrink-0 bg-card">
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-3">
-            <span className={offered.length > 0 ? "text-orange-400 font-bold" : "text-muted-foreground"}>
-              Dando {offered.length}
-            </span>
-            <span className="text-muted-foreground">·</span>
-            <span className={requested.length > 0 ? "text-primary font-bold" : "text-muted-foreground"}>
-              Pedindo {requested.length}
-            </span>
-          </div>
-          {offered.length === 0 && requested.length > 0 && (
-            <span className="text-[10px] text-amber-500 font-semibold">pedido sem oferta</span>
-          )}
-          {offered.length > 0 && requested.length === 0 && (
-            <span className="text-[10px] text-blue-400 font-semibold">doação</span>
-          )}
-        </div>
+      <div className="border-t border-border p-4 flex-shrink-0 bg-card">
         <button
-          onClick={handleSend}
-          disabled={!canSend || sending}
-          className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 disabled:opacity-40 hover:opacity-90 transition-opacity"
+          onClick={() => onClose(offered, requested)}
+          className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
         >
-          {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          Enviar proposta
+          <Check className="w-4 h-4" />
+          Confirmar — dando {offered.length}, pedindo {requested.length}
         </button>
       </div>
     </div>
