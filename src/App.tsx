@@ -11,6 +11,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import TradeLinkPage from "./pages/TradeLinkPage";
 import Admin from "./pages/Admin";
+import UserAlbum from "./pages/UserAlbum";
 import NotFound from "./pages/NotFound";
 import InstallBanner from "./components/InstallBanner";
 
