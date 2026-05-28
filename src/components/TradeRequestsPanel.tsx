@@ -461,10 +461,10 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
         />
       )}
 
-      {/* Custom trade builder */}
-      {matchData && scannedUserId && (
+      {/* Custom trade builder — só monta quando aberto para garantir estado fresco */}
+      {matchData && scannedUserId && showBuilder && (
         <TradeBuilderSheet
-          open={showBuilder}
+          open={true}
           onClose={() => setShowBuilder(false)}
           myDuplicates={matchData.myDuplicates}
           theirDuplicates={matchData.theirDuplicates}

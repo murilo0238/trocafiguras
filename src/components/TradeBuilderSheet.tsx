@@ -43,17 +43,17 @@ const TradeBuilderSheet = ({
   onSend,
 }: Props) => {
   const [tab, setTab] = useState<Tab>("offer");
-  const [offered, setOffered] = useState<Set<string>>(() => new Set(initialOffered));
-  const [requested, setRequested] = useState<Set<string>>(() => new Set(initialRequested));
+  // Use arrays instead of Sets to avoid React stale-state issues with Set mutations
+  const [offered, setOffered] = useState<string[]>(initialOffered);
+  const [requested, setRequested] = useState<string[]>(initialRequested);
   const [sending, setSending] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
-    // Auto-expand sections that have pre-selected stickers
-    const expanded = new Set<string>();
+  const [expandedSections, setExpandedSections] = useState<string[]>(() => {
+    const expanded: string[] = [];
     for (const section of SECTIONS) {
-      const hasOffer = initialOffered.some((id) => getSectionForSticker(id)?.code === section.code);
-      const hasRequest = initialRequested.some((id) => getSectionForSticker(id)?.code === section.code);
-      if (hasOffer) expanded.add(`offer-${section.code}`);
-      if (hasRequest) expanded.add(`request-${section.code}`);
+      if (initialOffered.some((id) => getSectionForSticker(id)?.code === section.code))
+        expanded.push(`offer-${section.code}`);
+      if (initialRequested.some((id) => getSectionForSticker(id)?.code === section.code))
+        expanded.push(`request-${section.code}`);
     }
     return expanded;
   });
@@ -65,54 +65,46 @@ const TradeBuilderSheet = ({
 
   const toggle = (id: string, side: Tab) => {
     if (side === "offer") {
-      setOffered((prev) => {
-        const next = new Set(prev);
-        next.has(id) ? next.delete(id) : next.add(id);
-        return next;
-      });
+      setOffered((prev) =>
+        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      );
     } else {
-      setRequested((prev) => {
-        const next = new Set(prev);
-        next.has(id) ? next.delete(id) : next.add(id);
-        return next;
-      });
+      setRequested((prev) =>
+        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      );
     }
   };
 
   const toggleSection = (code: string) => {
-    setExpandedSections((prev) => {
-      const next = new Set(prev);
-      next.has(code) ? next.delete(code) : next.add(code);
-      return next;
-    });
+    setExpandedSections((prev) =>
+      prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]
+    );
   };
 
   const selectAllInSection = (stickers: string[], side: Tab, allSelected: boolean) => {
     if (side === "offer") {
-      setOffered((prev) => {
-        const next = new Set(prev);
-        stickers.forEach((id) => allSelected ? next.delete(id) : next.add(id));
-        return next;
-      });
+      setOffered((prev) =>
+        allSelected
+          ? prev.filter((id) => !stickers.includes(id))
+          : [...new Set([...prev, ...stickers])]
+      );
     } else {
-      setRequested((prev) => {
-        const next = new Set(prev);
-        stickers.forEach((id) => allSelected ? next.delete(id) : next.add(id));
-        return next;
-      });
+      setRequested((prev) =>
+        allSelected
+          ? prev.filter((id) => !stickers.includes(id))
+          : [...new Set([...prev, ...stickers])]
+      );
     }
   };
 
   const handleSend = async () => {
-    if (offered.size === 0 && requested.size === 0) return;
+    if (offered.length === 0 && requested.length === 0) return;
     setSending(true);
-    await onSend([...offered], [...requested]);
+    await onSend(offered, requested);
     setSending(false);
     onClose();
   };
 
-  const activeSet = tab === "offer" ? offered : requested;
-  const groups = tab === "offer" ? offeredGroups : requestedGroups;
   const emptyMsg = tab === "offer"
     ? `Você não tem repetidas que ${partnerName} ainda não possui.`
     : `${partnerName} não tem repetidas que você ainda não possui.`;
@@ -126,27 +118,24 @@ const TradeBuilderSheet = ({
     }
 
     return grps.map((group) => {
-      const allSelected = group.stickers.every((id) => sel.has(id));
-      const someSelected = group.stickers.some((id) => sel.has(id));
-      const isExpanded = expandedSections.has(`${side}-${group.code}`);
-      const selectedCount = group.stickers.filter((id) => sel.has(id)).length;
+      const allSelected = group.stickers.every((id) => sel.includes(id));
+      const someSelected = group.stickers.some((id) => sel.includes(id));
+      const isExpanded = expandedSections.includes(`${side}-${group.code}`);
+      const selectedCount = group.stickers.filter((id) => sel.includes(id)).length;
 
       return (
         <div key={group.code} className="border border-border/50 rounded-xl overflow-hidden">
-          {/* Section header */}
-          <button
-            onClick={() => toggleSection(`${side}-${group.code}`)}
-            className="w-full flex items-center justify-between px-3 py-2.5 bg-muted/30 hover:bg-muted/50 transition-colors"
-          >
+          {/* Section header — use div to avoid nested button HTML issue */}
+          <div className="w-full flex items-center justify-between px-3 py-2.5 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+            onClick={() => toggleSection(`${side}-${group.code}`)}>
             <div className="flex items-center gap-2">
               <span className="text-base">{group.flag}</span>
               <span className="text-sm font-bold text-foreground">{group.name}</span>
-              {someSelected && (
+              {someSelected ? (
                 <span className="text-[10px] font-bold bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
                   {selectedCount}/{group.stickers.length}
                 </span>
-              )}
-              {!someSelected && (
+              ) : (
                 <span className="text-[10px] text-muted-foreground">
                   {group.stickers.length} disponív{group.stickers.length === 1 ? "el" : "eis"}
                 </span>
@@ -173,13 +162,13 @@ const TradeBuilderSheet = ({
                 <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
               )}
             </div>
-          </button>
+          </div>
 
           {/* Sticker chips */}
           {isExpanded && (
             <div className="flex flex-wrap gap-1.5 p-3">
               {group.stickers.map((id) => {
-                const selected = sel.has(id);
+                const selected = sel.includes(id);
                 return (
                   <button
                     key={id}
@@ -203,7 +192,7 @@ const TradeBuilderSheet = ({
     });
   };
 
-  const canSend = offered.size > 0 || requested.size > 0;
+  const canSend = offered.length > 0 || requested.length > 0;
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
@@ -228,9 +217,9 @@ const TradeBuilderSheet = ({
         >
           <span className="flex items-center justify-center gap-1.5">
             Eu ofereço
-            {offered.size > 0 && (
+            {offered.length > 0 && (
               <span className="bg-orange-500/20 text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                {offered.size}
+                {offered.length}
               </span>
             )}
           </span>
@@ -246,9 +235,9 @@ const TradeBuilderSheet = ({
         >
           <span className="flex items-center justify-center gap-1.5">
             Eu peço
-            {requested.size > 0 && (
+            {requested.length > 0 && (
               <span className="bg-primary/20 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                {requested.size}
+                {requested.length}
               </span>
             )}
           </span>
@@ -276,18 +265,18 @@ const TradeBuilderSheet = ({
       <div className="border-t border-border p-4 space-y-3 flex-shrink-0 bg-card">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-3">
-            <span className={offered.size > 0 ? "text-orange-400 font-bold" : "text-muted-foreground"}>
-              Dando {offered.size}
+            <span className={offered.length > 0 ? "text-orange-400 font-bold" : "text-muted-foreground"}>
+              Dando {offered.length}
             </span>
             <span className="text-muted-foreground">·</span>
-            <span className={requested.size > 0 ? "text-primary font-bold" : "text-muted-foreground"}>
-              Pedindo {requested.size}
+            <span className={requested.length > 0 ? "text-primary font-bold" : "text-muted-foreground"}>
+              Pedindo {requested.length}
             </span>
           </div>
-          {offered.size === 0 && requested.size > 0 && (
+          {offered.length === 0 && requested.length > 0 && (
             <span className="text-[10px] text-amber-500 font-semibold">pedido sem oferta</span>
           )}
-          {offered.size > 0 && requested.size === 0 && (
+          {offered.length > 0 && requested.length === 0 && (
             <span className="text-[10px] text-blue-400 font-semibold">doação</span>
           )}
         </div>
