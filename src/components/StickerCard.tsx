@@ -95,41 +95,43 @@ const StickerCard = ({
       </div>
 
       {/* Bottom Controls */}
-      <div className="flex items-center justify-between px-1">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (duplicates > 0) onRemoveDuplicate();
-          }}
-          disabled={duplicates === 0}
-          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-            duplicates > 0
-              ? "bg-destructive/15 text-destructive hover:bg-destructive/25 active:scale-90 cursor-pointer"
-              : "bg-white/5 text-white/20 cursor-not-allowed"
-          }`}
-        >
-          <Minus className="w-3.5 h-3.5" strokeWidth={3} />
-        </button>
+      {!readOnly && (
+        <div className="flex items-center justify-between px-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (duplicates > 0) onRemoveDuplicate();
+            }}
+            disabled={duplicates === 0}
+            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+              duplicates > 0
+                ? "bg-destructive/15 text-destructive hover:bg-destructive/25 active:scale-90 cursor-pointer"
+                : "bg-white/5 text-white/20 cursor-not-allowed"
+            }`}
+          >
+            <Minus className="w-3.5 h-3.5" strokeWidth={3} />
+          </button>
 
-        <span className="text-sm font-bold text-foreground w-6 text-center">
-          {collected ? duplicates + 1 : 0}
-        </span>
+          <span className="text-sm font-bold text-foreground w-6 text-center">
+            {collected ? duplicates + 1 : 0}
+          </span>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (collected) onAddDuplicate();
-          }}
-          disabled={!collected}
-          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-            collected
-              ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 active:scale-90 cursor-pointer"
-              : "bg-white/5 text-white/20 cursor-not-allowed"
-          }`}
-        >
-          <Plus className="w-3.5 h-3.5" strokeWidth={3} />
-        </button>
-      </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (collected) onAddDuplicate();
+            }}
+            disabled={!collected}
+            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+              collected
+                ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 active:scale-90 cursor-pointer"
+                : "bg-white/5 text-white/20 cursor-not-allowed"
+            }`}
+          >
+            <Plus className="w-3.5 h-3.5" strokeWidth={3} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
