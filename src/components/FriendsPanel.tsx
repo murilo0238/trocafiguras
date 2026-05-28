@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Users, Check, X, MessageCircle, UserMinus, Clock, Search, UserPlus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Users, Check, X, MessageCircle, UserMinus, Clock, Search, UserPlus, BookOpen } from "lucide-react";
 import { useFriends, Friend, UserSearchResult } from "@/contexts/FriendsContext";
 import UserAvatar from "@/components/UserAvatar";
 import DirectChatPanel from "@/components/DirectChatPanel";
