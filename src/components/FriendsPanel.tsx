@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Users, Check, X, MessageCircle, UserMinus, Clock, Search, UserPlus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Users, Check, X, MessageCircle, UserMinus, Clock, Search, UserPlus, BookOpen } from "lucide-react";
 import { useFriends, Friend, UserSearchResult } from "@/contexts/FriendsContext";
 import UserAvatar from "@/components/UserAvatar";
 import DirectChatPanel from "@/components/DirectChatPanel";
@@ -84,6 +85,13 @@ const FriendsPanel = () => {
                   <UserAvatar avatarUrl={r.avatarUrl} displayName={r.displayName} className="w-full h-full" />
                 </div>
                 <span className="flex-1 text-sm font-medium text-foreground truncate">{r.displayName}</span>
+                <Link
+                  to={`/album/${r.userId}`}
+                  className="p-2 rounded-lg bg-muted hover:bg-primary/10 text-primary transition-colors"
+                  title="Ver álbum"
+                >
+                  <BookOpen className="w-4 h-4" />
+                </Link>
                 <button
                   onClick={() => handleAdd(r)}
                   disabled={addingId === r.userId}
@@ -162,6 +170,13 @@ const FriendsPanel = () => {
             f={f}
             actions={
               <>
+                <Link
+                  to={`/album/${f.userId}`}
+                  className={`${btnBase} bg-muted hover:bg-primary/10 text-primary`}
+                  title="Ver álbum"
+                >
+                  <BookOpen className="w-4 h-4" />
+                </Link>
                 <button
                   onClick={() => setChat({ userId: f.userId, name: f.displayName, avatarUrl: f.avatarUrl })}
                   className={`${btnBase} bg-primary/10 hover:bg-primary/20 text-primary`}

@@ -11,6 +11,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import TradeLinkPage from "./pages/TradeLinkPage";
 import Admin from "./pages/Admin";
+import UserAlbum from "./pages/UserAlbum";
 import NotFound from "./pages/NotFound";
 import InstallBanner from "./components/InstallBanner";
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/trade/:userId" element={<TradeLinkPage />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/album/:userId" element={<UserAlbum />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
