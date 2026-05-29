@@ -6,8 +6,10 @@ import { getSectionForSticker } from "@/data/teams";
 interface Props {
   open: boolean;
   onClose: (offered: string[], requested: string[]) => void;
-  myDuplicates: string[];
-  theirDuplicates: string[];
+  myDuplicates: string[];        // only those they don't have (filtered)
+  theirDuplicates: string[];     // only those I don't have (filtered)
+  myAllDuplicates: string[];     // every duplicate I own
+  theirAllDuplicates: string[];  // every duplicate they own
   partnerName: string;
   initialOffered: string[];
   initialRequested: string[];
@@ -31,6 +33,8 @@ const TradeBuilderSheet = ({
   onClose,
   myDuplicates,
   theirDuplicates,
+  myAllDuplicates,
+  theirAllDuplicates,
   partnerName,
   initialOffered,
   initialRequested,
@@ -38,6 +42,8 @@ const TradeBuilderSheet = ({
   const [tab, setTab] = useState<Tab>("offer");
   const [offered, setOffered] = useState<string[]>(initialOffered);
   const [requested, setRequested] = useState<string[]>(initialRequested);
+  const [showAllOffer, setShowAllOffer] = useState(false);
+  const [showAllRequest, setShowAllRequest] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>(() => {
     const expanded: string[] = [];
     for (const section of SECTIONS) {
@@ -49,8 +55,11 @@ const TradeBuilderSheet = ({
     return expanded;
   });
 
-  const offeredGroups = useMemo(() => groupBySection(myDuplicates), [myDuplicates]);
-  const requestedGroups = useMemo(() => groupBySection(theirDuplicates), [theirDuplicates]);
+  const offerSource = showAllOffer ? myAllDuplicates : myDuplicates;
+  const requestSource = showAllRequest ? theirAllDuplicates : theirDuplicates;
+  const offeredGroups = useMemo(() => groupBySection(offerSource), [offerSource]);
+  const requestedGroups = useMemo(() => groupBySection(requestSource), [requestSource]);
+
 
   if (!open) return null;
 
