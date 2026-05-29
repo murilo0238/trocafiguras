@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users, Shield, Upload, RotateCcw } from "lucide-react";
+import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users, Shield, Upload, RotateCcw, LayoutGrid, List as ListIcon, ChevronRight, ArrowLeft } from "lucide-react";
+import { getPlayerName } from "@/data/teams";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import StickerCard from "@/components/StickerCard";
@@ -36,6 +37,8 @@ const Index = () => {
   const [filter, setFilter] = useState<FilterType>("all");
   const [tab, setTab] = useState<TabType>("album");
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [pinHash, setPinHash] = useState<string | null | undefined>(undefined);
   const [pinReady, setPinReady] = useState(false);
@@ -96,13 +99,18 @@ const Index = () => {
   }, [collection, collectionLoading]);
 
   const normalize = (s: string) =>
-    s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
   const filteredSections = useMemo(() => {
     const q = normalize(search.trim());
     if (!q) return SECTIONS;
-    return SECTIONS.filter((s) => normalize(s.name).includes(q) || s.code.toLowerCase().includes(q));
+    return SECTIONS.filter((s) => {
+      if (normalize(s.name).includes(q) || s.code.toLowerCase().includes(q)) return true;
+      const players = s.players || [];
+      return players.some((p) => p && normalize(p).includes(q));
+    });
   }, [search]);
+
 
   if (authLoading) {
     return (
@@ -158,17 +166,33 @@ const Index = () => {
 
   const getSectionStickers = (section: TeamSection) => {
     const count = section.stickerCount ?? STICKERS_PER_SECTION;
+    const q = normalize(search.trim());
+    const sectionMatches = q && (normalize(section.name).includes(q) || section.code.toLowerCase().includes(q));
     const ids: string[] = [];
     for (let i = 1; i <= count; i++) {
       const id = `${section.code}${getStickerNumber(section.code, i)}`;
       const data = collection[id];
-      const show =
+      const filterShow =
         filter === "all" ||
         (filter === "missing" && !data?.collected) ||
         (filter === "duplicates" && (data?.duplicates || 0) > 0);
-      if (show) ids.push(id);
+      if (!filterShow) continue;
+      if (q && !sectionMatches) {
+        const playerName = getPlayerName(id);
+        if (!(playerName && normalize(playerName).includes(q)) && !id.toLowerCase().includes(q)) continue;
+      }
+      ids.push(id);
     }
     return ids;
+  };
+
+  const getSectionCollectedCount = (section: TeamSection) => {
+    const sCount = section.stickerCount ?? STICKERS_PER_SECTION;
+    let count = 0;
+    for (let i = 1; i <= sCount; i++) {
+      if (collection[`${section.code}${getStickerNumber(section.code, i)}`]?.collected) count++;
+    }
+    return count;
   };
 
   const progressPct = stats.total > 0 ? Math.round((stats.collected / stats.total) * 100) : 0;
@@ -233,22 +257,41 @@ const Index = () => {
         {/* Busca + filtros */}
         {tab === "album" && (
           <>
-            <div className="relative">
-              <Search className="w-4 h-4 text-white/50 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar seleção..."
-                className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-black/25 text-white placeholder:text-white/40 border border-white/15 focus:border-gold/50 outline-none transition-all"
-              />
-              {search && (
-                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                  <X className="w-3.5 h-3.5 text-white/60" />
+            <div className="flex gap-2 items-stretch">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-white/50 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar seleção ou jogador..."
+                  className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-black/25 text-white placeholder:text-white/40 border border-white/15 focus:border-gold/50 outline-none transition-all"
+                />
+                {search && (
+                  <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                    <X className="w-3.5 h-3.5 text-white/60" />
+                  </button>
+                )}
+              </div>
+              <div className="flex rounded-xl bg-black/25 border border-white/15 p-0.5">
+                <button
+                  onClick={() => { setViewMode("grid"); setSelectedSection(null); }}
+                  className={`px-2.5 rounded-lg transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-white/60 hover:text-white"}`}
+                  title="Detalhado"
+                >
+                  <LayoutGrid className="w-4 h-4" />
                 </button>
-              )}
+                <button
+                  onClick={() => { setViewMode("list"); setSelectedSection(null); }}
+                  className={`px-2.5 rounded-lg transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-white/60 hover:text-white"}`}
+                  title="Lista"
+                >
+                  <ListIcon className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <FilterButtons activeFilter={filter} onFilterChange={setFilter} />
+
             <div className="flex gap-2">
               <button
                 onClick={() => setShowImport(true)}
@@ -309,14 +352,12 @@ const Index = () => {
             <p className="text-muted-foreground text-sm">Carregando coleção...</p>
           </div>
         ) : tab === "album" ? (
-          <div className="space-y-6">
-            {filteredSections.map((section) => {
+          (() => {
+            const renderSectionGrid = (section: TeamSection) => {
               const stickers = getSectionStickers(section);
               if (stickers.length === 0) return null;
               const sCount = section.stickerCount ?? STICKERS_PER_SECTION;
-              const collectedCount = Array.from({ length: sCount }, (_, i) =>
-                collection[`${section.code}${getStickerNumber(section.code, i + 1)}`]?.collected ? 1 : 0
-              ).reduce((a, b) => a + b, 0);
+              const collectedCount = getSectionCollectedCount(section);
               const sectionComplete = collectedCount === sCount;
               return (
                 <div key={section.code}>
@@ -339,7 +380,7 @@ const Index = () => {
                     </span>
                   </div>
                   <div className="h-px bg-gradient-to-r from-primary/40 to-transparent mb-3" />
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-5 gap-1.5">
                     {stickers.map((id) => (
                       <StickerCard
                         key={id}
@@ -354,18 +395,101 @@ const Index = () => {
                   </div>
                 </div>
               );
-            })}
+            };
 
-            {filteredSections.every((s) => getSectionStickers(s).length === 0) && (
-              <div className="text-center py-20 flex flex-col items-center gap-3">
-                <span className="text-6xl">{search ? "🔍" : filter === "missing" ? "🏆" : "🔁"}</span>
-                <p className="text-foreground font-bold text-lg">
-                  {search ? "Nenhuma seleção encontrada" : filter === "missing" ? "Álbum completo!" : "Sem figurinhas repetidas"}
-                </p>
-                {filter === "missing" && <p className="text-muted-foreground text-sm">Você colou tudo! 🎉</p>}
+            // Single team focused view (from list mode)
+            if (selectedSection) {
+              const section = SECTIONS.find((s) => s.code === selectedSection);
+              if (!section) return null;
+              return (
+                <div className="space-y-4">
+                  <button
+                    onClick={() => setSelectedSection(null)}
+                    className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Voltar à lista
+                  </button>
+                  {renderSectionGrid(section) ?? (
+                    <div className="text-center py-20 text-muted-foreground text-sm">
+                      Nenhuma figurinha para mostrar com os filtros atuais.
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            // List view
+            if (viewMode === "list") {
+              const visible = filteredSections.filter((s) => getSectionStickers(s).length > 0);
+              if (visible.length === 0) {
+                return (
+                  <div className="text-center py-20 flex flex-col items-center gap-3">
+                    <span className="text-6xl">{search ? "🔍" : filter === "missing" ? "🏆" : "🔁"}</span>
+                    <p className="text-foreground font-bold text-lg">
+                      {search ? "Nada encontrado" : filter === "missing" ? "Álbum completo!" : "Sem figurinhas repetidas"}
+                    </p>
+                  </div>
+                );
+              }
+              return (
+                <div className="space-y-2">
+                  {visible.map((section) => {
+                    const sCount = section.stickerCount ?? STICKERS_PER_SECTION;
+                    const collectedCount = getSectionCollectedCount(section);
+                    const pct = sCount > 0 ? Math.round((collectedCount / sCount) * 100) : 0;
+                    return (
+                      <button
+                        key={section.code}
+                        onClick={() => setSelectedSection(section.code)}
+                        className="w-full bg-card rounded-2xl p-3 flex items-center gap-3 shadow-md hover:bg-card/80 active:scale-[0.99] transition-all text-left"
+                      >
+                        <span className="text-3xl flex-shrink-0">{section.flag}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline justify-between gap-2">
+                            <h3 className="text-sm font-bold text-foreground truncate">{section.name}</h3>
+                            <span className="text-sm font-bold text-gold-light flex-shrink-0">{pct}%</span>
+                          </div>
+                          <div className="flex items-baseline justify-between gap-2 mb-1.5">
+                            <span className="text-[10px] text-muted-foreground">
+                              {section.group ? `Grupo ${section.group}` : section.code}
+                            </span>
+                            <span className="text-[10px] font-semibold text-muted-foreground">
+                              {collectedCount}/{sCount}
+                            </span>
+                          </div>
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-primary to-gold rounded-full transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            }
+
+            // Default grid view (all sections)
+            return (
+              <div className="space-y-6">
+                {filteredSections.map((section) => renderSectionGrid(section))}
+                {filteredSections.every((s) => getSectionStickers(s).length === 0) && (
+                  <div className="text-center py-20 flex flex-col items-center gap-3">
+                    <span className="text-6xl">{search ? "🔍" : filter === "missing" ? "🏆" : "🔁"}</span>
+                    <p className="text-foreground font-bold text-lg">
+                      {search ? "Nada encontrado" : filter === "missing" ? "Álbum completo!" : "Sem figurinhas repetidas"}
+                    </p>
+                    {filter === "missing" && <p className="text-muted-foreground text-sm">Você colou tudo! 🎉</p>}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })()
+
         ) : tab === "trades" ? (
           <TradingPanel onPendingCountChange={setPendingCount} />
         ) : tab === "groups" ? (
