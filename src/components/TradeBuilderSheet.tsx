@@ -232,10 +232,26 @@ const TradeBuilderSheet = ({
         </button>
       </div>
 
+      {/* Filter toggle (per-tab, independent) */}
+      <div className="px-4 pt-3 flex-shrink-0">
+        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={tab === "offer" ? showAllOffer : showAllRequest}
+            onChange={(e) =>
+              tab === "offer" ? setShowAllOffer(e.target.checked) : setShowAllRequest(e.target.checked)
+            }
+            className="w-4 h-4 accent-primary"
+          />
+          Mostrar todas as repetidas {tab === "offer" ? "minhas" : `de ${partnerName}`} (mesmo as que {tab === "offer" ? "ele já tem" : "eu já tenho"})
+        </label>
+      </div>
+
       {/* List */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
         {renderGroups(tab)}
       </div>
+
 
       {/* Footer */}
       <div className="border-t border-border p-4 flex-shrink-0 bg-card">
