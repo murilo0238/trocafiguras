@@ -143,6 +143,143 @@ export type Database = {
         }
         Relationships: []
       }
+      group_members: {
+        Row: {
+          group_id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_trade_confirmations: {
+        Row: {
+          confirmed_at: string
+          trade_id: string
+          user_id: string
+        }
+        Insert: {
+          confirmed_at?: string
+          trade_id: string
+          user_id: string
+        }
+        Update: {
+          confirmed_at?: string
+          trade_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_trade_confirmations_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "group_trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_trade_legs: {
+        Row: {
+          from_user_id: string
+          id: string
+          sticker_id: string
+          to_user_id: string
+          trade_id: string
+        }
+        Insert: {
+          from_user_id: string
+          id?: string
+          sticker_id: string
+          to_user_id: string
+          trade_id: string
+        }
+        Update: {
+          from_user_id?: string
+          id?: string
+          sticker_id?: string
+          to_user_id?: string
+          trade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_trade_legs_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "group_trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_trades: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          proposed_by: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          proposed_by: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          proposed_by?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_trades_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       players: {
         Row: {
           created_at: string
@@ -195,6 +332,7 @@ export type Database = {
           pin_hash: string | null
           share_collection: boolean
           share_location: boolean
+          show_in_trades: boolean
           state: string | null
           updated_at: string
           user_id: string
@@ -214,6 +352,7 @@ export type Database = {
           pin_hash?: string | null
           share_collection?: boolean
           share_location?: boolean
+          show_in_trades?: boolean
           state?: string | null
           updated_at?: string
           user_id: string
@@ -233,6 +372,7 @@ export type Database = {
           pin_hash?: string | null
           share_collection?: boolean
           share_location?: boolean
+          show_in_trades?: boolean
           state?: string | null
           updated_at?: string
           user_id?: string
@@ -363,7 +503,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_group: {
+        Args: { p_member_ids: string[]; p_name: string }
+        Returns: string
+      }
+      execute_group_trade: { Args: { p_trade_id: string }; Returns: undefined }
       execute_trade: { Args: { trade_id: string }; Returns: undefined }
+      get_all_trade_matches: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          display_name: string
+          i_can_give: number
+          other_user_id: string
+          they_can_give: number
+          trade_score: number
+        }[]
+      }
       has_admin_permission: {
         Args: {
           _permission: Database["public"]["Enums"]["admin_permission"]
@@ -376,6 +532,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_group_member: {
+        Args: { p_group_id: string; p_user_id: string }
         Returns: boolean
       }
     }
