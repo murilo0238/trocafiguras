@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users, Shield, Upload, RotateCcw } from "lucide-react";
+import { CheckCircle, XCircle, Copy, LogOut, User, Search, X, BookOpen, ArrowLeftRight, BarChart3, Users, Shield, Upload, RotateCcw, LayoutGrid, List as ListIcon, ChevronRight, ArrowLeft } from "lucide-react";
+import { getPlayerName } from "@/data/teams";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import StickerCard from "@/components/StickerCard";
