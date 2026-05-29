@@ -257,22 +257,41 @@ const Index = () => {
         {/* Busca + filtros */}
         {tab === "album" && (
           <>
-            <div className="relative">
-              <Search className="w-4 h-4 text-white/50 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar seleção..."
-                className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-black/25 text-white placeholder:text-white/40 border border-white/15 focus:border-gold/50 outline-none transition-all"
-              />
-              {search && (
-                <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                  <X className="w-3.5 h-3.5 text-white/60" />
+            <div className="flex gap-2 items-stretch">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-white/50 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar seleção ou jogador..."
+                  className="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl bg-black/25 text-white placeholder:text-white/40 border border-white/15 focus:border-gold/50 outline-none transition-all"
+                />
+                {search && (
+                  <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                    <X className="w-3.5 h-3.5 text-white/60" />
+                  </button>
+                )}
+              </div>
+              <div className="flex rounded-xl bg-black/25 border border-white/15 p-0.5">
+                <button
+                  onClick={() => { setViewMode("grid"); setSelectedSection(null); }}
+                  className={`px-2.5 rounded-lg transition-colors ${viewMode === "grid" ? "bg-primary text-primary-foreground" : "text-white/60 hover:text-white"}`}
+                  title="Detalhado"
+                >
+                  <LayoutGrid className="w-4 h-4" />
                 </button>
-              )}
+                <button
+                  onClick={() => { setViewMode("list"); setSelectedSection(null); }}
+                  className={`px-2.5 rounded-lg transition-colors ${viewMode === "list" ? "bg-primary text-primary-foreground" : "text-white/60 hover:text-white"}`}
+                  title="Lista"
+                >
+                  <ListIcon className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <FilterButtons activeFilter={filter} onFilterChange={setFilter} />
+
             <div className="flex gap-2">
               <button
                 onClick={() => setShowImport(true)}
