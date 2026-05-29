@@ -236,7 +236,10 @@ export const useTradeRequests = () => {
       .update(updateField)
       .eq("id", tradeId);
 
-    if (error) { toast.error("Erro ao confirmar troca."); return; }
+    if (error) {
+      toast.error(`Erro ao confirmar: ${error.message}`);
+      return;
+    }
 
     const updatedFromConfirmed = isFrom ? true : trade.from_confirmed;
     const updatedToConfirmed = isFrom ? trade.to_confirmed : true;
@@ -244,7 +247,10 @@ export const useTradeRequests = () => {
 
     if (bothConfirmed) {
       const { error: execError } = await supabase.rpc("execute_trade", { trade_id: tradeId });
-      if (execError) { toast.error("Erro ao executar troca."); return; }
+      if (execError) {
+        toast.error(`Erro ao executar troca: ${execError.message}`);
+        return;
+      }
       toast.success("Troca realizada com sucesso! Coleção atualizada.");
     } else {
       toast.success("Confirmação registrada! Aguardando a outra parte.");
