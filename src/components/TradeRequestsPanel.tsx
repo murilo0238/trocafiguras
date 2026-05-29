@@ -499,6 +499,8 @@ const TradeRequestsPanel = ({ scannedUserId, onClearScanned, onPendingCountChang
           }}
           myDuplicates={matchData.iCanGive}
           theirDuplicates={matchData.theyCanGive}
+          myAllDuplicates={matchData.myDuplicates}
+          theirAllDuplicates={matchData.theirDuplicates}
           partnerName={scannedName}
           initialOffered={customOffered ?? matchData.iCanGive.slice(0, Math.min(matchData.iCanGive.length, matchData.theyCanGive.length))}
           initialRequested={customRequested ?? matchData.theyCanGive.slice(0, Math.min(matchData.iCanGive.length, matchData.theyCanGive.length))}

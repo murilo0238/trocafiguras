@@ -6,8 +6,10 @@ import { getSectionForSticker } from "@/data/teams";
 interface Props {
   open: boolean;
   onClose: (offered: string[], requested: string[]) => void;
-  myDuplicates: string[];
-  theirDuplicates: string[];
+  myDuplicates: string[];        // only those they don't have (filtered)
+  theirDuplicates: string[];     // only those I don't have (filtered)
+  myAllDuplicates: string[];     // every duplicate I own
+  theirAllDuplicates: string[];  // every duplicate they own
   partnerName: string;
   initialOffered: string[];
   initialRequested: string[];
@@ -31,6 +33,8 @@ const TradeBuilderSheet = ({
   onClose,
   myDuplicates,
   theirDuplicates,
+  myAllDuplicates,
+  theirAllDuplicates,
   partnerName,
   initialOffered,
   initialRequested,
@@ -38,6 +42,8 @@ const TradeBuilderSheet = ({
   const [tab, setTab] = useState<Tab>("offer");
   const [offered, setOffered] = useState<string[]>(initialOffered);
   const [requested, setRequested] = useState<string[]>(initialRequested);
+  const [showAllOffer, setShowAllOffer] = useState(false);
+  const [showAllRequest, setShowAllRequest] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>(() => {
     const expanded: string[] = [];
     for (const section of SECTIONS) {
@@ -49,8 +55,11 @@ const TradeBuilderSheet = ({
     return expanded;
   });
 
-  const offeredGroups = useMemo(() => groupBySection(myDuplicates), [myDuplicates]);
-  const requestedGroups = useMemo(() => groupBySection(theirDuplicates), [theirDuplicates]);
+  const offerSource = showAllOffer ? myAllDuplicates : myDuplicates;
+  const requestSource = showAllRequest ? theirAllDuplicates : theirDuplicates;
+  const offeredGroups = useMemo(() => groupBySection(offerSource), [offerSource]);
+  const requestedGroups = useMemo(() => groupBySection(requestSource), [requestSource]);
+
 
   if (!open) return null;
 
@@ -223,10 +232,26 @@ const TradeBuilderSheet = ({
         </button>
       </div>
 
+      {/* Filter toggle (per-tab, independent) */}
+      <div className="px-4 pt-3 flex-shrink-0">
+        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={tab === "offer" ? showAllOffer : showAllRequest}
+            onChange={(e) =>
+              tab === "offer" ? setShowAllOffer(e.target.checked) : setShowAllRequest(e.target.checked)
+            }
+            className="w-4 h-4 accent-primary"
+          />
+          Mostrar todas as repetidas {tab === "offer" ? "minhas" : `de ${partnerName}`} (mesmo as que {tab === "offer" ? "ele já tem" : "eu já tenho"})
+        </label>
+      </div>
+
       {/* List */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
         {renderGroups(tab)}
       </div>
+
 
       {/* Footer */}
       <div className="border-t border-border p-4 flex-shrink-0 bg-card">
