@@ -37,6 +37,8 @@ const Index = () => {
   const [filter, setFilter] = useState<FilterType>("all");
   const [tab, setTab] = useState<TabType>("album");
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [pinHash, setPinHash] = useState<string | null | undefined>(undefined);
   const [pinReady, setPinReady] = useState(false);
