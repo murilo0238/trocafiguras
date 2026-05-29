@@ -166,17 +166,33 @@ const Index = () => {
 
   const getSectionStickers = (section: TeamSection) => {
     const count = section.stickerCount ?? STICKERS_PER_SECTION;
+    const q = normalize(search.trim());
+    const sectionMatches = q && (normalize(section.name).includes(q) || section.code.toLowerCase().includes(q));
     const ids: string[] = [];
     for (let i = 1; i <= count; i++) {
       const id = `${section.code}${getStickerNumber(section.code, i)}`;
       const data = collection[id];
-      const show =
+      const filterShow =
         filter === "all" ||
         (filter === "missing" && !data?.collected) ||
         (filter === "duplicates" && (data?.duplicates || 0) > 0);
-      if (show) ids.push(id);
+      if (!filterShow) continue;
+      if (q && !sectionMatches) {
+        const playerName = getPlayerName(id);
+        if (!(playerName && normalize(playerName).includes(q)) && !id.toLowerCase().includes(q)) continue;
+      }
+      ids.push(id);
     }
     return ids;
+  };
+
+  const getSectionCollectedCount = (section: TeamSection) => {
+    const sCount = section.stickerCount ?? STICKERS_PER_SECTION;
+    let count = 0;
+    for (let i = 1; i <= sCount; i++) {
+      if (collection[`${section.code}${getStickerNumber(section.code, i)}`]?.collected) count++;
+    }
+    return count;
   };
 
   const progressPct = stats.total > 0 ? Math.round((stats.collected / stats.total) * 100) : 0;
