@@ -99,13 +99,18 @@ const Index = () => {
   }, [collection, collectionLoading]);
 
   const normalize = (s: string) =>
-    s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
   const filteredSections = useMemo(() => {
     const q = normalize(search.trim());
     if (!q) return SECTIONS;
-    return SECTIONS.filter((s) => normalize(s.name).includes(q) || s.code.toLowerCase().includes(q));
+    return SECTIONS.filter((s) => {
+      if (normalize(s.name).includes(q) || s.code.toLowerCase().includes(q)) return true;
+      const players = s.players || [];
+      return players.some((p) => p && normalize(p).includes(q));
+    });
   }, [search]);
+
 
   if (authLoading) {
     return (
